@@ -10,24 +10,20 @@ Personal fitness app built with React + Vite + Tailwind + Supabase.
 npm install
 ```
 
-2. Copy env file:
+2. Create `.env`:
 
 ```bash
-cp .env.example .env
+VITE_SUPABASE_URL=your_url
+VITE_SUPABASE_ANON_KEY=your_anon_key
+VITE_EXERCISEDB_KEY=your_rapidapi_key
+VITE_USDA_API_KEY=your_usda_key
 ```
 
-3. Run local development:
+3. Run:
 
 ```bash
 npm run dev
 ```
-
-## Supabase configured
-
-The app now includes your public Supabase project URL and publishable key as defaults in code and in `.env.example`.
-
-- URL: `https://vzduymscsnuwbolucnag.supabase.co`
-- Publishable key: `sb_publishable_ghU7U0ZmZ95f7PhjMvuZLw_Io4N_BMZ`
 
 ## Supabase SQL
 
@@ -46,23 +42,6 @@ create policy "Users can manage own state"
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 ```
-
-## GitHub Pages
-
-This project is configured for publication under `/<repo-name>/` with repo name `FitTrack`.
-
-### Deploy command
-
-```bash
-npm run deploy
-```
-
-It runs:
-
-1. `npm run build`
-2. publishes `dist/` to the `gh-pages` branch
-
-> Important: in GitHub repository settings, enable Pages from branch `gh-pages` (root).
 
 ## Phases implemented
 
