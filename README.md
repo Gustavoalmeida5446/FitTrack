@@ -10,20 +10,24 @@ Personal fitness app built with React + Vite + Tailwind + Supabase.
 npm install
 ```
 
-2. Create `.env`:
+2. Copy env file:
 
 ```bash
-VITE_SUPABASE_URL=your_url
-VITE_SUPABASE_ANON_KEY=your_anon_key
-VITE_EXERCISEDB_KEY=your_rapidapi_key
-VITE_USDA_API_KEY=your_usda_key
+cp .env.example .env
 ```
 
-3. Run:
+3. Run local development:
 
 ```bash
 npm run dev
 ```
+
+## Supabase configured
+
+The app now includes your public Supabase project URL and publishable key as defaults in code and in `.env.example`.
+
+- URL: `https://vzduymscsnuwbolucnag.supabase.co`
+- Publishable key: `sb_publishable_ghU7U0ZmZ95f7PhjMvuZLw_Io4N_BMZ`
 
 ## Supabase SQL
 
@@ -42,6 +46,25 @@ create policy "Users can manage own state"
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 ```
+
+## GitHub Pages (fix for white screen)
+
+The white screen usually happens when JS/CSS assets are generated with the wrong base path.
+This project now uses Vite `base: './'`, so generated assets are relative and work in repo pages.
+
+### Deploy command
+
+```bash
+npm run deploy
+```
+
+This command:
+
+1. builds the app
+2. copies `dist/index.html` to `dist/404.html` (helps direct refreshes on GH Pages)
+3. publishes `dist/` to `gh-pages`
+
+After deploy, set GitHub Pages source to branch `gh-pages` (root).
 
 ## Phases implemented
 
