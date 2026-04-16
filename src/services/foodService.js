@@ -1,30 +1,25 @@
 export async function searchFoods(query) {
-  const apiKey = import.meta.env.VITE_USDA_API_KEY
-  if (!query || !apiKey) return []
+  if (!query || query.trim().length < 2) return []
 
+  const encoded = encodeURIComponent(query.trim())
   const response = await fetch(
-    `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, pageSize: 12 })
-    }
+    `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encoded}&search_simple=1&action=process&json=1&page_size=12&fields=product_name,nutriments,image_front_small_url`
   )
 
-  if (!response.ok) throw new Error('Failed to load foods')
+  if (!response.ok) throw new Error('Falha ao buscar alimentos')
 
   const data = await response.json()
+  const foods = data.products || []
 
-  return (data.foods || []).map((food) => {
-    const nutrients = food.foodNutrients || []
-    const byName = (name) => nutrients.find((n) => n.nutrientName === name)?.value || 0
-
-    return {
-      name: food.description,
-      protein: byName('Protein'),
-      calories: byName('Energy'),
-      fat: byName('Total lipid (fat)'),
-      carbs: byName('Carbohydrate, by difference')
-    }
-  })
+  return foods
+    .filter((food) => food.product_name)
+    .map((food) => ({
+      name: food.product_name,
+      protein: Number(food.nutriments?.proteins_100g || 0),
+      calories: Number(food.nutriments?.['energy-kcal_100g'] || 0),
+      fat: Number(food.nutriments?.fat_100g || 0),
+      carbs: Number(food.nutriments?.carbohydrates_100g || 0),
+      image: food.image_front_small_url || ''
+    }))
+    .slice(0, 12)
 }

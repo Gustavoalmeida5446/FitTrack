@@ -22,6 +22,12 @@ cp .env.example .env
 npm run dev
 ```
 
+## APIs usadas
+
+- **Exercícios**: WGER API (busca de exercícios, autocomplete)
+- **Alimentos**: OpenFoodFacts (busca em português, autocomplete por nome)
+- Fallback manual de alimento permanece disponível na tela de dieta.
+
 ## Supabase configured
 
 The app now includes your public Supabase project URL and publishable key as defaults in code and in `.env.example`.
@@ -65,16 +71,3 @@ This command:
 3. publishes `dist/` to `gh-pages`
 
 After deploy, set GitHub Pages source to branch `gh-pages` (root).
-
-## Phases implemented
-
-1. Project structure + navigation
-2. Workouts module
-3. Workout sequence logic (Home)
-4. Body weight + parameters
-5. Diet module
-6. API integrations (ExerciseDB + USDA)
-7. Supabase persistence (auth + state)
-8. History
-9. Backup
-10. UI polish (cards, spacing, mobile-friendly)

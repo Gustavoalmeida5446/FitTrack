@@ -1,14 +1,22 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { sumDietDay } from '../utils/calculations'
 import { weekDays } from '../data/defaultData'
 
-export default function DietScreen({ state, setState, foodResults, searchFood, loadingFoods }) {
+export default function DietScreen({ state, setState, foodResults, onFoodAutocomplete, loadingFoods }) {
   const [selectedDay, setSelectedDay] = useState(weekDays[0])
   const [query, setQuery] = useState('')
-  const [mealName, setMealName] = useState('Meal')
+  const [mealName, setMealName] = useState('Refeição')
 
   const dayPlan = state.dietPlan[selectedDay]
   const totals = useMemo(() => sumDietDay(dayPlan), [dayPlan])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onFoodAutocomplete(query)
+    }, 350)
+
+    return () => clearTimeout(timer)
+  }, [query, onFoodAutocomplete])
 
   const updateDay = (updater) => {
     setState((prev) => ({
@@ -20,7 +28,7 @@ export default function DietScreen({ state, setState, foodResults, searchFood, l
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       <section className="card lg:col-span-1">
-        <h2 className="mb-2 text-lg font-semibold">Week planner</h2>
+        <h2 className="mb-2 text-lg font-semibold">Planejamento semanal</h2>
         <div className="grid gap-2">
           {weekDays.map((day) => (
             <button key={day} className={selectedDay === day ? '' : 'secondary'} onClick={() => setSelectedDay(day)}>
@@ -32,13 +40,12 @@ export default function DietScreen({ state, setState, foodResults, searchFood, l
 
       <section className="card lg:col-span-2">
         <div className="mb-3 flex flex-wrap gap-2">
-          <input value={mealName} onChange={(e) => setMealName(e.target.value)} placeholder="Meal name" />
-          <button className="secondary" onClick={() => updateDay((day) => ({ ...day, meals: [...day.meals, { id: crypto.randomUUID(), name: mealName, items: [] }] }))}>Add meal</button>
-          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search USDA foods" />
-          <button onClick={() => searchFood(query)}>Search food</button>
+          <input value={mealName} onChange={(e) => setMealName(e.target.value)} placeholder="Nome da refeição" />
+          <button className="secondary" onClick={() => updateDay((day) => ({ ...day, meals: [...day.meals, { id: crypto.randomUUID(), name: mealName, items: [] }] }))}>Adicionar refeição</button>
+          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar alimento (autocomplete)" />
         </div>
 
-        {loadingFoods && <p className="mb-2 text-sm">Loading foods...</p>}
+        {loadingFoods && <p className="mb-2 text-sm">Buscando alimentos...</p>}
 
         <div className="mb-4 grid gap-2 md:grid-cols-2">
           {foodResults.map((food, index) => (
@@ -55,7 +62,7 @@ export default function DietScreen({ state, setState, foodResults, searchFood, l
               }}
             >
               <p className="font-medium">{food.name}</p>
-              <p className="text-xs">P {Math.round(food.protein)} | Cals {Math.round(food.calories)}</p>
+              <p className="text-xs">P {Math.round(food.protein)} | Kcal {Math.round(food.calories)}</p>
             </button>
           ))}
         </div>
@@ -65,7 +72,7 @@ export default function DietScreen({ state, setState, foodResults, searchFood, l
             <div key={meal.id} className="rounded-lg border border-slate-200 p-3">
               <div className="mb-2 flex items-center justify-between">
                 <h3 className="font-semibold">{meal.name}</h3>
-                <button className="secondary" onClick={() => updateDay((day) => ({ ...day, meals: day.meals.filter((m) => m.id !== meal.id) }))}>Delete meal</button>
+                <button className="secondary" onClick={() => updateDay((day) => ({ ...day, meals: day.meals.filter((m) => m.id !== meal.id) }))}>Excluir refeição</button>
               </div>
               {meal.items.map((item, idx) => (
                 <div key={`${item.name}-${idx}`} className="mb-1 grid grid-cols-6 gap-2 text-sm">
@@ -77,16 +84,16 @@ export default function DietScreen({ state, setState, foodResults, searchFood, l
                 </div>
               ))}
               <button className="secondary mt-2" onClick={() => {
-                const name = prompt('Manual food name')
+                const name = prompt('Nome do alimento manual')
                 if (!name) return
                 updateDay((day) => ({ ...day, meals: day.meals.map((m) => m.id === meal.id ? { ...m, items: [...m.items, { name, protein: 0, calories: 0, fat: 0, carbs: 0, qty: 100 }] } : m) }))
-              }}>Manual food fallback</button>
+              }}>Fallback manual</button>
             </div>
           ))}
         </div>
 
         <div className="mt-4 rounded-lg bg-slate-100 p-3 text-sm">
-          Daily totals: {totals.calories} kcal | P {totals.protein} | C {totals.carbs} | F {totals.fat}
+          Totais do dia: {totals.calories} kcal | P {totals.protein} | C {totals.carbs} | F {totals.fat}
         </div>
       </section>
     </div>

@@ -1,11 +1,26 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
-export default function WorkoutsScreen({ state, setState, onCompleteWorkout, exerciseSearch, loadingExercises }) {
+export default function WorkoutsScreen({
+  state,
+  setState,
+  onCompleteWorkout,
+  onExerciseAutocomplete,
+  exerciseSuggestions,
+  loadingExercises
+}) {
   const [selectedWorkoutId, setSelectedWorkoutId] = useState(state.workouts[0]?.id)
   const [newWorkoutName, setNewWorkoutName] = useState('')
   const [exerciseQuery, setExerciseQuery] = useState('')
 
   const workout = state.workouts.find((w) => w.id === selectedWorkoutId) || state.workouts[0]
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onExerciseAutocomplete(exerciseQuery)
+    }, 350)
+
+    return () => clearTimeout(timer)
+  }, [exerciseQuery, onExerciseAutocomplete])
 
   const patchWorkout = (updater) => {
     setState((prev) => ({
@@ -44,15 +59,15 @@ export default function WorkoutsScreen({ state, setState, onCompleteWorkout, exe
     })
   }
 
-  if (!workout) return <div className="card">Create your first workout.</div>
+  if (!workout) return <div className="card">Crie seu primeiro treino.</div>
 
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       <section className="card lg:col-span-1">
-        <h2 className="mb-3 text-lg font-semibold">Workouts</h2>
+        <h2 className="mb-3 text-lg font-semibold">Treinos</h2>
         <div className="mb-2 flex gap-2">
-          <input value={newWorkoutName} onChange={(e) => setNewWorkoutName(e.target.value)} placeholder="New workout name" />
-          <button onClick={addWorkout}>Add</button>
+          <input value={newWorkoutName} onChange={(e) => setNewWorkoutName(e.target.value)} placeholder="Novo treino" />
+          <button onClick={addWorkout}>Adicionar</button>
         </div>
         <div className="grid gap-2">
           {state.workouts.map((w) => (
@@ -66,23 +81,21 @@ export default function WorkoutsScreen({ state, setState, onCompleteWorkout, exe
           <h2 className="text-lg font-semibold">{workout.name}</h2>
           <div className="flex gap-2">
             <button className="secondary" onClick={() => {
-              const name = prompt('Rename workout', workout.name)
+              const name = prompt('Renomear treino', workout.name)
               if (name) patchWorkout((w) => ({ ...w, name }))
-            }}>Rename</button>
-            <button className="secondary" onClick={deleteWorkout}>Delete</button>
-            <button onClick={() => onCompleteWorkout(workout)}>Complete Workout</button>
+            }}>Renomear</button>
+            <button className="secondary" onClick={deleteWorkout}>Excluir</button>
+            <button onClick={() => onCompleteWorkout(workout)}>Concluir treino</button>
           </div>
         </div>
 
-        <div className="mb-3 flex gap-2">
-          <input value={exerciseQuery} onChange={(e) => setExerciseQuery(e.target.value)} placeholder="Search exercise API" />
-          <button className="secondary" onClick={() => exerciseSearch(exerciseQuery)}>Search</button>
+        <div className="mb-3">
+          <input value={exerciseQuery} onChange={(e) => setExerciseQuery(e.target.value)} placeholder="Buscar exercício (autocomplete)" />
+          {loadingExercises && <p className="mt-1 text-xs text-slate-500">Buscando...</p>}
         </div>
 
-        {loadingExercises && <p className="mb-3 text-sm">Loading exercises...</p>}
-
         <div className="mb-4 grid gap-2 md:grid-cols-2">
-          {state.favoritesExercises.map((ex, i) => (
+          {exerciseSuggestions.map((ex, i) => (
             <button key={`${ex.name}-${i}`} className="secondary text-left" onClick={() => addExercise(ex)}>
               <p className="font-medium capitalize">{ex.name}</p>
               <p className="text-xs">{ex.muscle}</p>
@@ -98,15 +111,15 @@ export default function WorkoutsScreen({ state, setState, onCompleteWorkout, exe
                 <div className="flex gap-1">
                   <button className="secondary" onClick={() => moveExercise(index, -1)}>↑</button>
                   <button className="secondary" onClick={() => moveExercise(index, 1)}>↓</button>
-                  <button className="secondary" onClick={() => patchWorkout((w) => ({ ...w, exercises: w.exercises.filter((item) => item.id !== ex.id) }))}>Delete</button>
+                  <button className="secondary" onClick={() => patchWorkout((w) => ({ ...w, exercises: w.exercises.filter((item) => item.id !== ex.id) }))}>Excluir</button>
                 </div>
               </div>
               <div className="grid gap-2 md:grid-cols-4">
-                <input type="number" value={ex.sets} onChange={(e) => patchWorkout((w) => ({ ...w, exercises: w.exercises.map((item) => item.id === ex.id ? { ...item, sets: Number(e.target.value) } : item) }))} placeholder="Sets" />
-                <input type="number" value={ex.reps} onChange={(e) => patchWorkout((w) => ({ ...w, exercises: w.exercises.map((item) => item.id === ex.id ? { ...item, reps: Number(e.target.value) } : item) }))} placeholder="Reps" />
-                <input value={ex.usedWeight} onChange={(e) => patchWorkout((w) => ({ ...w, exercises: w.exercises.map((item) => item.id === ex.id ? { ...item, usedWeight: e.target.value } : item) }))} placeholder="Used weight" />
+                <input type="number" value={ex.sets} onChange={(e) => patchWorkout((w) => ({ ...w, exercises: w.exercises.map((item) => item.id === ex.id ? { ...item, sets: Number(e.target.value) } : item) }))} placeholder="Séries" />
+                <input type="number" value={ex.reps} onChange={(e) => patchWorkout((w) => ({ ...w, exercises: w.exercises.map((item) => item.id === ex.id ? { ...item, reps: Number(e.target.value) } : item) }))} placeholder="Repetições" />
+                <input value={ex.usedWeight} onChange={(e) => patchWorkout((w) => ({ ...w, exercises: w.exercises.map((item) => item.id === ex.id ? { ...item, usedWeight: e.target.value } : item) }))} placeholder="Peso usado" />
                 <label className="flex items-center gap-2 text-sm">
-                  <input type="checkbox" checked={ex.done} onChange={(e) => patchWorkout((w) => ({ ...w, exercises: w.exercises.map((item) => item.id === ex.id ? { ...item, done: e.target.checked } : item) }))} /> Done
+                  <input type="checkbox" checked={ex.done} onChange={(e) => patchWorkout((w) => ({ ...w, exercises: w.exercises.map((item) => item.id === ex.id ? { ...item, done: e.target.checked } : item) }))} /> Feito
                 </label>
               </div>
             </div>
