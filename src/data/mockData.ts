@@ -1,4 +1,4 @@
-import { DietDay, NutritionTargets, UserProfile, WaterData, WeeklyDiet, WeightLog, Workout } from './types';
+import { DietDay, UserProfile, WaterData, WeeklyDiet, WeightLog, Workout } from './types';
 
 const exerciseMedia = 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800';
 
@@ -66,14 +66,6 @@ export const mockUserProfile: UserProfile = {
   sex: 'Masculino',
   activityLevel: 'Moderado',
   goal: 'Ganho de massa'
-};
-
-export const mockNutritionTargets: NutritionTargets = {
-  caloriesDaily: 2500,
-  proteinDaily: 160,
-  carbsDaily: 280,
-  fatDaily: 70,
-  waterDailyMl: 3000
 };
 
 export const mockWeightHistory: WeightLog[] = [

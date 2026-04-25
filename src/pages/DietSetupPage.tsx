@@ -35,6 +35,7 @@ function scaleFood(food: TacoFood, quantityGrams: number): FoodItem {
 
 export function DietSetupPage({ onBack, onSaveDiet }: Props) {
   const [selectedDayId, setSelectedDayId] = useState(initialDays[0].id);
+  const [editingMealId, setEditingMealId] = useState<string | null>(null);
   const [foodQuery, setFoodQuery] = useState('');
   const [foodOptions, setFoodOptions] = useState<TacoFood[]>([]);
   const [mealName, setMealName] = useState('');
@@ -73,13 +74,31 @@ export function DietSetupPage({ onBack, onSaveDiet }: Props) {
     if (!canSaveMeal) return;
 
     const meal: Meal = {
-      id: crypto.randomUUID(),
+      id: editingMealId ?? crypto.randomUUID(),
       name: mealName.trim(),
       foods: selectedFoods,
       done: false
     };
 
-    setDays((prev) => prev.map((day) => day.id === selectedDayId ? { ...day, meals: [...day.meals, meal] } : day));
+    setDays((prev) => prev.map((day) => {
+      if (day.id !== selectedDayId) {
+        return day;
+      }
+
+      if (editingMealId) {
+        return {
+          ...day,
+          meals: day.meals.map((item) => item.id === editingMealId ? meal : item)
+        };
+      }
+
+      return {
+        ...day,
+        meals: [...day.meals, meal]
+      };
+    }));
+
+    setEditingMealId(null);
     setMealName('');
     setSelectedFoods([]);
     setFoodQuery('');
@@ -87,8 +106,49 @@ export function DietSetupPage({ onBack, onSaveDiet }: Props) {
     setFoodQuantityGrams(100);
   };
 
+  const handleEditMeal = (meal: Meal) => {
+    setEditingMealId(meal.id);
+    setMealName(meal.name);
+    setSelectedFoods(meal.foods);
+    setFoodQuery('');
+    setFoodOptions([]);
+  };
+
   const handleRemoveMeal = (mealId: string) => {
     setDays((prev) => prev.map((day) => day.id === selectedDayId ? { ...day, meals: day.meals.filter((meal) => meal.id !== mealId) } : day));
+    if (editingMealId === mealId) {
+      setEditingMealId(null);
+      setMealName('');
+      setSelectedFoods([]);
+      setFoodQuery('');
+      setFoodOptions([]);
+      setFoodQuantityGrams(100);
+    }
+  };
+
+  const handleClearSelectedFoods = () => {
+    setSelectedFoods([]);
+    setFoodQuery('');
+    setFoodOptions([]);
+  };
+
+  const handleCopyPreviousDay = () => {
+    const currentIndex = days.findIndex((day) => day.id === selectedDayId);
+    if (currentIndex <= 0) return;
+
+    const previousDay = days[currentIndex - 1];
+    setDays((prev) => prev.map((day, index) => index === currentIndex ? {
+      ...day,
+      meals: previousDay.meals.map((meal) => ({
+        ...meal,
+        id: crypto.randomUUID(),
+        foods: meal.foods.map((food) => ({ ...food, id: crypto.randomUUID() }))
+      }))
+    } : day));
+  };
+
+  const handleClearSelectedDay = () => {
+    setDays((prev) => prev.map((day) => day.id === selectedDayId ? { ...day, meals: [] } : day));
   };
 
   const saveWeeklyDiet = () => {
@@ -161,6 +221,16 @@ export function DietSetupPage({ onBack, onSaveDiet }: Props) {
             <span className="meta-label">Resumo da refeição atual</span>
             <p>{selectedFoods.length} alimento(s) • {selectedMealTotals.calories.toFixed(1)} kcal • {selectedMealTotals.protein.toFixed(1)}g proteína</p>
           </div>
+          <div className="inline-actions">
+            {selectedFoods.length > 0 ? <Button kind="ghost" size="sm" onClick={handleClearSelectedFoods}>Limpar alimentos</Button> : null}
+            {editingMealId ? <Button kind="ghost" size="sm" onClick={() => {
+              setEditingMealId(null);
+              setMealName('');
+              setSelectedFoods([]);
+              setFoodQuery('');
+              setFoodOptions([]);
+            }}>Cancelar edição</Button> : null}
+          </div>
           <div className="stack">
             {selectedFoods.length > 0 ? selectedFoods.map((food) => (
               <div key={food.id} className="setup-selection-card">
@@ -188,7 +258,7 @@ export function DietSetupPage({ onBack, onSaveDiet }: Props) {
             )}
           </div>
           <div className="setup-card__footer">
-            <Button disabled={!canSaveMeal} onClick={handleAddMeal}>Adicionar refeição ao {selectedDay.label}</Button>
+            <Button disabled={!canSaveMeal} onClick={handleAddMeal}>{editingMealId ? `Atualizar refeição do ${selectedDay.label}` : `Adicionar refeição ao ${selectedDay.label}`}</Button>
           </div>
         </Tile>
 
@@ -204,6 +274,14 @@ export function DietSetupPage({ onBack, onSaveDiet }: Props) {
               </div>
             </div>
           </div>
+          <div className="inline-actions">
+            <Button kind="ghost" size="sm" disabled={days.findIndex((day) => day.id === selectedDayId) <= 0} onClick={handleCopyPreviousDay}>
+              Copiar dia anterior
+            </Button>
+            <Button kind="ghost" size="sm" disabled={selectedDay.meals.length === 0} onClick={handleClearSelectedDay}>
+              Limpar dia
+            </Button>
+          </div>
           <div className="stack">
             {selectedDay.meals.length > 0 ? selectedDay.meals.map((meal) => (
               <div key={meal.id} className="setup-selection-card">
@@ -212,9 +290,14 @@ export function DietSetupPage({ onBack, onSaveDiet }: Props) {
                     <span className="meta-label">{meal.foods.length} alimento(s)</span>
                     <p>{meal.name}</p>
                   </div>
-                  <Button kind="ghost" size="sm" renderIcon={TrashCan} iconDescription="Remover refeição" onClick={() => handleRemoveMeal(meal.id)}>
-                    Remover
-                  </Button>
+                  <div className="inline-actions">
+                    <Button kind="ghost" size="sm" onClick={() => handleEditMeal(meal)}>
+                      Editar
+                    </Button>
+                    <Button kind="ghost" size="sm" renderIcon={TrashCan} iconDescription="Remover refeição" onClick={() => handleRemoveMeal(meal.id)}>
+                      Remover
+                    </Button>
+                  </div>
                 </div>
                 <div className="setup-selection-card__meta">
                   <span>{meal.foods.reduce((sum, food) => sum + food.calories, 0).toFixed(1)} kcal</span>

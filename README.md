@@ -24,11 +24,13 @@ O script:
 
 ## Estado atual
 
-- UI local com dados mockados para treino, hidratação, dieta semanal e metas nutricionais
-- Persistência local em `localStorage` para manter o estado entre recargas
+- Cadastro de treinos com múltiplos exercícios
+- Cadastro de dieta por dia, refeição e quantidade em gramas com base local TACO
+- Reset diário do consumo de água
+- Metas nutricionais calculadas a partir do perfil
+- Persistência local com sincronização remota via Supabase para usuários autenticados
 - Busca de exercícios via WGER
-- Busca de alimentos via USDA FoodData Central com fallback local
-- Cliente Supabase configurado em `src/lib/supabaseClient.ts`
+- Busca de alimentos via base local TACO em `src/data/taco-foods.json`
 
 ## Variáveis de ambiente
 
@@ -37,11 +39,13 @@ Use os valores de `.env.example`:
 ```bash
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
-VITE_USDA_API_KEY=
 ```
+
+## Supabase
+
+Antes de usar a persistência remota, execute o schema em `supabase/schema.sql`.
 
 ## Observações
 
 - O projeto não usa Tailwind na UI atual.
-- Não existe script `deploy` no `package.json` neste momento.
-- A persistência remota no Supabase ainda não está conectada às telas.
+- O script `deploy` publica em `gh-pages`.

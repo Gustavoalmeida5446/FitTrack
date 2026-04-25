@@ -1,4 +1,4 @@
-import { Calendar, CalendarHeatMap, Home, UserAvatar } from '@carbon/icons-react';
+import { Calendar, CalendarHeatMap, Home } from '@carbon/icons-react';
 import { Button, Theme } from '@carbon/react';
 import { useEffect, useMemo, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
@@ -10,27 +10,27 @@ import { NutritionGoalsPage } from './pages/NutritionGoalsPage';
 import { WorkoutSetupPage } from './pages/WorkoutSetupPage';
 import { LoginPage } from './pages/LoginPage';
 import { WeeklyDiet, Workout } from './data/types';
-import { AppState, loadAppState, saveAppState } from './lib/appState';
+import { AppState, defaultAppState, normalizeWaterData } from './lib/appState';
 import { getTodayDateString } from './lib/date';
 import { calculateNutritionTargets } from './lib/nutrition';
 import { getCurrentSession, onAuthStateChange, signInWithEmail, signOut } from './services/authService';
 import { loadRemoteAppState, saveRemoteAppState } from './services/appStateService';
 
-type View = 'home' | 'workout' | 'diet-day' | 'workout-setup' | 'diet-setup' | 'goals' | 'login';
+type View = 'home' | 'workout' | 'diet-day' | 'workout-setup' | 'diet-setup' | 'goals';
 
 export default function App() {
-  const initialState = useMemo(() => loadAppState(), []);
   const [view, setView] = useState<View>('home');
   const [selectedWorkoutId, setSelectedWorkoutId] = useState<string>('');
   const [selectedDayId, setSelectedDayId] = useState<string>('');
   const [session, setSession] = useState<Session | null>(null);
+  const [isAuthReady, setIsAuthReady] = useState(false);
   const [isRemoteReady, setIsRemoteReady] = useState(false);
 
-  const [profile, setProfile] = useState(initialState.profile);
-  const [workouts, setWorkouts] = useState(initialState.workouts);
-  const [water, setWater] = useState(initialState.water);
-  const [weeklyDiet, setWeeklyDiet] = useState(initialState.weeklyDiet);
-  const [weightHistory, setWeightHistory] = useState(initialState.weightHistory);
+  const [profile, setProfile] = useState(defaultAppState.profile);
+  const [workouts, setWorkouts] = useState(defaultAppState.workouts);
+  const [water, setWater] = useState(normalizeWaterData(defaultAppState.water));
+  const [weeklyDiet, setWeeklyDiet] = useState(defaultAppState.weeklyDiet);
+  const [weightHistory, setWeightHistory] = useState(defaultAppState.weightHistory);
 
   const appState = useMemo<AppState>(() => ({
     profile,
@@ -43,20 +43,19 @@ export default function App() {
   const targets = useMemo(() => calculateNutritionTargets(profile), [profile]);
   const selectedWorkout = useMemo(() => workouts.find((item) => item.id === selectedWorkoutId), [workouts, selectedWorkoutId]);
   const selectedDay = useMemo(() => weeklyDiet.days.find((item) => item.id === selectedDayId), [weeklyDiet.days, selectedDayId]);
-
-  useEffect(() => {
-    saveAppState(appState);
-  }, [appState]);
+  const userInitial = session?.user.email?.trim().charAt(0).toUpperCase() ?? 'U';
 
   useEffect(() => {
     void getCurrentSession().then((currentSession) => {
       setSession(currentSession);
-      setIsRemoteReady(!currentSession);
+      setIsRemoteReady(false);
+      setIsAuthReady(true);
     });
 
     const { data } = onAuthStateChange((nextSession) => {
       setSession(nextSession);
-      setIsRemoteReady(!nextSession);
+      setIsRemoteReady(false);
+      setIsAuthReady(true);
     });
 
     return () => {
@@ -66,6 +65,11 @@ export default function App() {
 
   useEffect(() => {
     if (!session) {
+      setProfile(defaultAppState.profile);
+      setWorkouts(defaultAppState.workouts);
+      setWater(normalizeWaterData(defaultAppState.water));
+      setWeeklyDiet(defaultAppState.weeklyDiet);
+      setWeightHistory(defaultAppState.weightHistory);
       setIsRemoteReady(true);
       return;
     }
@@ -79,11 +83,7 @@ export default function App() {
       if (remoteState) {
         setProfile(remoteState.profile);
         setWorkouts(remoteState.workouts);
-        setWater({
-          ...remoteState.water,
-          consumedMl: remoteState.water.updatedAt === getTodayDateString() ? remoteState.water.consumedMl : 0,
-          updatedAt: remoteState.water.updatedAt ?? getTodayDateString()
-        });
+        setWater(normalizeWaterData(remoteState.water));
         setWeeklyDiet(remoteState.weeklyDiet);
         setWeightHistory(remoteState.weightHistory);
       }
@@ -110,21 +110,6 @@ export default function App() {
     };
   }, [appState, isRemoteReady, session]);
 
-  useEffect(() => {
-    setWater((prev) => {
-      const today = getTodayDateString();
-      if (prev.updatedAt === today) {
-        return prev;
-      }
-
-      return {
-        ...prev,
-        consumedMl: 0,
-        updatedAt: today
-      };
-    });
-  }, []);
-
   const updateWorkout = (workoutId: string, updater: (workout: Workout) => Workout) => {
     setWorkouts((prev) => prev.map((workout) => (workout.id === workoutId ? updater(workout) : workout)));
   };
@@ -150,7 +135,30 @@ export default function App() {
     if (!success) return;
 
     setSession(null);
+    setView('home');
   };
+
+  if (!isAuthReady) {
+    return (
+      <Theme theme="g100">
+        <div className="app-shell">
+          <div className="page-container">
+            <div className="loading-state">Carregando...</div>
+          </div>
+        </div>
+      </Theme>
+    );
+  }
+
+  if (!session) {
+    return (
+      <Theme theme="g100">
+        <div className="app-shell">
+          <LoginPage onLogin={handleLogin} />
+        </div>
+      </Theme>
+    );
+  }
 
   return (
     <Theme theme="g100">
@@ -160,6 +168,7 @@ export default function App() {
             workouts={workouts}
             water={water}
             weeklyDiet={weeklyDiet}
+            waterGoalMl={targets.waterDailyMl}
             onOpenWorkout={(workoutId) => {
               setSelectedWorkoutId(workoutId);
               setView('workout');
@@ -223,13 +232,9 @@ export default function App() {
             onAddWeight={(weight) => setWeightHistory((prev) => [...prev, { date: getTodayDateString(), weight }])}
             onRemoveWeight={(index) => setWeightHistory((prev) => prev.filter((_, itemIndex) => itemIndex !== index))}
             session={session}
-            onOpenLogin={() => setView('login')}
+            onOpenLogin={() => undefined}
             onSignOut={handleSignOut}
           />
-        ) : null}
-
-        {view === 'login' ? (
-          <LoginPage onBack={() => setView('goals')} onLogin={handleLogin} />
         ) : null}
 
         <nav className="bottom-tabbar bottom-nav" aria-label="Navegação principal">
@@ -246,7 +251,7 @@ export default function App() {
             <span>Dieta</span>
           </Button>
           <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'goals' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={() => setView('goals')}>
-            <UserAvatar size={20} />
+            <span className="profile-initial-badge" aria-hidden="true">{userInitial}</span>
             <span>Perfil</span>
           </Button>
         </nav>

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { PageContainer } from '../components/PageContainer';
 
 interface Props {
-  onBack: () => void;
+  onBack?: () => void;
   onLogin: (email: string, password: string) => Promise<boolean>;
 }
 
@@ -32,7 +32,7 @@ export function LoginPage({ onBack, onLogin }: Props) {
   };
 
   return (
-    <PageContainer title="Login" subtitle="Acesse sua conta do Supabase" actions={<Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button>}>
+    <PageContainer title="Login" subtitle="Acesse sua conta do Supabase" actions={onBack ? <Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button> : undefined}>
       <div className="stack">
         <Tile className="card metric-card auth-card">
           <div className="card-head">

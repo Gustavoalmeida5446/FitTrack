@@ -1,9 +1,5 @@
-import { mockUserProfile, mockWater, mockWeeklyDiet, mockWeightHistory, mockWorkouts } from '../data/mockData';
-import { UserProfile, WaterData, WeeklyDiet, WeightLog, Workout } from '../data/types';
+import { ActivityLevel, GoalType, Sex, UserProfile, WaterData, WeeklyDiet, WeightLog, Workout } from '../data/types';
 import { getTodayDateString } from './date';
-
-const APP_STATE_KEY = 'fittrack:app-state';
-const APP_STATE_VERSION = 1;
 
 export interface AppState {
   profile: UserProfile;
@@ -13,20 +9,45 @@ export interface AppState {
   weightHistory: WeightLog[];
 }
 
-interface PersistedAppState {
-  version: number;
-  data: Partial<AppState>;
+function createEmptyProfile(): UserProfile {
+  return {
+    currentWeight: 0,
+    heightCm: 0,
+    age: 0,
+    sex: 'Masculino' as Sex,
+    activityLevel: 'Moderado' as ActivityLevel,
+    goal: 'Manutenção' as GoalType
+  };
+}
+
+function createEmptyWeeklyDiet(): WeeklyDiet {
+  return {
+    id: 'diet-empty',
+    days: Array.from({ length: 7 }, (_, index) => ({
+      id: `d-${index + 1}`,
+      label: `Dia ${index + 1}`,
+      meals: []
+    }))
+  };
+}
+
+function createEmptyWater(): WaterData {
+  return {
+    goalMl: 0,
+    consumedMl: 0,
+    updatedAt: getTodayDateString()
+  };
 }
 
 export const defaultAppState: AppState = {
-  profile: mockUserProfile,
-  workouts: mockWorkouts,
-  water: mockWater,
-  weeklyDiet: mockWeeklyDiet,
-  weightHistory: mockWeightHistory
+  profile: createEmptyProfile(),
+  workouts: [] as Workout[],
+  water: createEmptyWater(),
+  weeklyDiet: createEmptyWeeklyDiet(),
+  weightHistory: [] as WeightLog[]
 };
 
-function normalizeWaterData(water?: WaterData): WaterData {
+export function normalizeWaterData(water?: WaterData): WaterData {
   const fallback = water ?? defaultAppState.water;
   const today = getTodayDateString();
 
@@ -39,39 +60,4 @@ function normalizeWaterData(water?: WaterData): WaterData {
     consumedMl: 0,
     updatedAt: today
   };
-}
-
-export function loadAppState(): AppState {
-  if (typeof window === 'undefined') return defaultAppState;
-
-  try {
-    const raw = window.localStorage.getItem(APP_STATE_KEY);
-    if (!raw) return defaultAppState;
-
-    const parsed = JSON.parse(raw) as PersistedAppState;
-    if (!parsed.data) return defaultAppState;
-
-    const data = parsed.data;
-
-    return {
-      profile: data.profile ?? defaultAppState.profile,
-      workouts: data.workouts ?? defaultAppState.workouts,
-      water: normalizeWaterData(data.water),
-      weeklyDiet: data.weeklyDiet ?? defaultAppState.weeklyDiet,
-      weightHistory: data.weightHistory ?? defaultAppState.weightHistory
-    };
-  } catch {
-    return defaultAppState;
-  }
-}
-
-export function saveAppState(data: AppState) {
-  if (typeof window === 'undefined') return;
-
-  const payload: PersistedAppState = {
-    version: APP_STATE_VERSION,
-    data
-  };
-
-  window.localStorage.setItem(APP_STATE_KEY, JSON.stringify(payload));
 }

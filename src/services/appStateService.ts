@@ -1,5 +1,5 @@
 import type { Session } from '@supabase/supabase-js';
-import { AppState } from '../lib/appState';
+import { AppState, defaultAppState, normalizeWaterData } from '../lib/appState';
 import { supabase } from '../lib/supabaseClient';
 
 interface RemoteAppStateRow {
@@ -14,10 +14,30 @@ function mapRemoteRow(row: RemoteAppStateRow): AppState {
   return {
     profile: row.profile,
     workouts: row.workouts,
-    water: row.water,
+    water: normalizeWaterData(row.water),
     weeklyDiet: row.weekly_diet,
     weightHistory: row.weight_history
   };
+}
+
+async function createRemoteAppState(session: Session, state: AppState) {
+  const { error } = await supabase
+    .from('user_app_states')
+    .insert({
+      user_id: session.user.id,
+      profile: state.profile,
+      workouts: state.workouts,
+      water: state.water,
+      weekly_diet: state.weeklyDiet,
+      weight_history: state.weightHistory
+    });
+
+  if (error) {
+    console.error('Erro ao criar estado remoto', error);
+    return null;
+  }
+
+  return state;
 }
 
 export async function loadRemoteAppState(session: Session): Promise<AppState | null> {
@@ -33,7 +53,10 @@ export async function loadRemoteAppState(session: Session): Promise<AppState | n
   }
 
   if (!data) {
-    return null;
+    return createRemoteAppState(session, {
+      ...defaultAppState,
+      water: normalizeWaterData(defaultAppState.water)
+    });
   }
 
   return mapRemoteRow(data as RemoteAppStateRow);

@@ -7,6 +7,7 @@ interface Props {
   workouts: Workout[];
   water: WaterData;
   weeklyDiet: WeeklyDiet;
+  waterGoalMl: number;
   onOpenWorkout: (workoutId: string) => void;
   onOpenDietDay: (dayId: string) => void;
   onAddWater: (amount: number) => void;
@@ -20,8 +21,9 @@ function DumbbellIcon({ size = 24 }: { size?: number }) {
   );
 }
 
-export function HomePage({ workouts, water, weeklyDiet, onOpenWorkout, onOpenDietDay, onAddWater }: Props) {
-  const progress = Math.min(100, Math.round((water.consumedMl / water.goalMl) * 100));
+export function HomePage({ workouts, water, weeklyDiet, waterGoalMl, onOpenWorkout, onOpenDietDay, onAddWater }: Props) {
+  const progress = waterGoalMl > 0 ? Math.min(100, Math.round((water.consumedMl / waterGoalMl) * 100)) : 0;
+  const hasDiet = weeklyDiet.days.some((day) => day.meals.length > 0);
 
   return (
     <PageContainer title="FitTrack">
@@ -32,7 +34,7 @@ export function HomePage({ workouts, water, weeklyDiet, onOpenWorkout, onOpenDie
         </div>
       </div>
       <div className="stack">
-        {workouts.map((workout) => (
+        {workouts.length > 0 ? workouts.map((workout) => (
           <Tile key={workout.id} className="card-click list-card" onClick={() => onOpenWorkout(workout.id)}>
             <div className="list-card__badge list-card__badge--primary">
               <DumbbellIcon size={24} />
@@ -44,7 +46,12 @@ export function HomePage({ workouts, water, weeklyDiet, onOpenWorkout, onOpenDie
             </div>
             <ChevronRight size={24} className="list-card__chevron" />
           </Tile>
-        ))}
+        )) : (
+          <Tile className="card metric-card empty-state-card">
+            <h3>Nenhum treino cadastrado</h3>
+            <p>Cadastre seu primeiro treino na aba de treinos para ele aparecer aqui.</p>
+          </Tile>
+        )}
       </div>
 
       <div className="section-title">
@@ -55,20 +62,20 @@ export function HomePage({ workouts, water, weeklyDiet, onOpenWorkout, onOpenDie
       </div>
       <Tile className="card metric-card water-card">
         <div className="metric-row water-card__summary">
-          <strong>{water.consumedMl} ml / {water.goalMl} ml</strong>
-          <span>Meta diária: {water.goalMl} ml</span>
+          <strong>{water.consumedMl} ml / {waterGoalMl} ml</strong>
+          <span>{waterGoalMl > 0 ? `Meta diária: ${waterGoalMl} ml` : 'Preencha seu perfil para calcular a meta.'}</span>
         </div>
         <div className="water-card__progress">
           <ProgressBar label="" hideLabel helperText="" value={progress} max={100} />
           <span>{progress}%</span>
         </div>
         <div className="actions-grid water-card__actions">
-          <Button size="sm" onClick={() => onAddWater(250)}>+250 ml</Button>
-          <Button size="sm" onClick={() => onAddWater(500)}>+500 ml</Button>
+          <Button size="sm" disabled={waterGoalMl <= 0} onClick={() => onAddWater(250)}>+250 ml</Button>
+          <Button size="sm" disabled={waterGoalMl <= 0} onClick={() => onAddWater(500)}>+500 ml</Button>
           <Button size="sm" kind="tertiary" onClick={() => {
             const custom = Number(prompt('Quanto deseja adicionar em ml?'));
             if (custom > 0) onAddWater(custom);
-          }}>Personalizado</Button>
+          }} disabled={waterGoalMl <= 0}>Personalizado</Button>
         </div>
       </Tile>
 
@@ -79,7 +86,7 @@ export function HomePage({ workouts, water, weeklyDiet, onOpenWorkout, onOpenDie
         </div>
       </div>
       <div className="stack">
-        {weeklyDiet.days.map((day) => (
+        {hasDiet ? weeklyDiet.days.map((day) => (
           <Tile key={day.id} className="card-click list-card list-card--compact" onClick={() => onOpenDietDay(day.id)}>
             <div className="list-card__badge list-card__badge--purple">
               <CalendarHeatMap size={20} />
@@ -90,7 +97,12 @@ export function HomePage({ workouts, water, weeklyDiet, onOpenWorkout, onOpenDie
             </div>
             <ChevronRight size={24} className="list-card__chevron" />
           </Tile>
-        ))}
+        )) : (
+          <Tile className="card metric-card empty-state-card">
+            <h3>Nenhuma dieta cadastrada</h3>
+            <p>Monte sua dieta na aba de dieta para ver o planejamento semanal aqui.</p>
+          </Tile>
+        )}
       </div>
     </PageContainer>
   );

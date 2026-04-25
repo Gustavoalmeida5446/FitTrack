@@ -25,6 +25,7 @@ const defaultExerciseValues = {
 
 export function WorkoutSetupPage({ onBack, onCreateWorkout }: Props) {
   const skipNextSearchRef = useRef(false);
+  const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [options, setOptions] = useState<{ id: string; name: string }[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -69,6 +70,7 @@ export function WorkoutSetupPage({ onBack, onCreateWorkout }: Props) {
   }, [query]);
 
   const resetExerciseForm = () => {
+    setEditingExerciseId(null);
     setQuery('');
     setExerciseName(defaultExerciseValues.name);
     setExerciseGroup(defaultExerciseValues.muscleGroup);
@@ -91,8 +93,8 @@ export function WorkoutSetupPage({ onBack, onCreateWorkout }: Props) {
   const handleAddExercise = () => {
     if (!canAddExercise) return;
 
-    setDraftExercises((prev) => [...prev, {
-      id: crypto.randomUUID(),
+    const nextExercise: DraftExercise = {
+      id: editingExerciseId ?? crypto.randomUUID(),
       name: exerciseName.trim(),
       muscleGroup: exerciseGroup,
       mediaType: 'image',
@@ -101,13 +103,38 @@ export function WorkoutSetupPage({ onBack, onCreateWorkout }: Props) {
       reps,
       sets,
       restSeconds
-    }]);
+    };
+
+    setDraftExercises((prev) => {
+      if (editingExerciseId) {
+        return prev.map((exercise) => exercise.id === editingExerciseId ? nextExercise : exercise);
+      }
+
+      return [...prev, nextExercise];
+    });
 
     resetExerciseForm();
   };
 
+  const handleEditExercise = (exercise: DraftExercise) => {
+    skipNextSearchRef.current = true;
+    setEditingExerciseId(exercise.id);
+    setQuery(exercise.name);
+    setExerciseName(exercise.name);
+    setExerciseGroup(exercise.muscleGroup);
+    setLoadKg(exercise.loadKg);
+    setReps(exercise.reps);
+    setSets(exercise.sets);
+    setRestSeconds(exercise.restSeconds);
+    setOptions([]);
+    setIsSearching(false);
+  };
+
   const handleRemoveExercise = (exerciseId: string) => {
     setDraftExercises((prev) => prev.filter((exercise) => exercise.id !== exerciseId));
+    if (editingExerciseId === exerciseId) {
+      resetExerciseForm();
+    }
   };
 
   const handleSave = () => {
@@ -175,7 +202,10 @@ export function WorkoutSetupPage({ onBack, onCreateWorkout }: Props) {
             <NumberInput id="exercise-rest" label="Descanso (s)" min={0} value={restSeconds} onChange={(event) => setRestSeconds(Number((event.target as HTMLInputElement).value))} />
           </div>
           <div className="setup-card__footer">
-            <Button disabled={!canAddExercise} onClick={handleAddExercise}>Adicionar exercício</Button>
+            <div className="inline-actions">
+              <Button disabled={!canAddExercise} onClick={handleAddExercise}>{editingExerciseId ? 'Atualizar exercício' : 'Adicionar exercício'}</Button>
+              {editingExerciseId ? <Button kind="ghost" onClick={resetExerciseForm}>Cancelar edição</Button> : null}
+            </div>
           </div>
         </Tile>
 
@@ -196,6 +226,10 @@ export function WorkoutSetupPage({ onBack, onCreateWorkout }: Props) {
             <span className="meta-label">Grupos do treino</span>
             <p>{workoutGroups.join(', ') || 'Adicione exercícios para gerar os grupos automaticamente.'}</p>
           </div>
+          <div className="info-block">
+            <span className="meta-label">Resumo</span>
+            <p>{draftExercises.length} exercício(s) no treino.</p>
+          </div>
           <div className="stack">
             {draftExercises.length > 0 ? draftExercises.map((exercise, index) => (
               <div key={exercise.id} className="setup-selection-card">
@@ -204,9 +238,14 @@ export function WorkoutSetupPage({ onBack, onCreateWorkout }: Props) {
                     <span className="meta-label">Exercício {index + 1}</span>
                     <p>{exercise.name}</p>
                   </div>
-                  <Button kind="ghost" size="sm" renderIcon={TrashCan} iconDescription="Remover exercício" onClick={() => handleRemoveExercise(exercise.id)}>
-                    Remover
-                  </Button>
+                  <div className="inline-actions">
+                    <Button kind="ghost" size="sm" onClick={() => handleEditExercise(exercise)}>
+                      Editar
+                    </Button>
+                    <Button kind="ghost" size="sm" renderIcon={TrashCan} iconDescription="Remover exercício" onClick={() => handleRemoveExercise(exercise.id)}>
+                      Remover
+                    </Button>
+                  </div>
                 </div>
                 <div className="setup-selection-card__meta">
                   <span>{exercise.muscleGroup}</span>

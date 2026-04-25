@@ -20,6 +20,16 @@ function getBmr(weightKg: number, heightCm: number, age: number, sex: Sex): numb
 }
 
 export function calculateNutritionTargets(profile: UserProfile): NutritionTargets {
+  if (profile.currentWeight <= 0 || profile.heightCm <= 0 || profile.age <= 0) {
+    return {
+      caloriesDaily: 0,
+      proteinDaily: 0,
+      carbsDaily: 0,
+      fatDaily: 0,
+      waterDailyMl: 0
+    };
+  }
+
   const bmr = getBmr(profile.currentWeight, profile.heightCm, profile.age, profile.sex);
   const maintenanceCalories = bmr * activityMultipliers[profile.activityLevel];
   const caloriesDaily = Math.max(1200, Math.round(maintenanceCalories + goalAdjustments[profile.goal]));
