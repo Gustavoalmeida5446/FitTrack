@@ -31,11 +31,19 @@ export function DietSetupPage({ onBack, onSaveDiet }: Props) {
     setFoodOptions(results);
   };
 
+  const handleSelectFood = (food: { id: string; name: string; calories: number; protein: number }) => {
+    setSelectedFoods((prev) => [...prev, food]);
+    setFoodQuery(food.name);
+    setFoodOptions([]);
+  };
+
   const addMeal = () => {
     if (!canSaveMeal) return;
     setMeals((prev) => [...prev, { id: crypto.randomUUID(), name: mealName, foods: selectedFoods, done: false }]);
     setMealName('');
     setSelectedFoods([]);
+    setFoodQuery('');
+    setFoodOptions([]);
   };
 
   const saveWeeklyDiet = () => {
@@ -63,12 +71,18 @@ export function DietSetupPage({ onBack, onSaveDiet }: Props) {
               </div>
             </div>
           </div>
-          <TextInput id="food-search" labelText="Buscar alimento" value={foodQuery} onChange={(event) => void handleFoodSearch(event.target.value)} />
+          <TextInput
+            id="food-search"
+            labelText="Buscar alimento"
+            value={foodQuery}
+            onChange={(event) => void handleFoodSearch(event.target.value)}
+            onBlur={() => window.setTimeout(() => setFoodOptions([]), 150)}
+          />
           {foodOptions.length > 0 ? (
             <ul className="search-list">
               {foodOptions.map((food) => (
                 <li key={food.id}>
-                  <button type="button" onClick={() => setSelectedFoods((prev) => [...prev, food])}>{food.name} ({food.calories} kcal)</button>
+                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => handleSelectFood(food)}>{food.name} ({food.calories} kcal)</button>
                 </li>
               ))}
             </ul>

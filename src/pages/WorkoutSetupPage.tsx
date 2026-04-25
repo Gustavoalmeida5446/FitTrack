@@ -1,6 +1,6 @@
 import { CheckmarkFilled, ChevronLeft, Search } from '@carbon/icons-react';
 import { Button, Checkbox, NumberInput, TextInput, Tile } from '@carbon/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { MuscleGroup, Workout } from '../data/types';
 import { searchExercises } from '../services/wgerService';
 import { PageContainer } from '../components/PageContainer';
@@ -13,6 +13,7 @@ interface Props {
 const groups: MuscleGroup[] = ['Peito', 'Costas', 'Pernas', 'Ombros', 'Braços', 'Core'];
 
 export function WorkoutSetupPage({ onBack, onCreateWorkout }: Props) {
+  const skipNextSearchRef = useRef(false);
   const [query, setQuery] = useState('');
   const [options, setOptions] = useState<{ id: string; name: string }[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -35,6 +36,13 @@ export function WorkoutSetupPage({ onBack, onCreateWorkout }: Props) {
   useEffect(() => {
     const trimmedQuery = query.trim();
     if (!trimmedQuery) {
+      setOptions([]);
+      setIsSearching(false);
+      return;
+    }
+
+    if (skipNextSearchRef.current) {
+      skipNextSearchRef.current = false;
       setOptions([]);
       setIsSearching(false);
       return;
@@ -82,6 +90,14 @@ export function WorkoutSetupPage({ onBack, onCreateWorkout }: Props) {
     setOptions([]);
   };
 
+  const handleSelectExercise = (exercise: { id: string; name: string }) => {
+    skipNextSearchRef.current = true;
+    setQuery(exercise.name);
+    setExerciseName(exercise.name);
+    setOptions([]);
+    setIsSearching(false);
+  };
+
   return (
     <PageContainer title="Cadastro de treino" subtitle="Exercício > Grupo muscular > Treino" actions={<Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button>}>
       <div className="stack">
@@ -97,17 +113,19 @@ export function WorkoutSetupPage({ onBack, onCreateWorkout }: Props) {
               </div>
             </div>
           </div>
-          <TextInput id="exercise-search" labelText="Buscar exercício (wger)" value={query} onChange={(event) => setQuery(event.target.value)} />
+          <TextInput
+            id="exercise-search"
+            labelText="Buscar exercício (wger)"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            onBlur={() => window.setTimeout(() => setOptions([]), 150)}
+          />
           {isSearching ? <p className="meta-label">Buscando exercícios...</p> : null}
           {options.length > 0 ? (
             <ul className="search-list">
               {options.map((option) => (
                 <li key={option.id}>
-                  <button type="button" onClick={() => {
-                    setQuery(option.name);
-                    setExerciseName(option.name);
-                    setOptions([]);
-                  }}>{option.name}</button>
+                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => handleSelectExercise(option)}>{option.name}</button>
                 </li>
               ))}
             </ul>

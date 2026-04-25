@@ -42,6 +42,32 @@ const fallbackExerciseNames = [
 
 let cachedExercises: ExerciseOption[] | null = null;
 
+function normalizeSearchValue(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function getSearchScore(name: string, query: string): number {
+  const normalizedName = normalizeSearchValue(name);
+  const normalizedQuery = normalizeSearchValue(query);
+
+  if (!normalizedQuery) return -1;
+  if (normalizedName === normalizedQuery) return 4;
+  if (normalizedName.startsWith(normalizedQuery)) return 3;
+
+  const queryTerms = normalizedQuery.split(/\s+/).filter(Boolean);
+  if (queryTerms.length === 0) return -1;
+
+  const containsAllTerms = queryTerms.every((term) => normalizedName.includes(term));
+  if (!containsAllTerms) return -1;
+
+  return 2;
+}
+
 function createExerciseOption(name: string, id?: string | number): ExerciseOption {
   return {
     id: String(id ?? name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')),
@@ -101,12 +127,24 @@ async function loadExercises(): Promise<ExerciseOption[]> {
 }
 
 export async function searchExercises(query: string): Promise<ExerciseOption[]> {
-  const normalizedQuery = query.trim().toLowerCase();
+  const normalizedQuery = query.trim();
   if (!normalizedQuery) return [];
 
   const exercises = await loadExercises();
 
   return exercises
-    .filter((item) => item.name.toLowerCase().includes(normalizedQuery))
+    .map((item) => ({
+      item,
+      score: getSearchScore(item.name, normalizedQuery)
+    }))
+    .filter((entry) => entry.score >= 0)
+    .sort((a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+
+      return a.item.name.localeCompare(b.item.name, 'pt-BR');
+    })
+    .map((entry) => entry.item)
     .slice(0, 10);
 }
