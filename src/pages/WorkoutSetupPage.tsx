@@ -23,6 +23,10 @@ const defaultExerciseValues = {
   restSeconds: 60
 };
 
+function getSafeNumber(value: number, fallback: number) {
+  return Number.isFinite(value) ? value : fallback;
+}
+
 export function WorkoutSetupPage({ onBack, onCreateWorkout }: Props) {
   const skipNextSearchRef = useRef(false);
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null);
@@ -174,7 +178,11 @@ export function WorkoutSetupPage({ onBack, onCreateWorkout }: Props) {
             id="exercise-search"
             labelText="Buscar exercício"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => {
+              const value = event.target.value;
+              setQuery(value);
+              setExerciseName(value);
+            }}
             onBlur={() => window.setTimeout(() => setOptions([]), 150)}
           />
           {isSearching ? <p className="meta-label">Buscando exercícios...</p> : null}
@@ -188,7 +196,16 @@ export function WorkoutSetupPage({ onBack, onCreateWorkout }: Props) {
             </ul>
           ) : null}
           <div className="setup-card__fields">
-            <TextInput id="exercise-name" labelText="Nome do exercício" value={exerciseName} onChange={(event) => setExerciseName(event.target.value)} />
+            <TextInput
+              id="exercise-name"
+              labelText="Nome do exercício"
+              value={exerciseName}
+              onChange={(event) => {
+                const value = event.target.value;
+                setExerciseName(value);
+                setQuery(value);
+              }}
+            />
             <Select id="exercise-group" labelText="Grupo muscular" value={exerciseGroup} onChange={(event) => setExerciseGroup(event.target.value as MuscleGroup)}>
               {groups.map((group) => (
                 <SelectItem key={group} value={group} text={group} />
@@ -196,10 +213,10 @@ export function WorkoutSetupPage({ onBack, onCreateWorkout }: Props) {
             </Select>
           </div>
           <div className="setup-card__metrics">
-            <NumberInput id="exercise-load" label="Carga (kg)" min={0} value={loadKg} onChange={(event) => setLoadKg(Number((event.target as HTMLInputElement).value))} />
-            <NumberInput id="exercise-reps" label="Repetições" min={1} value={reps} onChange={(event) => setReps(Number((event.target as HTMLInputElement).value))} />
-            <NumberInput id="exercise-sets" label="Séries" min={1} value={sets} onChange={(event) => setSets(Number((event.target as HTMLInputElement).value))} />
-            <NumberInput id="exercise-rest" label="Descanso (s)" min={0} value={restSeconds} onChange={(event) => setRestSeconds(Number((event.target as HTMLInputElement).value))} />
+            <NumberInput id="exercise-load" label="Carga (kg)" min={0} value={loadKg} onChange={(event) => setLoadKg(getSafeNumber(Number((event.target as HTMLInputElement).value), defaultExerciseValues.loadKg))} />
+            <NumberInput id="exercise-reps" label="Repetições" min={1} value={reps} onChange={(event) => setReps(getSafeNumber(Number((event.target as HTMLInputElement).value), defaultExerciseValues.reps))} />
+            <NumberInput id="exercise-sets" label="Séries" min={1} value={sets} onChange={(event) => setSets(getSafeNumber(Number((event.target as HTMLInputElement).value), defaultExerciseValues.sets))} />
+            <NumberInput id="exercise-rest" label="Descanso (s)" min={0} value={restSeconds} onChange={(event) => setRestSeconds(getSafeNumber(Number((event.target as HTMLInputElement).value), defaultExerciseValues.restSeconds))} />
           </div>
           <div className="setup-card__footer">
             <div className="inline-actions">

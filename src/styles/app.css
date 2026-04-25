@@ -354,18 +354,21 @@ body {
 }
 
 .profile-initial-badge {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  background: transparent;
+  color: inherit;
+  font-size: 21px;
+  font-weight: 600;
   border-radius: 999px;
-  background: rgba(69, 137, 255, 0.18);
-  border: 1px solid rgba(69, 137, 255, 0.4);
-  color: #cfe1ff;
-  font-size: 0.78rem;
-  font-weight: 700;
+  transform: scale(1.5);  font-weight: 600;
   text-transform: uppercase;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px #fff;
 }
 
 .bottom-tabbar__item--active.cds--btn.cds--btn--ghost,

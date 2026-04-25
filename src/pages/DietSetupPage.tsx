@@ -33,6 +33,10 @@ function scaleFood(food: TacoFood, quantityGrams: number): FoodItem {
   };
 }
 
+function getSafeNumber(value: number, fallback: number) {
+  return Number.isFinite(value) ? value : fallback;
+}
+
 export function DietSetupPage({ onBack, onSaveDiet }: Props) {
   const [selectedDayId, setSelectedDayId] = useState(initialDays[0].id);
   const [editingMealId, setEditingMealId] = useState<string | null>(null);
@@ -53,6 +57,17 @@ export function DietSetupPage({ onBack, onSaveDiet }: Props) {
     carbs: acc.carbs + food.carbs,
     fat: acc.fat + food.fat
   }), { calories: 0, protein: 0, carbs: 0, fat: 0 }), [selectedFoods]);
+
+  if (!selectedDay) {
+    return (
+      <PageContainer title="Cadastro de dieta" subtitle="Monte a dieta por dia, refeição e quantidade" actions={<Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button>}>
+        <Tile className="card metric-card empty-state-card">
+          <h3>Não foi possível carregar a dieta</h3>
+          <p>Tente voltar e abrir o cadastro novamente.</p>
+        </Tile>
+      </PageContainer>
+    );
+  }
 
   const handleFoodSearch = (value: string) => {
     setFoodQuery(value);
@@ -109,7 +124,7 @@ export function DietSetupPage({ onBack, onSaveDiet }: Props) {
   const handleEditMeal = (meal: Meal) => {
     setEditingMealId(meal.id);
     setMealName(meal.name);
-    setSelectedFoods(meal.foods);
+    setSelectedFoods(meal.foods.map((food) => ({ ...food })));
     setFoodQuery('');
     setFoodOptions([]);
   };
@@ -203,7 +218,7 @@ export function DietSetupPage({ onBack, onSaveDiet }: Props) {
               onChange={(event) => handleFoodSearch(event.target.value)}
               onBlur={() => window.setTimeout(() => setFoodOptions([]), 150)}
             />
-            <NumberInput id="food-quantity" label="Quantidade (g)" min={1} value={foodQuantityGrams} onChange={(event) => setFoodQuantityGrams(Number((event.target as HTMLInputElement).value))} />
+            <NumberInput id="food-quantity" label="Quantidade (g)" min={1} value={foodQuantityGrams} onChange={(event) => setFoodQuantityGrams(getSafeNumber(Number((event.target as HTMLInputElement).value), 100))} />
           </div>
           {foodOptions.length > 0 ? (
             <ul className="search-list">
