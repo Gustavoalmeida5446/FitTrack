@@ -1,20 +1,15 @@
 import { CalendarHeatMap, CheckmarkFilled, ChevronLeft, Search, TrashCan } from '@carbon/icons-react';
 import { Button, NumberInput, TextInput, Tile } from '@carbon/react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { DietDay, FoodItem, Meal, WeeklyDiet } from '../data/types';
 import { searchFoods, type FoodItem as TacoFood } from '../services/foods';
 import { PageContainer } from '../components/PageContainer';
 
 interface Props {
   onBack: () => void;
+  diet: WeeklyDiet;
   onSaveDiet: (diet: WeeklyDiet) => void;
 }
-
-const initialDays: DietDay[] = Array.from({ length: 7 }, (_, index) => ({
-  id: `d-${index + 1}`,
-  label: `Dia ${index + 1}`,
-  meals: []
-}));
 
 function scaleFood(food: TacoFood, quantityGrams: number): FoodItem {
   const factor = quantityGrams / 100;
@@ -37,30 +32,45 @@ function getSafeNumber(value: number, fallback: number) {
   return Number.isFinite(value) ? value : fallback;
 }
 
-export function DietSetupPage({ onBack, onSaveDiet }: Props) {
-  const [selectedDayId, setSelectedDayId] = useState(initialDays[0].id);
+export function DietSetupPage({ onBack, diet, onSaveDiet }: Props) {
+  const [draftDiet, setDraftDiet] = useState(diet);
+  const [selectedDayId, setSelectedDayId] = useState(diet.days[0]?.id ?? 'd-1');
   const [editingMealId, setEditingMealId] = useState<string | null>(null);
   const [foodQuery, setFoodQuery] = useState('');
   const [foodOptions, setFoodOptions] = useState<TacoFood[]>([]);
   const [mealName, setMealName] = useState('');
   const [foodQuantityGrams, setFoodQuantityGrams] = useState(100);
   const [selectedFoods, setSelectedFoods] = useState<FoodItem[]>([]);
-  const [days, setDays] = useState<DietDay[]>(initialDays);
+  const [selectedDayMealIds, setSelectedDayMealIds] = useState<string[]>([]);
 
-  const selectedDay = useMemo(() => days.find((day) => day.id === selectedDayId) ?? days[0], [days, selectedDayId]);
+  useEffect(() => {
+    setDraftDiet(diet);
+    setSelectedDayId((currentDayId) => diet.days.some((day) => day.id === currentDayId) ? currentDayId : (diet.days[0]?.id ?? 'd-1'));
+  }, [diet]);
+
+  const selectedDay = useMemo(() => draftDiet.days.find((day) => day.id === selectedDayId) ?? draftDiet.days[0], [draftDiet.days, selectedDayId]);
+
+  useEffect(() => {
+    if (!selectedDay) {
+      setSelectedDayMealIds([]);
+      return;
+    }
+
+    setSelectedDayMealIds(selectedDay.mealIds);
+  }, [selectedDay]);
+
   const canSaveMeal = useMemo(() => mealName.trim() && selectedFoods.length > 0, [mealName, selectedFoods.length]);
-  const canSaveDiet = useMemo(() => days.some((day) => day.meals.length > 0), [days]);
-
   const selectedMealTotals = useMemo(() => selectedFoods.reduce((acc, food) => ({
     calories: acc.calories + food.calories,
     protein: acc.protein + food.protein,
     carbs: acc.carbs + food.carbs,
     fat: acc.fat + food.fat
   }), { calories: 0, protein: 0, carbs: 0, fat: 0 }), [selectedFoods]);
+  const selectedDayMeals = useMemo(() => draftDiet.meals.filter((meal) => selectedDayMealIds.includes(meal.id)), [draftDiet.meals, selectedDayMealIds]);
 
   if (!selectedDay) {
     return (
-      <PageContainer title="Cadastro de dieta" subtitle="Monte a dieta por dia, refeição e quantidade" actions={<Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button>}>
+      <PageContainer title="Cadastro de dieta" subtitle="Crie refeições e monte os dias da semana" actions={<Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button>}>
         <Tile className="card metric-card empty-state-card">
           <h3>Não foi possível carregar a dieta</h3>
           <p>Tente voltar e abrir o cadastro novamente.</p>
@@ -68,6 +78,20 @@ export function DietSetupPage({ onBack, onSaveDiet }: Props) {
       </PageContainer>
     );
   }
+
+  const commitDiet = (nextDiet: WeeklyDiet) => {
+    setDraftDiet(nextDiet);
+    onSaveDiet(nextDiet);
+  };
+
+  const resetMealForm = () => {
+    setEditingMealId(null);
+    setMealName('');
+    setSelectedFoods([]);
+    setFoodQuery('');
+    setFoodOptions([]);
+    setFoodQuantityGrams(100);
+  };
 
   const handleFoodSearch = (value: string) => {
     setFoodQuery(value);
@@ -77,127 +101,97 @@ export function DietSetupPage({ onBack, onSaveDiet }: Props) {
   const handleSelectFood = (food: TacoFood) => {
     const quantity = Math.max(1, foodQuantityGrams || 100);
     setSelectedFoods((prev) => [...prev, scaleFood(food, quantity)]);
-    setFoodQuery(food.nome);
+    setFoodQuery('');
     setFoodOptions([]);
+    setFoodQuantityGrams(100);
   };
 
   const handleRemoveDraftFood = (foodId: string) => {
     setSelectedFoods((prev) => prev.filter((food) => food.id !== foodId));
   };
 
-  const handleAddMeal = () => {
+  const handleSaveMeal = () => {
     if (!canSaveMeal) return;
 
     const meal: Meal = {
       id: editingMealId ?? crypto.randomUUID(),
       name: mealName.trim(),
-      foods: selectedFoods,
-      done: false
+      foods: selectedFoods.map((food) => ({ ...food }))
     };
 
-    setDays((prev) => prev.map((day) => {
-      if (day.id !== selectedDayId) {
-        return day;
-      }
+    const nextDiet: WeeklyDiet = {
+      ...draftDiet,
+      meals: editingMealId
+        ? draftDiet.meals.map((item) => item.id === editingMealId ? meal : item)
+        : [...draftDiet.meals, meal]
+    };
 
-      if (editingMealId) {
-        return {
-          ...day,
-          meals: day.meals.map((item) => item.id === editingMealId ? meal : item)
-        };
-      }
-
-      return {
-        ...day,
-        meals: [...day.meals, meal]
-      };
-    }));
-
-    setEditingMealId(null);
-    setMealName('');
-    setSelectedFoods([]);
-    setFoodQuery('');
-    setFoodOptions([]);
-    setFoodQuantityGrams(100);
+    commitDiet(nextDiet);
+    resetMealForm();
   };
 
   const handleEditMeal = (meal: Meal) => {
     setEditingMealId(meal.id);
     setMealName(meal.name);
-    setSelectedFoods(meal.foods.map((food) => ({ ...food })));
+    setSelectedFoods(meal.foods.map((food) => ({ ...food, id: crypto.randomUUID() })));
     setFoodQuery('');
     setFoodOptions([]);
   };
 
   const handleRemoveMeal = (mealId: string) => {
-    setDays((prev) => prev.map((day) => day.id === selectedDayId ? { ...day, meals: day.meals.filter((meal) => meal.id !== mealId) } : day));
+    const nextDiet: WeeklyDiet = {
+      ...draftDiet,
+      meals: draftDiet.meals.filter((meal) => meal.id !== mealId),
+      days: draftDiet.days.map((day) => ({
+        ...day,
+        mealIds: day.mealIds.filter((id) => id !== mealId),
+        completedMealIds: day.completedMealIds.filter((id) => id !== mealId)
+      }))
+    };
+
+    commitDiet(nextDiet);
+
     if (editingMealId === mealId) {
-      setEditingMealId(null);
-      setMealName('');
-      setSelectedFoods([]);
-      setFoodQuery('');
-      setFoodOptions([]);
-      setFoodQuantityGrams(100);
+      resetMealForm();
     }
   };
 
-  const handleClearSelectedFoods = () => {
-    setSelectedFoods([]);
-    setFoodQuery('');
-    setFoodOptions([]);
+  const toggleMealInDay = (mealId: string) => {
+    setSelectedDayMealIds((prev) => prev.includes(mealId) ? prev.filter((id) => id !== mealId) : [...prev, mealId]);
   };
 
-  const handleCopyPreviousDay = () => {
-    const currentIndex = days.findIndex((day) => day.id === selectedDayId);
-    if (currentIndex <= 0) return;
+  const handleSaveDay = () => {
+    const nextDiet: WeeklyDiet = {
+      ...draftDiet,
+      days: draftDiet.days.map((day) => {
+        if (day.id !== selectedDay.id) {
+          return day;
+        }
 
-    const previousDay = days[currentIndex - 1];
-    setDays((prev) => prev.map((day, index) => index === currentIndex ? {
-      ...day,
-      meals: previousDay.meals.map((meal) => ({
-        ...meal,
-        id: crypto.randomUUID(),
-        foods: meal.foods.map((food) => ({ ...food, id: crypto.randomUUID() }))
-      }))
-    } : day));
+        return {
+          ...day,
+          mealIds: selectedDayMealIds,
+          completedMealIds: day.completedMealIds.filter((mealId) => selectedDayMealIds.includes(mealId))
+        };
+      })
+    };
+
+    commitDiet(nextDiet);
   };
 
-  const handleClearSelectedDay = () => {
-    setDays((prev) => prev.map((day) => day.id === selectedDayId ? { ...day, meals: [] } : day));
-  };
+  const handleClearDay = () => {
+    setSelectedDayMealIds([]);
+    const nextDiet: WeeklyDiet = {
+      ...draftDiet,
+      days: draftDiet.days.map((day) => day.id === selectedDay.id ? { ...day, mealIds: [], completedMealIds: [] } : day)
+    };
 
-  const saveWeeklyDiet = () => {
-    if (!canSaveDiet) return;
-    onSaveDiet({
-      id: crypto.randomUUID(),
-      days
-    });
+    commitDiet(nextDiet);
   };
 
   return (
-    <PageContainer title="Cadastro de dieta" subtitle="Monte a dieta por dia, refeição e quantidade" actions={<Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button>}>
+    <PageContainer title="Cadastro de dieta" subtitle="Crie refeições com vários alimentos e monte os dias da semana" actions={<Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button>}>
       <div className="stack">
-        <Tile className="card metric-card setup-card">
-          <div className="card-head">
-            <div className="card-head__group">
-              <div className="icon-badge icon-badge--purple card-head__badge">
-                <CalendarHeatMap size={20} />
-              </div>
-              <div className="card-head__title">
-                <h3>Dia da dieta</h3>
-                <p>Escolha o dia que você quer montar</p>
-              </div>
-            </div>
-          </div>
-          <div className="day-selector">
-            {days.map((day) => (
-              <button key={day.id} type="button" className={`day-selector__item ${selectedDayId === day.id ? 'day-selector__item--active' : ''}`} onClick={() => setSelectedDayId(day.id)}>
-                {day.label}
-              </button>
-            ))}
-          </div>
-        </Tile>
-
         <Tile className="card metric-card setup-card">
           <div className="card-head">
             <div className="card-head__group">
@@ -205,8 +199,8 @@ export function DietSetupPage({ onBack, onSaveDiet }: Props) {
                 <Search size={20} />
               </div>
               <div className="card-head__title">
-                <h3>Alimentos</h3>
-                <p>Busque na base TACO, defina a quantidade e monte a refeição</p>
+                <h3>Criar refeição</h3>
+                <p>Busque alimentos, adicione quantos quiser e salve a refeição</p>
               </div>
             </div>
           </div>
@@ -237,14 +231,8 @@ export function DietSetupPage({ onBack, onSaveDiet }: Props) {
             <p>{selectedFoods.length} alimento(s) • {selectedMealTotals.calories.toFixed(1)} kcal • {selectedMealTotals.protein.toFixed(1)}g proteína</p>
           </div>
           <div className="inline-actions">
-            {selectedFoods.length > 0 ? <Button kind="ghost" size="sm" onClick={handleClearSelectedFoods}>Limpar alimentos</Button> : null}
-            {editingMealId ? <Button kind="ghost" size="sm" onClick={() => {
-              setEditingMealId(null);
-              setMealName('');
-              setSelectedFoods([]);
-              setFoodQuery('');
-              setFoodOptions([]);
-            }}>Cancelar edição</Button> : null}
+            {selectedFoods.length > 0 ? <Button kind="ghost" size="sm" onClick={() => setSelectedFoods([])}>Limpar alimentos</Button> : null}
+            {editingMealId ? <Button kind="ghost" size="sm" onClick={resetMealForm}>Cancelar edição</Button> : null}
           </div>
           <div className="stack">
             {selectedFoods.length > 0 ? selectedFoods.map((food) => (
@@ -268,12 +256,12 @@ export function DietSetupPage({ onBack, onSaveDiet }: Props) {
             )) : (
               <div className="info-block">
                 <span className="meta-label">Alimentos da refeição</span>
-                <p>Selecione alimentos e quantidade para montar a refeição.</p>
+                <p>Selecione quantos alimentos quiser para montar a refeição.</p>
               </div>
             )}
           </div>
           <div className="setup-card__footer">
-            <Button disabled={!canSaveMeal} onClick={handleAddMeal}>{editingMealId ? `Atualizar refeição do ${selectedDay.label}` : `Adicionar refeição ao ${selectedDay.label}`}</Button>
+            <Button disabled={!canSaveMeal} onClick={handleSaveMeal}>{editingMealId ? 'Atualizar refeição' : 'Salvar refeição'}</Button>
           </div>
         </Tile>
 
@@ -284,21 +272,13 @@ export function DietSetupPage({ onBack, onSaveDiet }: Props) {
                 <CheckmarkFilled size={20} />
               </div>
               <div className="card-head__title">
-                <h3>{selectedDay.label}</h3>
-                <p>Reveja as refeições cadastradas para o dia selecionado</p>
+                <h3>Refeições cadastradas</h3>
+                <p>Use essas refeições para montar os dias da dieta</p>
               </div>
             </div>
           </div>
-          <div className="inline-actions">
-            <Button kind="ghost" size="sm" disabled={days.findIndex((day) => day.id === selectedDayId) <= 0} onClick={handleCopyPreviousDay}>
-              Copiar dia anterior
-            </Button>
-            <Button kind="ghost" size="sm" disabled={selectedDay.meals.length === 0} onClick={handleClearSelectedDay}>
-              Limpar dia
-            </Button>
-          </div>
           <div className="stack">
-            {selectedDay.meals.length > 0 ? selectedDay.meals.map((meal) => (
+            {draftDiet.meals.length > 0 ? draftDiet.meals.map((meal) => (
               <div key={meal.id} className="setup-selection-card">
                 <div className="setup-selection-card__header">
                   <div>
@@ -321,13 +301,94 @@ export function DietSetupPage({ onBack, onSaveDiet }: Props) {
               </div>
             )) : (
               <div className="info-block">
-                <span className="meta-label">Refeições do dia</span>
-                <p>Nenhuma refeição cadastrada para este dia ainda.</p>
+                <span className="meta-label">Refeições</span>
+                <p>Nenhuma refeição cadastrada ainda.</p>
               </div>
             )}
           </div>
-          <div className="setup-card__footer">
-            <Button disabled={!canSaveDiet} onClick={saveWeeklyDiet}>Salvar dieta semanal</Button>
+        </Tile>
+
+        <Tile className="card metric-card setup-card">
+          <div className="card-head">
+            <div className="card-head__group">
+              <div className="icon-badge icon-badge--purple card-head__badge">
+                <CalendarHeatMap size={20} />
+              </div>
+              <div className="card-head__title">
+                <h3>Criar dia</h3>
+                <p>Escolha o dia e selecione quais refeições fazem parte dele</p>
+              </div>
+            </div>
+          </div>
+          <div className="day-selector">
+            {draftDiet.days.map((day) => (
+              <button key={day.id} type="button" className={`day-selector__item ${selectedDayId === day.id ? 'day-selector__item--active' : ''}`} onClick={() => setSelectedDayId(day.id)}>
+                {day.label}
+              </button>
+            ))}
+          </div>
+          <div className="stack">
+            {draftDiet.meals.length > 0 ? draftDiet.meals.map((meal) => {
+              const selected = selectedDayMealIds.includes(meal.id);
+
+              return (
+                <button key={meal.id} type="button" className={`selection-toggle-card ${selected ? 'selection-toggle-card--active' : ''}`} onClick={() => toggleMealInDay(meal.id)}>
+                  <div>
+                    <span className="meta-label">{meal.foods.length} alimento(s)</span>
+                    <strong>{meal.name}</strong>
+                  </div>
+                  <span>{selected ? 'Selecionada' : 'Selecionar'}</span>
+                </button>
+              );
+            }) : (
+              <div className="info-block">
+                <span className="meta-label">Refeições disponíveis</span>
+                <p>Cadastre pelo menos uma refeição antes de montar o dia.</p>
+              </div>
+            )}
+          </div>
+          <div className="inline-actions">
+            <Button kind="ghost" size="sm" disabled={selectedDayMealIds.length === 0} onClick={handleClearDay}>
+              Limpar dia
+            </Button>
+            <Button disabled={draftDiet.meals.length === 0} onClick={handleSaveDay}>
+              Salvar {selectedDay.label}
+            </Button>
+          </div>
+        </Tile>
+
+        <Tile className="card metric-card setup-card">
+          <div className="card-head">
+            <div className="card-head__group">
+              <div className="icon-badge icon-badge--purple card-head__badge">
+                <CheckmarkFilled size={20} />
+              </div>
+              <div className="card-head__title">
+                <h3>{selectedDay.label}</h3>
+                <p>Reveja as refeições atribuídas ao dia selecionado</p>
+              </div>
+            </div>
+          </div>
+          <div className="stack">
+            {selectedDayMeals.length > 0 ? selectedDayMeals.map((meal) => (
+              <div key={meal.id} className="setup-selection-card">
+                <div className="setup-selection-card__header">
+                  <div>
+                    <span className="meta-label">{meal.foods.length} alimento(s)</span>
+                    <p>{meal.name}</p>
+                  </div>
+                </div>
+                <div className="setup-selection-card__meta">
+                  <span>{meal.foods.reduce((sum, food) => sum + food.calories, 0).toFixed(1)} kcal</span>
+                  <span>{meal.foods.reduce((sum, food) => sum + food.protein, 0).toFixed(1)}g proteína</span>
+                </div>
+              </div>
+            )) : (
+              <div className="info-block">
+                <span className="meta-label">Refeições do dia</span>
+                <p>Nenhuma refeição selecionada para este dia ainda.</p>
+              </div>
+            )}
           </div>
         </Tile>
       </div>

@@ -10,6 +10,10 @@ interface Props {
   onUpdateLoad: (exerciseId: string, loadKg: number) => void;
 }
 
+function getSafeNumber(value: number, fallback: number) {
+  return Number.isFinite(value) ? value : fallback;
+}
+
 export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateLoad }: Props) {
   const completedExercises = workout.exercises.filter((exercise) => exercise.done).length;
 
@@ -46,7 +50,7 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateLoa
                 </div>
               </div>
             </div>
-            <img src={exercise.mediaUrl} alt={exercise.name} className="exercise-media" />
+            {exercise.mediaUrl ? <img src={exercise.mediaUrl} alt={exercise.name} className="exercise-media" /> : null}
             <div className="workout-exercise-card__meta">
               <div className="stat-pill">
                 <span>Repetições</span>
@@ -66,16 +70,11 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateLoa
               label="Carga (kg)"
               min={0}
               value={exercise.loadKg}
-              onChange={(event) => onUpdateLoad(exercise.id, Number((event.target as HTMLInputElement).value))}
+              onChange={(event) => onUpdateLoad(exercise.id, getSafeNumber(Number((event.target as HTMLInputElement).value), exercise.loadKg))}
             />
             <div className="workout-exercise-card__footer">
               <span className="meta-label">Mídia: {exercise.mediaType}</span>
-              <Checkbox
-                id={`done-${exercise.id}`}
-                labelText="Feito"
-                checked={exercise.done}
-                onChange={() => onToggleExerciseDone(exercise.id)}
-              />
+              <Checkbox id={`done-${exercise.id}`} labelText="Feito" checked={exercise.done} onChange={() => onToggleExerciseDone(exercise.id)} />
             </div>
           </Tile>
         ))}

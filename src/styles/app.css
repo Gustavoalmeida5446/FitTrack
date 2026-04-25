@@ -361,8 +361,8 @@ body {
   justify-content: center;
   background: transparent;
   color: inherit;
-  font-size: 21px;
-  font-weight: 600;
+  font-size: 240px;
+  font-weight: 900;
   border-radius: 999px;
   transform: scale(1.5);  font-weight: 600;
   text-transform: uppercase;
@@ -545,6 +545,43 @@ body {
 .day-selector__item--active {
   border-color: #8a63ff;
   background: rgba(124, 58, 237, 0.22);
+}
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.selection-toggle-card {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0.8rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.selection-toggle-card strong {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.95rem;
+}
+
+.selection-toggle-card span:last-child {
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+}
+
+.selection-toggle-card--active {
+  border-color: #8a63ff;
+  background: rgba(124, 58, 237, 0.16);
 }
 
 .setup-selection-card {
@@ -791,6 +828,10 @@ body {
 
   .day-selector {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .checkbox-grid {
+    grid-template-columns: 1fr;
   }
 
   .goals-grid,

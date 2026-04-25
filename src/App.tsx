@@ -43,6 +43,13 @@ export default function App() {
   const targets = useMemo(() => calculateNutritionTargets(profile), [profile]);
   const selectedWorkout = useMemo(() => workouts.find((item) => item.id === selectedWorkoutId), [workouts, selectedWorkoutId]);
   const selectedDay = useMemo(() => weeklyDiet.days.find((item) => item.id === selectedDayId), [weeklyDiet.days, selectedDayId]);
+  const selectedDayMeals = useMemo(() => {
+    if (!selectedDay) {
+      return [];
+    }
+
+    return weeklyDiet.meals.filter((meal) => selectedDay.mealIds.includes(meal.id));
+  }, [selectedDay, weeklyDiet.meals]);
   const userInitial = session?.user.email?.trim().charAt(0).toUpperCase() ?? 'U';
 
   useEffect(() => {
@@ -78,16 +85,13 @@ export default function App() {
     setIsRemoteReady(false);
 
     void loadRemoteAppState(session).then((remoteState) => {
-      if (!isActive) return;
+      if (!isActive || !remoteState) return;
 
-      if (remoteState) {
-        setProfile(remoteState.profile);
-        setWorkouts(remoteState.workouts);
-        setWater(normalizeWaterData(remoteState.water));
-        setWeeklyDiet(remoteState.weeklyDiet);
-        setWeightHistory(remoteState.weightHistory);
-      }
-
+      setProfile(remoteState.profile);
+      setWorkouts(remoteState.workouts);
+      setWater(normalizeWaterData(remoteState.water));
+      setWeeklyDiet(remoteState.weeklyDiet);
+      setWeightHistory(remoteState.weightHistory);
       setIsRemoteReady(true);
     });
 
@@ -130,9 +134,7 @@ export default function App() {
     return true;
   };
 
-  const handleSignUp = async (email: string, password: string) => {
-    return signUpWithEmail(email, password);
-  };
+  const handleSignUp = async (email: string, password: string) => signUpWithEmail(email, password);
 
   const handleSignOut = async () => {
     const success = await signOut();
@@ -207,23 +209,26 @@ export default function App() {
         {view === 'diet-day' && selectedDay ? (
           <DietDayPage
             day={selectedDay}
+            meals={selectedDayMeals}
             onBack={() => setView('home')}
             onToggleMealDone={(mealId) => updateDiet((diet) => ({
               ...diet,
               days: diet.days.map((day) => day.id !== selectedDay.id ? day : {
                 ...day,
-                meals: day.meals.map((meal) => meal.id === mealId ? { ...meal, done: !meal.done } : meal)
+                completedMealIds: day.completedMealIds.includes(mealId)
+                  ? day.completedMealIds.filter((item) => item !== mealId)
+                  : [...day.completedMealIds, mealId]
               })
             }))}
           />
         ) : null}
 
         {view === 'workout-setup' ? (
-          <WorkoutSetupPage onBack={() => setView('home')} onCreateWorkout={(workout) => setWorkouts((prev) => [...prev, workout])} />
+          <WorkoutSetupPage onBack={() => setView('home')} workouts={workouts} onSaveWorkouts={setWorkouts} />
         ) : null}
 
         {view === 'diet-setup' ? (
-          <DietSetupPage onBack={() => setView('home')} onSaveDiet={setWeeklyDiet} />
+          <DietSetupPage onBack={() => setView('home')} diet={weeklyDiet} onSaveDiet={setWeeklyDiet} />
         ) : null}
 
         {view === 'goals' ? (

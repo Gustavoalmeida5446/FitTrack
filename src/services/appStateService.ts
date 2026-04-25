@@ -1,33 +1,31 @@
 import type { Session } from '@supabase/supabase-js';
-import { AppState, defaultAppState, normalizeWaterData } from '../lib/appState';
-import { mockUserProfile, mockWeeklyDiet, mockWeightHistory, mockWorkouts } from '../data/mockData';
+import { AppState, defaultAppState, normalizeWaterData, normalizeWeeklyDiet, normalizeWorkoutState } from '../lib/appState';
 import { supabase } from '../lib/supabaseClient';
 
 interface RemoteAppStateRow {
   profile: AppState['profile'];
-  workouts: AppState['workouts'];
+  workouts: unknown;
   water: AppState['water'];
-  weekly_diet: AppState['weeklyDiet'];
+  weekly_diet: unknown;
   weight_history: AppState['weightHistory'];
 }
 
 function mapRemoteRow(row: RemoteAppStateRow): AppState {
   return {
-    profile: row.profile,
-    workouts: row.workouts,
+    profile: row.profile ?? defaultAppState.profile,
+    workouts: normalizeWorkoutState(row.workouts as AppState['workouts']),
     water: normalizeWaterData(row.water),
-    weeklyDiet: row.weekly_diet,
-    weightHistory: row.weight_history
+    weeklyDiet: normalizeWeeklyDiet(row.weekly_diet as AppState['weeklyDiet']),
+    weightHistory: Array.isArray(row.weight_history) ? row.weight_history : []
   };
 }
 
 function isLegacyMockState(state: AppState): boolean {
-  const matchesMockWorkouts = JSON.stringify(state.workouts) === JSON.stringify(mockWorkouts);
-  const matchesMockDiet = JSON.stringify(state.weeklyDiet) === JSON.stringify(mockWeeklyDiet);
-  const matchesMockProfile = JSON.stringify(state.profile) === JSON.stringify(mockUserProfile);
-  const matchesMockWeightHistory = JSON.stringify(state.weightHistory) === JSON.stringify(mockWeightHistory);
+  const looksLikeMockWorkout = state.workouts.some((workout) => ['Push A', 'Pull B'].includes(workout.name));
+  const looksLikeMockDiet = state.weeklyDiet.meals.some((meal) => ['Café da manhã', 'Almoço', 'Jantar'].includes(meal.name));
+  const looksLikeMockProfile = state.profile.currentWeight === 78 && state.profile.heightCm === 175;
 
-  return matchesMockWorkouts || matchesMockDiet || (matchesMockProfile && matchesMockWeightHistory);
+  return looksLikeMockWorkout || looksLikeMockDiet || looksLikeMockProfile;
 }
 
 async function replaceRemoteAppState(session: Session, state: AppState) {

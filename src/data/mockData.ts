@@ -1,4 +1,4 @@
-import { DietDay, UserProfile, WaterData, WeeklyDiet, WeightLog, Workout } from './types';
+import { UserProfile, WaterData, WeeklyDiet, WeightLog, Workout } from './types';
 
 const exerciseMedia = 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800';
 
@@ -8,8 +8,8 @@ export const mockWorkouts: Workout[] = [
     name: 'Push A',
     muscleGroups: ['Peito', 'Ombros', 'Braços'],
     exercises: [
-      { id: 'e1', name: 'Supino reto', muscleGroup: 'Peito', mediaType: 'image', mediaUrl: exerciseMedia, loadKg: 40, reps: 10, sets: 4, restSeconds: 90, done: false },
-      { id: 'e2', name: 'Desenvolvimento', muscleGroup: 'Ombros', mediaType: 'image', mediaUrl: exerciseMedia, loadKg: 20, reps: 12, sets: 3, restSeconds: 60, done: false }
+      { id: 'e1', source: 'manual', name: 'Supino reto', muscleGroup: 'Peito', mediaType: 'image', mediaUrl: exerciseMedia, loadKg: 40, reps: 10, sets: 4, restSeconds: 90, done: false },
+      { id: 'e2', source: 'manual', name: 'Desenvolvimento', muscleGroup: 'Ombros', mediaType: 'image', mediaUrl: exerciseMedia, loadKg: 20, reps: 12, sets: 3, restSeconds: 60, done: false }
     ]
   },
   {
@@ -17,8 +17,8 @@ export const mockWorkouts: Workout[] = [
     name: 'Pull B',
     muscleGroups: ['Costas', 'Braços'],
     exercises: [
-      { id: 'e3', name: 'Remada baixa', muscleGroup: 'Costas', mediaType: 'image', mediaUrl: exerciseMedia, loadKg: 35, reps: 12, sets: 4, restSeconds: 90, done: false },
-      { id: 'e4', name: 'Rosca direta', muscleGroup: 'Braços', mediaType: 'gif', mediaUrl: exerciseMedia, loadKg: 15, reps: 12, sets: 3, restSeconds: 60, done: false }
+      { id: 'e3', source: 'manual', name: 'Remada baixa', muscleGroup: 'Costas', mediaType: 'image', mediaUrl: exerciseMedia, loadKg: 35, reps: 12, sets: 4, restSeconds: 90, done: false },
+      { id: 'e4', source: 'manual', name: 'Rosca direta', muscleGroup: 'Braços', mediaType: 'gif', mediaUrl: exerciseMedia, loadKg: 15, reps: 12, sets: 3, restSeconds: 60, done: false }
     ]
   }
 ];
@@ -29,34 +29,32 @@ export const mockWater: WaterData = {
   updatedAt: '2026-04-25'
 };
 
-const buildDay = (id: number): DietDay => ({
-  id: `d${id}`,
-  label: `Dia ${id}`,
+export const mockWeeklyDiet: WeeklyDiet = {
+  id: 'diet-1',
   meals: [
     {
-      id: `m${id}1`,
+      id: 'm11',
       name: 'Café da manhã',
-      done: id === 1,
       foods: [
-        { id: `f${id}1`, name: 'Ovos', calories: 140, protein: 12, carbs: 1, fat: 10, fiber: 0, quantityGrams: 100, baseQuantityGrams: 100 },
-        { id: `f${id}2`, name: 'Pão integral', calories: 120, protein: 5, carbs: 21, fat: 1.5, fiber: 3, quantityGrams: 50, baseQuantityGrams: 50 }
+        { id: 'f11', name: 'Ovos', calories: 140, protein: 12, carbs: 1, fat: 10, fiber: 0, quantityGrams: 100, baseQuantityGrams: 100 },
+        { id: 'f12', name: 'Pão integral', calories: 120, protein: 5, carbs: 21, fat: 1.5, fiber: 3, quantityGrams: 50, baseQuantityGrams: 50 }
       ]
     },
     {
-      id: `m${id}2`,
+      id: 'm12',
       name: 'Almoço',
-      done: false,
       foods: [
-        { id: `f${id}3`, name: 'Frango', calories: 220, protein: 35, carbs: 0, fat: 8, fiber: 0, quantityGrams: 130, baseQuantityGrams: 130 },
-        { id: `f${id}4`, name: 'Arroz', calories: 180, protein: 4, carbs: 39, fat: 0.4, fiber: 1, quantityGrams: 140, baseQuantityGrams: 140 }
+        { id: 'f13', name: 'Frango', calories: 220, protein: 35, carbs: 0, fat: 8, fiber: 0, quantityGrams: 130, baseQuantityGrams: 130 },
+        { id: 'f14', name: 'Arroz', calories: 180, protein: 4, carbs: 39, fat: 0.4, fiber: 1, quantityGrams: 140, baseQuantityGrams: 140 }
       ]
     }
-  ]
-});
-
-export const mockWeeklyDiet: WeeklyDiet = {
-  id: 'diet-1',
-  days: [1, 2, 3, 4, 5, 6, 7].map(buildDay)
+  ],
+  days: Array.from({ length: 7 }, (_, index) => ({
+    id: `d-${index + 1}`,
+    label: `Dia ${index + 1}`,
+    mealIds: index === 0 ? ['m11', 'm12'] : [],
+    completedMealIds: index === 0 ? ['m11'] : []
+  }))
 };
 
 export const mockUserProfile: UserProfile = {

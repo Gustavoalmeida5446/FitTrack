@@ -23,7 +23,7 @@ function DumbbellIcon({ size = 24 }: { size?: number }) {
 
 export function HomePage({ workouts, water, weeklyDiet, waterGoalMl, onOpenWorkout, onOpenDietDay, onAddWater }: Props) {
   const progress = waterGoalMl > 0 ? Math.min(100, Math.round((water.consumedMl / waterGoalMl) * 100)) : 0;
-  const hasDiet = weeklyDiet.days.some((day) => day.meals.length > 0);
+  const hasDiet = weeklyDiet.days.some((day) => day.mealIds.length > 0);
 
   return (
     <PageContainer title="FitTrack">
@@ -93,7 +93,7 @@ export function HomePage({ workouts, water, weeklyDiet, waterGoalMl, onOpenWorko
             </div>
             <div className="list-card__content">
               <h3>{day.label}</h3>
-              <span>{day.meals.length} refeições</span>
+              <span>{day.mealIds.length} refeições</span>
             </div>
             <ChevronRight size={24} className="list-card__chevron" />
           </Tile>

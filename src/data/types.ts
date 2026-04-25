@@ -2,13 +2,16 @@ export type MuscleGroup = 'Peito' | 'Costas' | 'Pernas' | 'Ombros' | 'Braços' |
 export type Sex = 'Masculino' | 'Feminino';
 export type ActivityLevel = 'Sedentario' | 'Leve' | 'Moderado' | 'Intenso' | 'Atleta';
 export type GoalType = 'Perda de gordura' | 'Manutenção' | 'Ganho de massa';
+export type ExerciseMediaType = 'image' | 'video' | 'gif' | 'none';
 
-export interface Exercise {
+export interface WorkoutExercise {
   id: string;
+  source: 'manual' | 'local';
+  sourceId?: string;
   name: string;
   muscleGroup: MuscleGroup;
-  mediaType: 'image' | 'video' | 'gif';
-  mediaUrl: string;
+  mediaType: ExerciseMediaType;
+  mediaUrl: string | null;
   loadKg: number;
   reps: number;
   sets: number;
@@ -20,7 +23,7 @@ export interface Workout {
   id: string;
   name: string;
   muscleGroups: MuscleGroup[];
-  exercises: Exercise[];
+  exercises: WorkoutExercise[];
 }
 
 export interface WaterData {
@@ -46,17 +49,18 @@ export interface Meal {
   id: string;
   name: string;
   foods: FoodItem[];
-  done: boolean;
 }
 
 export interface DietDay {
   id: string;
   label: string;
-  meals: Meal[];
+  mealIds: string[];
+  completedMealIds: string[];
 }
 
 export interface WeeklyDiet {
   id: string;
+  meals: Meal[];
   days: DietDay[];
 }
 
