@@ -1,6 +1,7 @@
-import { ChartLine, CheckmarkFilled, ChevronLeft, TrashCan, UserAvatar } from '@carbon/icons-react';
+import { ChartLine, CheckmarkFilled, ChevronLeft, Login, Logout, TrashCan, UserAvatar } from '@carbon/icons-react';
 import { Button, NumberInput, Select, SelectItem, TextInput, Tile } from '@carbon/react';
 import { useEffect, useState } from 'react';
+import type { Session } from '@supabase/supabase-js';
 import { NutritionTargets, UserProfile, WeightLog } from '../data/types';
 import { PageContainer } from '../components/PageContainer';
 
@@ -12,9 +13,12 @@ interface Props {
   onUpdateProfile: (profile: UserProfile) => void;
   onAddWeight: (weight: number) => void;
   onRemoveWeight: (index: number) => void;
+  session: Session | null;
+  onOpenLogin: () => void;
+  onSignOut: () => Promise<void>;
 }
 
-export function NutritionGoalsPage({ profile, targets, weightHistory, onBack, onUpdateProfile, onAddWeight, onRemoveWeight }: Props) {
+export function NutritionGoalsPage({ profile, targets, weightHistory, onBack, onUpdateProfile, onAddWeight, onRemoveWeight, session, onOpenLogin, onSignOut }: Props) {
   const [newWeight, setNewWeight] = useState(profile.currentWeight);
   useEffect(() => {
     setNewWeight(profile.currentWeight);
@@ -23,6 +27,36 @@ export function NutritionGoalsPage({ profile, targets, weightHistory, onBack, on
   return (
     <PageContainer title="Metas nutricionais" subtitle="Acompanhamento completo" actions={<Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button>}>
       <div className="stack">
+        <Tile className="card metric-card goals-card">
+          <div className="card-head">
+            <div className="card-head__group">
+              <div className="icon-badge icon-badge--primary card-head__badge">
+                <UserAvatar size={20} />
+              </div>
+              <div className="card-head__title">
+                <h3>Status da conta</h3>
+                <p>{session ? 'Você está logado no Supabase' : 'Você ainda não fez login'}</p>
+              </div>
+            </div>
+          </div>
+          <div className="auth-status">
+            <div className="info-block">
+              <p>{session?.user.email ?? 'Nenhum usuário conectado'}</p>
+            </div>
+            <div className="row-actions">
+              {session ? (
+                <Button kind="ghost" renderIcon={Logout} onClick={() => void onSignOut()}>
+                  Sair
+                </Button>
+              ) : (
+                <Button renderIcon={Login} onClick={onOpenLogin}>
+                  Fazer login
+                </Button>
+              )}
+            </div>
+          </div>
+        </Tile>
+
         <Tile className="card metric-card goals-card">
           <div className="card-head">
             <div className="card-head__group">

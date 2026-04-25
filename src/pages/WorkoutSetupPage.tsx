@@ -1,6 +1,6 @@
 import { CheckmarkFilled, ChevronLeft, Search } from '@carbon/icons-react';
 import { Button, Checkbox, NumberInput, TextInput, Tile } from '@carbon/react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MuscleGroup, Workout } from '../data/types';
 import { searchExercises } from '../services/wgerService';
 import { PageContainer } from '../components/PageContainer';
@@ -15,6 +15,7 @@ const groups: MuscleGroup[] = ['Peito', 'Costas', 'Pernas', 'Ombros', 'Braços',
 export function WorkoutSetupPage({ onBack, onCreateWorkout }: Props) {
   const [query, setQuery] = useState('');
   const [options, setOptions] = useState<{ id: string; name: string }[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [name, setName] = useState('');
   const [selectedGroups, setSelectedGroups] = useState<MuscleGroup[]>([]);
 
@@ -31,11 +32,25 @@ export function WorkoutSetupPage({ onBack, onCreateWorkout }: Props) {
     setSelectedGroups((prev) => (prev.includes(group) ? prev.filter((g) => g !== group) : [...prev, group]));
   };
 
-  const handleSearch = async (value: string) => {
-    setQuery(value);
-    const result = await searchExercises(value);
-    setOptions(result);
-  };
+  useEffect(() => {
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) {
+      setOptions([]);
+      setIsSearching(false);
+      return;
+    }
+
+    const timeoutId = window.setTimeout(async () => {
+      setIsSearching(true);
+      const result = await searchExercises(trimmedQuery);
+      setOptions(result);
+      setIsSearching(false);
+    }, 250);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [query]);
 
   const handleSave = () => {
     if (!canSave) return;
@@ -61,8 +76,10 @@ export function WorkoutSetupPage({ onBack, onCreateWorkout }: Props) {
     });
 
     setName('');
+    setQuery('');
     setExerciseName('');
     setSelectedGroups([]);
+    setOptions([]);
   };
 
   return (
@@ -80,12 +97,17 @@ export function WorkoutSetupPage({ onBack, onCreateWorkout }: Props) {
               </div>
             </div>
           </div>
-          <TextInput id="exercise-search" labelText="Buscar exercício (wger)" value={query} onChange={(event) => void handleSearch(event.target.value)} />
+          <TextInput id="exercise-search" labelText="Buscar exercício (wger)" value={query} onChange={(event) => setQuery(event.target.value)} />
+          {isSearching ? <p className="meta-label">Buscando exercícios...</p> : null}
           {options.length > 0 ? (
             <ul className="search-list">
               {options.map((option) => (
                 <li key={option.id}>
-                  <button type="button" onClick={() => setExerciseName(option.name)}>{option.name}</button>
+                  <button type="button" onClick={() => {
+                    setQuery(option.name);
+                    setExerciseName(option.name);
+                    setOptions([]);
+                  }}>{option.name}</button>
                 </li>
               ))}
             </ul>

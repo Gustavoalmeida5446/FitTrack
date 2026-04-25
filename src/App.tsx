@@ -7,15 +7,19 @@ import { DietDayPage } from './pages/DietDayPage';
 import { DietSetupPage } from './pages/DietSetupPage';
 import { NutritionGoalsPage } from './pages/NutritionGoalsPage';
 import { WorkoutSetupPage } from './pages/WorkoutSetupPage';
+import { LoginPage } from './pages/LoginPage';
 import { mockNutritionTargets } from './data/mockData';
 import { WeeklyDiet, Workout } from './data/types';
 import { loadAppState, saveAppState } from './lib/appState';
+import { getCurrentSession, onAuthStateChange, signInWithEmail, signOut } from './services/authService';
+import type { Session } from '@supabase/supabase-js';
 
 export default function App() {
   const initialState = useMemo(() => loadAppState(), []);
-  const [view, setView] = useState<'home' | 'workout' | 'diet-day' | 'workout-setup' | 'diet-setup' | 'goals'>('home');
+  const [view, setView] = useState<'home' | 'workout' | 'diet-day' | 'workout-setup' | 'diet-setup' | 'goals' | 'login'>('home');
   const [selectedWorkoutId, setSelectedWorkoutId] = useState<string>('');
   const [selectedDayId, setSelectedDayId] = useState<string>('');
+  const [session, setSession] = useState<Session | null>(null);
 
   const [workouts, setWorkouts] = useState(initialState.workouts);
   const [water, setWater] = useState(initialState.water);
@@ -30,12 +34,45 @@ export default function App() {
     saveAppState({ profile, workouts, water, weeklyDiet, weightHistory });
   }, [profile, workouts, water, weeklyDiet, weightHistory]);
 
+  useEffect(() => {
+    void getCurrentSession().then((currentSession) => {
+      setSession(currentSession);
+    });
+
+    const { data } = onAuthStateChange((nextSession) => {
+      setSession(nextSession);
+    });
+
+    return () => {
+      data.subscription.unsubscribe();
+    };
+  }, []);
+
   const updateWorkout = (workoutId: string, updater: (workout: Workout) => Workout) => {
     setWorkouts((prev) => prev.map((workout) => (workout.id === workoutId ? updater(workout) : workout)));
   };
 
   const updateDiet = (updater: (diet: WeeklyDiet) => WeeklyDiet) => {
     setWeeklyDiet((prev) => updater(prev));
+  };
+
+  const handleLogin = async (email: string, password: string) => {
+    const nextSession = await signInWithEmail(email, password);
+
+    if (!nextSession) {
+      return false;
+    }
+
+    setSession(nextSession);
+    setView('goals');
+    return true;
+  };
+
+  const handleSignOut = async () => {
+    const success = await signOut();
+    if (!success) return;
+
+    setSession(null);
   };
 
   return (
@@ -104,7 +141,14 @@ export default function App() {
             onUpdateProfile={setProfile}
             onAddWeight={(weight) => setWeightHistory((prev) => [...prev, { date: new Date().toISOString().slice(0, 10), weight }])}
             onRemoveWeight={(index) => setWeightHistory((prev) => prev.filter((_, itemIndex) => itemIndex !== index))}
+            session={session}
+            onOpenLogin={() => setView('login')}
+            onSignOut={handleSignOut}
           />
+        ) : null}
+
+        {view === 'login' ? (
+          <LoginPage onBack={() => setView('goals')} onLogin={handleLogin} />
         ) : null}
 
         <nav className="bottom-tabbar bottom-nav" aria-label="Navegação principal">

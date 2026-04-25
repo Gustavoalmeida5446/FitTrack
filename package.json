@@ -4,9 +4,11 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "start": "vite --host",
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "bash ./scripts/deploy-gh-pages.sh"
   },
   "dependencies": {
     "@carbon/icons-react": "^11.62.0",

@@ -10,6 +10,18 @@ cp .env.example .env
 npm run dev
 ```
 
+## Deploy GitHub Pages
+
+```bash
+npm run deploy
+```
+
+O script:
+
+- gera o build em `dist/`
+- copia `dist/index.html` para `dist/404.html`
+- publica o conteúdo em `origin/gh-pages`
+
 ## Estado atual
 
 - UI local com dados mockados para treino, hidratação, dieta semanal e metas nutricionais
