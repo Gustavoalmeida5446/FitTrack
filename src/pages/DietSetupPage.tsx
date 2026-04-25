@@ -2,7 +2,7 @@ import { CalendarHeatMap, CheckmarkFilled, ChevronLeft, Search } from '@carbon/i
 import { Button, TextInput, Tile } from '@carbon/react';
 import { useMemo, useState } from 'react';
 import { DietDay, Meal, WeeklyDiet } from '../data/types';
-import { searchFoods } from '../services/tacoService';
+import { searchFoods } from '../services/foods';
 import { PageContainer } from '../components/PageContainer';
 
 interface Props {
@@ -21,7 +21,14 @@ export function DietSetupPage({ onBack, onSaveDiet }: Props) {
 
   const handleFoodSearch = async (value: string) => {
     setFoodQuery(value);
-    setFoodOptions(await searchFoods(value));
+    const results = searchFoods(value).slice(0, 10).map((food) => ({
+      id: String(food.id),
+      name: food.nome,
+      calories: food.kcal ?? 0,
+      protein: food.proteina ?? 0
+    }));
+
+    setFoodOptions(results);
   };
 
   const addMeal = () => {
@@ -51,8 +58,8 @@ export function DietSetupPage({ onBack, onSaveDiet }: Props) {
                 <Search size={20} />
               </div>
               <div className="card-head__title">
-                <h3>Alimento (API TACO)</h3>
-                <p>Busque alimentos e monte a base da refeição</p>
+                <h3>Alimento (base TACO)</h3>
+                <p>Busque alimentos da base local e monte a refeição</p>
               </div>
             </div>
           </div>

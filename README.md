@@ -27,7 +27,7 @@ O script:
 - UI local com dados mockados para treino, hidratação, dieta semanal e metas nutricionais
 - Persistência local em `localStorage` para manter o estado entre recargas
 - Busca de exercícios via WGER
-- Busca de alimentos com fallback local preparado para futura integração TACO
+- Busca de alimentos via USDA FoodData Central com fallback local
 - Cliente Supabase configurado em `src/lib/supabaseClient.ts`
 
 ## Variáveis de ambiente
@@ -37,6 +37,7 @@ Use os valores de `.env.example`:
 ```bash
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
+VITE_USDA_API_KEY=
 ```
 
 ## Observações

@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
+    "convert:taco": "node scripts/convert-taco.js",
     "deploy": "bash ./scripts/deploy-gh-pages.sh"
   },
   "dependencies": {
