@@ -1,6 +1,7 @@
 import { Calendar, CalendarHeatMap, Home, UserAvatar } from '@carbon/icons-react';
 import { Button, Theme } from '@carbon/react';
 import { useEffect, useMemo, useState } from 'react';
+import type { Session } from '@supabase/supabase-js';
 import { HomePage } from './pages/HomePage';
 import { WorkoutPage } from './pages/WorkoutPage';
 import { DietDayPage } from './pages/DietDayPage';
@@ -8,44 +9,120 @@ import { DietSetupPage } from './pages/DietSetupPage';
 import { NutritionGoalsPage } from './pages/NutritionGoalsPage';
 import { WorkoutSetupPage } from './pages/WorkoutSetupPage';
 import { LoginPage } from './pages/LoginPage';
-import { mockNutritionTargets } from './data/mockData';
 import { WeeklyDiet, Workout } from './data/types';
-import { loadAppState, saveAppState } from './lib/appState';
+import { AppState, loadAppState, saveAppState } from './lib/appState';
+import { getTodayDateString } from './lib/date';
+import { calculateNutritionTargets } from './lib/nutrition';
 import { getCurrentSession, onAuthStateChange, signInWithEmail, signOut } from './services/authService';
-import type { Session } from '@supabase/supabase-js';
+import { loadRemoteAppState, saveRemoteAppState } from './services/appStateService';
+
+type View = 'home' | 'workout' | 'diet-day' | 'workout-setup' | 'diet-setup' | 'goals' | 'login';
 
 export default function App() {
   const initialState = useMemo(() => loadAppState(), []);
-  const [view, setView] = useState<'home' | 'workout' | 'diet-day' | 'workout-setup' | 'diet-setup' | 'goals' | 'login'>('home');
+  const [view, setView] = useState<View>('home');
   const [selectedWorkoutId, setSelectedWorkoutId] = useState<string>('');
   const [selectedDayId, setSelectedDayId] = useState<string>('');
   const [session, setSession] = useState<Session | null>(null);
+  const [isRemoteReady, setIsRemoteReady] = useState(false);
 
+  const [profile, setProfile] = useState(initialState.profile);
   const [workouts, setWorkouts] = useState(initialState.workouts);
   const [water, setWater] = useState(initialState.water);
   const [weeklyDiet, setWeeklyDiet] = useState(initialState.weeklyDiet);
   const [weightHistory, setWeightHistory] = useState(initialState.weightHistory);
-  const [profile, setProfile] = useState(initialState.profile);
 
+  const appState = useMemo<AppState>(() => ({
+    profile,
+    workouts,
+    water,
+    weeklyDiet,
+    weightHistory
+  }), [profile, workouts, water, weeklyDiet, weightHistory]);
+
+  const targets = useMemo(() => calculateNutritionTargets(profile), [profile]);
   const selectedWorkout = useMemo(() => workouts.find((item) => item.id === selectedWorkoutId), [workouts, selectedWorkoutId]);
   const selectedDay = useMemo(() => weeklyDiet.days.find((item) => item.id === selectedDayId), [weeklyDiet.days, selectedDayId]);
 
   useEffect(() => {
-    saveAppState({ profile, workouts, water, weeklyDiet, weightHistory });
-  }, [profile, workouts, water, weeklyDiet, weightHistory]);
+    saveAppState(appState);
+  }, [appState]);
 
   useEffect(() => {
     void getCurrentSession().then((currentSession) => {
       setSession(currentSession);
+      setIsRemoteReady(!currentSession);
     });
 
     const { data } = onAuthStateChange((nextSession) => {
       setSession(nextSession);
+      setIsRemoteReady(!nextSession);
     });
 
     return () => {
       data.subscription.unsubscribe();
     };
+  }, []);
+
+  useEffect(() => {
+    if (!session) {
+      setIsRemoteReady(true);
+      return;
+    }
+
+    let isActive = true;
+    setIsRemoteReady(false);
+
+    void loadRemoteAppState(session).then((remoteState) => {
+      if (!isActive) return;
+
+      if (remoteState) {
+        setProfile(remoteState.profile);
+        setWorkouts(remoteState.workouts);
+        setWater({
+          ...remoteState.water,
+          consumedMl: remoteState.water.updatedAt === getTodayDateString() ? remoteState.water.consumedMl : 0,
+          updatedAt: remoteState.water.updatedAt ?? getTodayDateString()
+        });
+        setWeeklyDiet(remoteState.weeklyDiet);
+        setWeightHistory(remoteState.weightHistory);
+      }
+
+      setIsRemoteReady(true);
+    });
+
+    return () => {
+      isActive = false;
+    };
+  }, [session]);
+
+  useEffect(() => {
+    if (!session || !isRemoteReady) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      void saveRemoteAppState(session, appState);
+    }, 400);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [appState, isRemoteReady, session]);
+
+  useEffect(() => {
+    setWater((prev) => {
+      const today = getTodayDateString();
+      if (prev.updatedAt === today) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        consumedMl: 0,
+        updatedAt: today
+      };
+    });
   }, []);
 
   const updateWorkout = (workoutId: string, updater: (workout: Workout) => Workout) => {
@@ -91,7 +168,11 @@ export default function App() {
               setSelectedDayId(dayId);
               setView('diet-day');
             }}
-            onAddWater={(amount) => setWater((prev) => ({ ...prev, consumedMl: prev.consumedMl + amount }))}
+            onAddWater={(amount) => setWater((prev) => ({
+              ...prev,
+              consumedMl: prev.consumedMl + amount,
+              updatedAt: getTodayDateString()
+            }))}
           />
         ) : null}
 
@@ -129,17 +210,17 @@ export default function App() {
         ) : null}
 
         {view === 'diet-setup' ? (
-          <DietSetupPage onBack={() => setView('home')} onSaveDiet={(diet) => setWeeklyDiet(diet)} />
+          <DietSetupPage onBack={() => setView('home')} onSaveDiet={setWeeklyDiet} />
         ) : null}
 
         {view === 'goals' ? (
           <NutritionGoalsPage
             profile={profile}
-            targets={mockNutritionTargets}
+            targets={targets}
             weightHistory={weightHistory}
             onBack={() => setView('home')}
             onUpdateProfile={setProfile}
-            onAddWeight={(weight) => setWeightHistory((prev) => [...prev, { date: new Date().toISOString().slice(0, 10), weight }])}
+            onAddWeight={(weight) => setWeightHistory((prev) => [...prev, { date: getTodayDateString(), weight }])}
             onRemoveWeight={(index) => setWeightHistory((prev) => prev.filter((_, itemIndex) => itemIndex !== index))}
             session={session}
             onOpenLogin={() => setView('login')}

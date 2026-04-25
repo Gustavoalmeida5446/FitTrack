@@ -1,4 +1,7 @@
 export type MuscleGroup = 'Peito' | 'Costas' | 'Pernas' | 'Ombros' | 'Braços' | 'Core';
+export type Sex = 'Masculino' | 'Feminino';
+export type ActivityLevel = 'Sedentario' | 'Leve' | 'Moderado' | 'Intenso' | 'Atleta';
+export type GoalType = 'Perda de gordura' | 'Manutenção' | 'Ganho de massa';
 
 export interface Exercise {
   id: string;
@@ -23,13 +26,20 @@ export interface Workout {
 export interface WaterData {
   goalMl: number;
   consumedMl: number;
+  updatedAt: string;
 }
 
 export interface FoodItem {
   id: string;
+  foodId?: number;
   name: string;
   calories: number;
   protein: number;
+  carbs: number;
+  fat: number;
+  fiber: number;
+  quantityGrams: number;
+  baseQuantityGrams: number;
 }
 
 export interface Meal {
@@ -54,9 +64,9 @@ export interface UserProfile {
   currentWeight: number;
   heightCm: number;
   age: number;
-  sex: 'Masculino' | 'Feminino';
-  activityLevel: string;
-  goal: string;
+  sex: Sex;
+  activityLevel: ActivityLevel;
+  goal: GoalType;
 }
 
 export interface WeightLog {
@@ -67,5 +77,7 @@ export interface WeightLog {
 export interface NutritionTargets {
   caloriesDaily: number;
   proteinDaily: number;
+  carbsDaily: number;
+  fatDaily: number;
   waterDailyMl: number;
 }

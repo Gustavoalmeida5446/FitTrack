@@ -73,6 +73,7 @@ export function DietDayPage({ day, onBack, onToggleMealDone }: Props) {
                 <li key={food.id} className="diet-food-list__item">
                   <div>
                     <strong>{food.name}</strong>
+                    <span>{food.quantityGrams} g</span>
                   </div>
                   <span>{food.calories} kcal • {food.protein}g proteína</span>
                 </li>

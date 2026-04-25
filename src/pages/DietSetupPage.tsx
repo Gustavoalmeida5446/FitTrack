@@ -1,8 +1,8 @@
-import { CalendarHeatMap, CheckmarkFilled, ChevronLeft, Search } from '@carbon/icons-react';
-import { Button, TextInput, Tile } from '@carbon/react';
+import { CalendarHeatMap, CheckmarkFilled, ChevronLeft, Search, TrashCan } from '@carbon/icons-react';
+import { Button, NumberInput, TextInput, Tile } from '@carbon/react';
 import { useMemo, useState } from 'react';
-import { DietDay, Meal, WeeklyDiet } from '../data/types';
-import { searchFoods } from '../services/foods';
+import { DietDay, FoodItem, Meal, WeeklyDiet } from '../data/types';
+import { searchFoods, type FoodItem as TacoFood } from '../services/foods';
 import { PageContainer } from '../components/PageContainer';
 
 interface Props {
@@ -10,55 +10,119 @@ interface Props {
   onSaveDiet: (diet: WeeklyDiet) => void;
 }
 
+const initialDays: DietDay[] = Array.from({ length: 7 }, (_, index) => ({
+  id: `d-${index + 1}`,
+  label: `Dia ${index + 1}`,
+  meals: []
+}));
+
+function scaleFood(food: TacoFood, quantityGrams: number): FoodItem {
+  const factor = quantityGrams / 100;
+
+  return {
+    id: crypto.randomUUID(),
+    foodId: food.id,
+    name: food.nome,
+    calories: Number(((food.kcal ?? 0) * factor).toFixed(1)),
+    protein: Number(((food.proteina ?? 0) * factor).toFixed(1)),
+    carbs: Number(((food.carboidrato ?? 0) * factor).toFixed(1)),
+    fat: Number(((food.gordura ?? 0) * factor).toFixed(1)),
+    fiber: Number(((food.fibra ?? 0) * factor).toFixed(1)),
+    quantityGrams,
+    baseQuantityGrams: 100
+  };
+}
+
 export function DietSetupPage({ onBack, onSaveDiet }: Props) {
+  const [selectedDayId, setSelectedDayId] = useState(initialDays[0].id);
   const [foodQuery, setFoodQuery] = useState('');
-  const [foodOptions, setFoodOptions] = useState<{ id: string; name: string; calories: number; protein: number }[]>([]);
+  const [foodOptions, setFoodOptions] = useState<TacoFood[]>([]);
   const [mealName, setMealName] = useState('');
-  const [selectedFoods, setSelectedFoods] = useState<{ id: string; name: string; calories: number; protein: number }[]>([]);
-  const [meals, setMeals] = useState<Meal[]>([]);
+  const [foodQuantityGrams, setFoodQuantityGrams] = useState(100);
+  const [selectedFoods, setSelectedFoods] = useState<FoodItem[]>([]);
+  const [days, setDays] = useState<DietDay[]>(initialDays);
 
-  const canSaveMeal = useMemo(() => mealName.trim() && selectedFoods.length > 0, [mealName, selectedFoods]);
+  const selectedDay = useMemo(() => days.find((day) => day.id === selectedDayId) ?? days[0], [days, selectedDayId]);
+  const canSaveMeal = useMemo(() => mealName.trim() && selectedFoods.length > 0, [mealName, selectedFoods.length]);
+  const canSaveDiet = useMemo(() => days.some((day) => day.meals.length > 0), [days]);
 
-  const handleFoodSearch = async (value: string) => {
+  const selectedMealTotals = useMemo(() => selectedFoods.reduce((acc, food) => ({
+    calories: acc.calories + food.calories,
+    protein: acc.protein + food.protein,
+    carbs: acc.carbs + food.carbs,
+    fat: acc.fat + food.fat
+  }), { calories: 0, protein: 0, carbs: 0, fat: 0 }), [selectedFoods]);
+
+  const handleFoodSearch = (value: string) => {
     setFoodQuery(value);
-    const results = searchFoods(value).slice(0, 10).map((food) => ({
-      id: String(food.id),
-      name: food.nome,
-      calories: food.kcal ?? 0,
-      protein: food.proteina ?? 0
-    }));
-
-    setFoodOptions(results);
+    setFoodOptions(searchFoods(value).slice(0, 10));
   };
 
-  const handleSelectFood = (food: { id: string; name: string; calories: number; protein: number }) => {
-    setSelectedFoods((prev) => [...prev, food]);
-    setFoodQuery(food.name);
+  const handleSelectFood = (food: TacoFood) => {
+    const quantity = Math.max(1, foodQuantityGrams || 100);
+    setSelectedFoods((prev) => [...prev, scaleFood(food, quantity)]);
+    setFoodQuery(food.nome);
     setFoodOptions([]);
   };
 
-  const addMeal = () => {
+  const handleRemoveDraftFood = (foodId: string) => {
+    setSelectedFoods((prev) => prev.filter((food) => food.id !== foodId));
+  };
+
+  const handleAddMeal = () => {
     if (!canSaveMeal) return;
-    setMeals((prev) => [...prev, { id: crypto.randomUUID(), name: mealName, foods: selectedFoods, done: false }]);
+
+    const meal: Meal = {
+      id: crypto.randomUUID(),
+      name: mealName.trim(),
+      foods: selectedFoods,
+      done: false
+    };
+
+    setDays((prev) => prev.map((day) => day.id === selectedDayId ? { ...day, meals: [...day.meals, meal] } : day));
     setMealName('');
     setSelectedFoods([]);
     setFoodQuery('');
     setFoodOptions([]);
+    setFoodQuantityGrams(100);
+  };
+
+  const handleRemoveMeal = (mealId: string) => {
+    setDays((prev) => prev.map((day) => day.id === selectedDayId ? { ...day, meals: day.meals.filter((meal) => meal.id !== mealId) } : day));
   };
 
   const saveWeeklyDiet = () => {
-    const days: DietDay[] = Array.from({ length: 7 }, (_, index) => ({
-      id: `d-${index + 1}`,
-      label: `Dia ${index + 1}`,
-      meals
-    }));
-
-    onSaveDiet({ id: crypto.randomUUID(), days });
+    if (!canSaveDiet) return;
+    onSaveDiet({
+      id: crypto.randomUUID(),
+      days
+    });
   };
 
   return (
-    <PageContainer title="Cadastro de dieta" subtitle="Dieta semanal > Dia > Refeição > Alimento" actions={<Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button>}>
+    <PageContainer title="Cadastro de dieta" subtitle="Monte a dieta por dia, refeição e quantidade" actions={<Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button>}>
       <div className="stack">
+        <Tile className="card metric-card setup-card">
+          <div className="card-head">
+            <div className="card-head__group">
+              <div className="icon-badge icon-badge--purple card-head__badge">
+                <CalendarHeatMap size={20} />
+              </div>
+              <div className="card-head__title">
+                <h3>Dia da dieta</h3>
+                <p>Escolha o dia que você quer montar</p>
+              </div>
+            </div>
+          </div>
+          <div className="day-selector">
+            {days.map((day) => (
+              <button key={day.id} type="button" className={`day-selector__item ${selectedDayId === day.id ? 'day-selector__item--active' : ''}`} onClick={() => setSelectedDayId(day.id)}>
+                {day.label}
+              </button>
+            ))}
+          </div>
+        </Tile>
+
         <Tile className="card metric-card setup-card">
           <div className="card-head">
             <div className="card-head__group">
@@ -66,30 +130,65 @@ export function DietSetupPage({ onBack, onSaveDiet }: Props) {
                 <Search size={20} />
               </div>
               <div className="card-head__title">
-                <h3>Alimento (base TACO)</h3>
-                <p>Busque alimentos da base local e monte a refeição</p>
+                <h3>Alimentos</h3>
+                <p>Busque na base TACO, defina a quantidade e monte a refeição</p>
               </div>
             </div>
           </div>
-          <TextInput
-            id="food-search"
-            labelText="Buscar alimento"
-            value={foodQuery}
-            onChange={(event) => void handleFoodSearch(event.target.value)}
-            onBlur={() => window.setTimeout(() => setFoodOptions([]), 150)}
-          />
+          <div className="setup-card__fields">
+            <TextInput
+              id="food-search"
+              labelText="Buscar alimento"
+              value={foodQuery}
+              onChange={(event) => handleFoodSearch(event.target.value)}
+              onBlur={() => window.setTimeout(() => setFoodOptions([]), 150)}
+            />
+            <NumberInput id="food-quantity" label="Quantidade (g)" min={1} value={foodQuantityGrams} onChange={(event) => setFoodQuantityGrams(Number((event.target as HTMLInputElement).value))} />
+          </div>
           {foodOptions.length > 0 ? (
             <ul className="search-list">
               {foodOptions.map((food) => (
                 <li key={food.id}>
-                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => handleSelectFood(food)}>{food.name} ({food.calories} kcal)</button>
+                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => handleSelectFood(food)}>
+                    {food.nome} ({food.kcal ?? 0} kcal / 100g)
+                  </button>
                 </li>
               ))}
             </ul>
           ) : null}
+          <TextInput id="meal-name" labelText="Nome da refeição" value={mealName} onChange={(event) => setMealName(event.target.value)} />
           <div className="info-block">
-            <span className="meta-label">Selecionados</span>
-            <p>{selectedFoods.map((food) => food.name).join(', ') || 'Nenhum'}</p>
+            <span className="meta-label">Resumo da refeição atual</span>
+            <p>{selectedFoods.length} alimento(s) • {selectedMealTotals.calories.toFixed(1)} kcal • {selectedMealTotals.protein.toFixed(1)}g proteína</p>
+          </div>
+          <div className="stack">
+            {selectedFoods.length > 0 ? selectedFoods.map((food) => (
+              <div key={food.id} className="setup-selection-card">
+                <div className="setup-selection-card__header">
+                  <div>
+                    <span className="meta-label">{food.quantityGrams} g</span>
+                    <p>{food.name}</p>
+                  </div>
+                  <Button kind="ghost" size="sm" renderIcon={TrashCan} iconDescription="Remover alimento" onClick={() => handleRemoveDraftFood(food.id)}>
+                    Remover
+                  </Button>
+                </div>
+                <div className="setup-selection-card__meta">
+                  <span>{food.calories} kcal</span>
+                  <span>{food.protein}g proteína</span>
+                  <span>{food.carbs}g carb</span>
+                  <span>{food.fat}g gordura</span>
+                </div>
+              </div>
+            )) : (
+              <div className="info-block">
+                <span className="meta-label">Alimentos da refeição</span>
+                <p>Selecione alimentos e quantidade para montar a refeição.</p>
+              </div>
+            )}
+          </div>
+          <div className="setup-card__footer">
+            <Button disabled={!canSaveMeal} onClick={handleAddMeal}>Adicionar refeição ao {selectedDay.label}</Button>
           </div>
         </Tile>
 
@@ -100,39 +199,37 @@ export function DietSetupPage({ onBack, onSaveDiet }: Props) {
                 <CheckmarkFilled size={20} />
               </div>
               <div className="card-head__title">
-                <h3>Refeição</h3>
-                <p>Defina o nome e salve a refeição montada</p>
+                <h3>{selectedDay.label}</h3>
+                <p>Reveja as refeições cadastradas para o dia selecionado</p>
               </div>
             </div>
           </div>
-          <TextInput id="meal-name" labelText="Nome da refeição" value={mealName} onChange={(event) => setMealName(event.target.value)} />
-          <div className="info-block">
-            <span className="meta-label">Total de refeições</span>
-            <p>{meals.length}</p>
+          <div className="stack">
+            {selectedDay.meals.length > 0 ? selectedDay.meals.map((meal) => (
+              <div key={meal.id} className="setup-selection-card">
+                <div className="setup-selection-card__header">
+                  <div>
+                    <span className="meta-label">{meal.foods.length} alimento(s)</span>
+                    <p>{meal.name}</p>
+                  </div>
+                  <Button kind="ghost" size="sm" renderIcon={TrashCan} iconDescription="Remover refeição" onClick={() => handleRemoveMeal(meal.id)}>
+                    Remover
+                  </Button>
+                </div>
+                <div className="setup-selection-card__meta">
+                  <span>{meal.foods.reduce((sum, food) => sum + food.calories, 0).toFixed(1)} kcal</span>
+                  <span>{meal.foods.reduce((sum, food) => sum + food.protein, 0).toFixed(1)}g proteína</span>
+                </div>
+              </div>
+            )) : (
+              <div className="info-block">
+                <span className="meta-label">Refeições do dia</span>
+                <p>Nenhuma refeição cadastrada para este dia ainda.</p>
+              </div>
+            )}
           </div>
           <div className="setup-card__footer">
-            <Button disabled={!canSaveMeal} onClick={addMeal}>Salvar refeição</Button>
-          </div>
-        </Tile>
-
-        <Tile className="card metric-card setup-card">
-          <div className="card-head">
-            <div className="card-head__group">
-              <div className="icon-badge icon-badge--purple card-head__badge">
-                <CalendarHeatMap size={20} />
-              </div>
-              <div className="card-head__title">
-                <h3>Montagem da dieta semanal</h3>
-                <p>Replica as refeições criadas do Dia 1 ao Dia 7</p>
-              </div>
-            </div>
-          </div>
-          <div className="info-block">
-            <span className="meta-label">Aplicação semanal</span>
-            <p>Dia 1 até Dia 7 recebem as refeições criadas.</p>
-          </div>
-          <div className="setup-card__footer">
-            <Button disabled={meals.length === 0} onClick={saveWeeklyDiet}>Salvar dieta semanal</Button>
+            <Button disabled={!canSaveDiet} onClick={saveWeeklyDiet}>Salvar dieta semanal</Button>
           </div>
         </Tile>
       </div>

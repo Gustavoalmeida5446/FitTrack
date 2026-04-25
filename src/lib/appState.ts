@@ -1,5 +1,6 @@
 import { mockUserProfile, mockWater, mockWeeklyDiet, mockWeightHistory, mockWorkouts } from '../data/mockData';
 import { UserProfile, WaterData, WeeklyDiet, WeightLog, Workout } from '../data/types';
+import { getTodayDateString } from './date';
 
 const APP_STATE_KEY = 'fittrack:app-state';
 const APP_STATE_VERSION = 1;
@@ -25,6 +26,21 @@ export const defaultAppState: AppState = {
   weightHistory: mockWeightHistory
 };
 
+function normalizeWaterData(water?: WaterData): WaterData {
+  const fallback = water ?? defaultAppState.water;
+  const today = getTodayDateString();
+
+  if (fallback.updatedAt === today) {
+    return fallback;
+  }
+
+  return {
+    ...fallback,
+    consumedMl: 0,
+    updatedAt: today
+  };
+}
+
 export function loadAppState(): AppState {
   if (typeof window === 'undefined') return defaultAppState;
 
@@ -40,7 +56,7 @@ export function loadAppState(): AppState {
     return {
       profile: data.profile ?? defaultAppState.profile,
       workouts: data.workouts ?? defaultAppState.workouts,
-      water: data.water ?? defaultAppState.water,
+      water: normalizeWaterData(data.water),
       weeklyDiet: data.weeklyDiet ?? defaultAppState.weeklyDiet,
       weightHistory: data.weightHistory ?? defaultAppState.weightHistory
     };

@@ -503,6 +503,54 @@ body {
   color: var(--color-text);
 }
 
+.day-selector {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.day-selector__item {
+  padding: 0.7rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.day-selector__item--active {
+  border-color: #8a63ff;
+  background: rgba(124, 58, 237, 0.22);
+}
+
+.setup-selection-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.setup-selection-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.setup-selection-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.setup-selection-card__meta span {
+  padding: 0.4rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+}
+
 .goals-card {
   display: flex;
   flex-direction: column;
@@ -638,6 +686,10 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .day-selector {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .goals-grid,
   .goals-form-grid,
   .goals-grid--compact {
@@ -645,6 +697,11 @@ body {
   }
 
   .goals-weight-log li {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .setup-selection-card__header {
     flex-direction: column;
     align-items: flex-start;
   }

@@ -1,8 +1,8 @@
 import { ChartLine, CheckmarkFilled, ChevronLeft, Login, Logout, TrashCan, UserAvatar } from '@carbon/icons-react';
-import { Button, NumberInput, Select, SelectItem, TextInput, Tile } from '@carbon/react';
+import { Button, NumberInput, Select, SelectItem, Tile } from '@carbon/react';
 import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
-import { NutritionTargets, UserProfile, WeightLog } from '../data/types';
+import { ActivityLevel, GoalType, NutritionTargets, UserProfile, WeightLog } from '../data/types';
 import { PageContainer } from '../components/PageContainer';
 
 interface Props {
@@ -17,6 +17,9 @@ interface Props {
   onOpenLogin: () => void;
   onSignOut: () => Promise<void>;
 }
+
+const activityLevels: ActivityLevel[] = ['Sedentario', 'Leve', 'Moderado', 'Intenso', 'Atleta'];
+const goals: GoalType[] = ['Perda de gordura', 'Manutenção', 'Ganho de massa'];
 
 export function NutritionGoalsPage({ profile, targets, weightHistory, onBack, onUpdateProfile, onAddWeight, onRemoveWeight, session, onOpenLogin, onSignOut }: Props) {
   const [newWeight, setNewWeight] = useState(profile.currentWeight);
@@ -77,8 +80,16 @@ export function NutritionGoalsPage({ profile, targets, weightHistory, onBack, on
               <SelectItem value="Masculino" text="Masculino" />
               <SelectItem value="Feminino" text="Feminino" />
             </Select>
-            <TextInput id="profile-activity" labelText="Nível de atividade" value={profile.activityLevel} onChange={(event) => onUpdateProfile({ ...profile, activityLevel: event.target.value })} />
-            <TextInput id="profile-goal" labelText="Objetivo" value={profile.goal} onChange={(event) => onUpdateProfile({ ...profile, goal: event.target.value })} />
+            <Select id="profile-activity" labelText="Nível de atividade" value={profile.activityLevel} onChange={(event) => onUpdateProfile({ ...profile, activityLevel: event.target.value as ActivityLevel })}>
+              {activityLevels.map((level) => (
+                <SelectItem key={level} value={level} text={level} />
+              ))}
+            </Select>
+            <Select id="profile-goal" labelText="Objetivo" value={profile.goal} onChange={(event) => onUpdateProfile({ ...profile, goal: event.target.value as GoalType })}>
+              {goals.map((goal) => (
+                <SelectItem key={goal} value={goal} text={goal} />
+              ))}
+            </Select>
           </div>
         </Tile>
 
@@ -102,6 +113,14 @@ export function NutritionGoalsPage({ profile, targets, weightHistory, onBack, on
             <div className="stat-pill">
               <span>Proteína</span>
               <strong>{targets.proteinDaily} g</strong>
+            </div>
+            <div className="stat-pill">
+              <span>Carboidrato</span>
+              <strong>{targets.carbsDaily} g</strong>
+            </div>
+            <div className="stat-pill">
+              <span>Gordura</span>
+              <strong>{targets.fatDaily} g</strong>
             </div>
             <div className="stat-pill">
               <span>Água</span>

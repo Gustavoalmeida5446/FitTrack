@@ -25,7 +25,8 @@ export const mockWorkouts: Workout[] = [
 
 export const mockWater: WaterData = {
   goalMl: 3000,
-  consumedMl: 1250
+  consumedMl: 1250,
+  updatedAt: '2026-04-25'
 };
 
 const buildDay = (id: number): DietDay => ({
@@ -37,8 +38,8 @@ const buildDay = (id: number): DietDay => ({
       name: 'Café da manhã',
       done: id === 1,
       foods: [
-        { id: `f${id}1`, name: 'Ovos', calories: 140, protein: 12 },
-        { id: `f${id}2`, name: 'Pão integral', calories: 120, protein: 5 }
+        { id: `f${id}1`, name: 'Ovos', calories: 140, protein: 12, carbs: 1, fat: 10, fiber: 0, quantityGrams: 100, baseQuantityGrams: 100 },
+        { id: `f${id}2`, name: 'Pão integral', calories: 120, protein: 5, carbs: 21, fat: 1.5, fiber: 3, quantityGrams: 50, baseQuantityGrams: 50 }
       ]
     },
     {
@@ -46,8 +47,8 @@ const buildDay = (id: number): DietDay => ({
       name: 'Almoço',
       done: false,
       foods: [
-        { id: `f${id}3`, name: 'Frango', calories: 220, protein: 35 },
-        { id: `f${id}4`, name: 'Arroz', calories: 180, protein: 4 }
+        { id: `f${id}3`, name: 'Frango', calories: 220, protein: 35, carbs: 0, fat: 8, fiber: 0, quantityGrams: 130, baseQuantityGrams: 130 },
+        { id: `f${id}4`, name: 'Arroz', calories: 180, protein: 4, carbs: 39, fat: 0.4, fiber: 1, quantityGrams: 140, baseQuantityGrams: 140 }
       ]
     }
   ]
@@ -70,6 +71,8 @@ export const mockUserProfile: UserProfile = {
 export const mockNutritionTargets: NutritionTargets = {
   caloriesDaily: 2500,
   proteinDaily: 160,
+  carbsDaily: 280,
+  fatDaily: 70,
   waterDailyMl: 3000
 };
 
