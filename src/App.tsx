@@ -13,7 +13,7 @@ import { WeeklyDiet, Workout } from './data/types';
 import { AppState, defaultAppState, normalizeWaterData } from './lib/appState';
 import { getTodayDateString } from './lib/date';
 import { calculateNutritionTargets } from './lib/nutrition';
-import { getCurrentSession, onAuthStateChange, signInWithEmail, signOut } from './services/authService';
+import { getCurrentSession, onAuthStateChange, signInWithEmail, signOut, signUpWithEmail } from './services/authService';
 import { loadRemoteAppState, saveRemoteAppState } from './services/appStateService';
 
 type View = 'home' | 'workout' | 'diet-day' | 'workout-setup' | 'diet-setup' | 'goals';
@@ -130,6 +130,10 @@ export default function App() {
     return true;
   };
 
+  const handleSignUp = async (email: string, password: string) => {
+    return signUpWithEmail(email, password);
+  };
+
   const handleSignOut = async () => {
     const success = await signOut();
     if (!success) return;
@@ -154,7 +158,7 @@ export default function App() {
     return (
       <Theme theme="g100">
         <div className="app-shell">
-          <LoginPage onLogin={handleLogin} />
+          <LoginPage onLogin={handleLogin} onSignUp={handleSignUp} />
         </div>
       </Theme>
     );

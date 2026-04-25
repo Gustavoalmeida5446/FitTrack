@@ -1,6 +1,11 @@
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 
+export interface AuthActionResult {
+  success: boolean;
+  requiresEmailConfirmation?: boolean;
+}
+
 export async function getCurrentSession() {
   const { data, error } = await supabase.auth.getSession();
 
@@ -24,6 +29,23 @@ export async function signInWithEmail(email: string, password: string) {
   }
 
   return data.session;
+}
+
+export async function signUpWithEmail(email: string, password: string): Promise<AuthActionResult> {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password
+  });
+
+  if (error) {
+    console.error('Erro ao criar conta', error);
+    return { success: false };
+  }
+
+  return {
+    success: true,
+    requiresEmailConfirmation: !data.session
+  };
 }
 
 export async function signOut() {
