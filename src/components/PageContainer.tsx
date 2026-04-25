@@ -15,7 +15,7 @@ export function PageContainer({ title, subtitle, actions, children }: Props) {
           <h1>{title}</h1>
           {subtitle ? <p>{subtitle}</p> : null}
         </div>
-        {actions}
+        {actions ? <div className="page-header__actions">{actions}</div> : null}
       </header>
       <section className="page-content">{children}</section>
     </main>

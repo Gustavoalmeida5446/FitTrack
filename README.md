@@ -1,73 +1,34 @@
 # FitTrack
 
-Personal fitness app built with React + Vite + Tailwind + Supabase.
+App de fitness em React + Vite + TypeScript com componentes Carbon e cliente Supabase preparado.
 
 ## Setup
 
-1. Install dependencies:
-
 ```bash
 npm install
-```
-
-2. Copy env file:
-
-```bash
 cp .env.example .env
-```
-
-3. Run local development:
-
-```bash
 npm run dev
 ```
 
-## APIs usadas
+## Estado atual
 
-- **Exercícios**: WGER API (busca de exercícios, autocomplete)
-- **Alimentos**: OpenFoodFacts (busca em português, autocomplete por nome)
-- Fallback manual de alimento permanece disponível na tela de dieta.
+- UI local com dados mockados para treino, hidratação, dieta semanal e metas nutricionais
+- Persistência local em `localStorage` para manter o estado entre recargas
+- Busca de exercícios via WGER
+- Busca de alimentos com fallback local preparado para futura integração TACO
+- Cliente Supabase configurado em `src/lib/supabaseClient.ts`
 
-## Supabase configured
+## Variáveis de ambiente
 
-The app now includes your public Supabase project URL and publishable key as defaults in code and in `.env.example`.
-
-- URL: `https://vzduymscsnuwbolucnag.supabase.co`
-- Publishable key: `sb_publishable_ghU7U0ZmZ95f7PhjMvuZLw_Io4N_BMZ`
-
-## Supabase SQL
-
-```sql
-create table if not exists user_state (
-  user_id uuid primary key references auth.users (id) on delete cascade,
-  payload jsonb not null,
-  updated_at timestamptz not null default now()
-);
-
-alter table user_state enable row level security;
-
-create policy "Users can manage own state"
-  on user_state
-  for all
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
-```
-
-## GitHub Pages (fix for white screen)
-
-The white screen usually happens when JS/CSS assets are generated with the wrong base path.
-This project now uses Vite `base: './'`, so generated assets are relative and work in repo pages.
-
-### Deploy command
+Use os valores de `.env.example`:
 
 ```bash
-npm run deploy
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
 ```
 
-This command:
+## Observações
 
-1. builds the app
-2. copies `dist/index.html` to `dist/404.html` (helps direct refreshes on GH Pages)
-3. publishes `dist/` to `gh-pages`
-
-After deploy, set GitHub Pages source to branch `gh-pages` (root).
+- O projeto não usa Tailwind na UI atual.
+- Não existe script `deploy` no `package.json` neste momento.
+- A persistência remota no Supabase ainda não está conectada às telas.

@@ -1,3 +1,4 @@
+import { CheckmarkFilled, ChevronLeft, Search } from '@carbon/icons-react';
 import { Button, Checkbox, NumberInput, TextInput, Tile } from '@carbon/react';
 import { useMemo, useState } from 'react';
 import { MuscleGroup, Workout } from '../data/types';
@@ -65,10 +66,20 @@ export function WorkoutSetupPage({ onBack, onCreateWorkout }: Props) {
   };
 
   return (
-    <PageContainer title="Cadastro de treino" subtitle="Exercício > Grupo muscular > Treino" actions={<Button kind="ghost" size="sm" onClick={onBack}>Voltar</Button>}>
+    <PageContainer title="Cadastro de treino" subtitle="Exercício > Grupo muscular > Treino" actions={<Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button>}>
       <div className="stack">
-        <Tile className="card">
-          <h3>Exercício</h3>
+        <Tile className="card metric-card setup-card">
+          <div className="card-head">
+            <div className="card-head__group">
+              <div className="icon-badge icon-badge--primary card-head__badge">
+                <Search size={20} />
+              </div>
+              <div className="card-head__title">
+                <h3>Exercício</h3>
+                <p>Busque e configure o exercício do treino</p>
+              </div>
+            </div>
+          </div>
           <TextInput id="exercise-search" labelText="Buscar exercício (wger)" value={query} onChange={(event) => void handleSearch(event.target.value)} />
           {options.length > 0 ? (
             <ul className="search-list">
@@ -79,24 +90,40 @@ export function WorkoutSetupPage({ onBack, onCreateWorkout }: Props) {
               ))}
             </ul>
           ) : null}
-          <TextInput id="exercise-name" labelText="Nome" value={exerciseName} onChange={(event) => setExerciseName(event.target.value)} />
-          <TextInput id="exercise-group" labelText="Grupo muscular" value={exerciseGroup} onChange={(event) => setExerciseGroup(event.target.value as MuscleGroup)} />
-          <NumberInput id="exercise-load" label="Carga" min={0} value={loadKg} onChange={(event) => setLoadKg(Number((event.target as HTMLInputElement).value))} />
-          <NumberInput id="exercise-reps" label="Repetições" min={1} value={reps} onChange={(event) => setReps(Number((event.target as HTMLInputElement).value))} />
-          <NumberInput id="exercise-sets" label="Séries" min={1} value={sets} onChange={(event) => setSets(Number((event.target as HTMLInputElement).value))} />
-          <NumberInput id="exercise-rest" label="Descanso (s)" min={0} value={restSeconds} onChange={(event) => setRestSeconds(Number((event.target as HTMLInputElement).value))} />
+          <div className="setup-card__fields">
+            <TextInput id="exercise-name" labelText="Nome" value={exerciseName} onChange={(event) => setExerciseName(event.target.value)} />
+            <TextInput id="exercise-group" labelText="Grupo muscular" value={exerciseGroup} onChange={(event) => setExerciseGroup(event.target.value as MuscleGroup)} />
+          </div>
+          <div className="setup-card__metrics">
+            <NumberInput id="exercise-load" label="Carga" min={0} value={loadKg} onChange={(event) => setLoadKg(Number((event.target as HTMLInputElement).value))} />
+            <NumberInput id="exercise-reps" label="Repetições" min={1} value={reps} onChange={(event) => setReps(Number((event.target as HTMLInputElement).value))} />
+            <NumberInput id="exercise-sets" label="Séries" min={1} value={sets} onChange={(event) => setSets(Number((event.target as HTMLInputElement).value))} />
+            <NumberInput id="exercise-rest" label="Descanso (s)" min={0} value={restSeconds} onChange={(event) => setRestSeconds(Number((event.target as HTMLInputElement).value))} />
+          </div>
         </Tile>
 
-        <Tile className="card">
-          <h3>Treino</h3>
+        <Tile className="card metric-card setup-card">
+          <div className="card-head">
+            <div className="card-head__group">
+              <div className="icon-badge icon-badge--primary card-head__badge">
+                <CheckmarkFilled size={20} />
+              </div>
+              <div className="card-head__title">
+                <h3>Treino</h3>
+                <p>Defina o nome e os grupos musculares</p>
+              </div>
+            </div>
+          </div>
           <TextInput id="workout-name" labelText="Nome do treino" value={name} onChange={(event) => setName(event.target.value)} />
-          <p>Selecionar grupos musculares:</p>
+          <p className="meta-label">Selecionar grupos musculares</p>
           <div className="check-grid">
             {groups.map((group) => (
               <Checkbox key={group} id={`group-${group}`} labelText={group} checked={selectedGroups.includes(group)} onChange={() => toggleGroup(group)} />
             ))}
           </div>
-          <Button disabled={!canSave} onClick={handleSave}>Salvar treino</Button>
+          <div className="setup-card__footer">
+            <Button disabled={!canSave} onClick={handleSave}>Salvar treino</Button>
+          </div>
         </Tile>
       </div>
     </PageContainer>

@@ -1,3 +1,4 @@
+import { CalendarHeatMap, ChevronRight, TemperatureWater } from '@carbon/icons-react';
 import { Button, ProgressBar, Tile } from '@carbon/react';
 import { PageContainer } from '../components/PageContainer';
 import { WaterData, WeeklyDiet, Workout } from '../data/types';
@@ -11,28 +12,57 @@ interface Props {
   onAddWater: (amount: number) => void;
 }
 
+function DumbbellIcon({ size = 24 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M3 9.5v5M5.5 7v10M8.5 8.5v7M15.5 8.5v7M18.5 7v10M21 9.5v5M8.5 12h7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export function HomePage({ workouts, water, weeklyDiet, onOpenWorkout, onOpenDietDay, onAddWater }: Props) {
   const progress = Math.min(100, Math.round((water.consumedMl / water.goalMl) * 100));
 
   return (
-    <PageContainer title="FitTrack" subtitle="Resumo diário">
-      <h2>Treinos</h2>
+    <PageContainer title="FitTrack">
+      <div className="section-title">
+        <div className="section-title__group">
+          <DumbbellIcon size={24} />
+          <h2>Treinos</h2>
+        </div>
+      </div>
       <div className="stack">
         {workouts.map((workout) => (
-          <Tile key={workout.id} className="card-click" onClick={() => onOpenWorkout(workout.id)}>
-            <h3>{workout.name}</h3>
-            <p>Grupos: {workout.muscleGroups.join(', ')}</p>
-            <p>Exercícios: {workout.exercises.length}</p>
+          <Tile key={workout.id} className="card-click list-card" onClick={() => onOpenWorkout(workout.id)}>
+            <div className="list-card__badge list-card__badge--primary">
+              <DumbbellIcon size={24} />
+            </div>
+            <div className="list-card__content">
+              <h3>{workout.name}</h3>
+              <p>{workout.muscleGroups.join(', ')}</p>
+              <span>{workout.exercises.length} exercícios</span>
+            </div>
+            <ChevronRight size={24} className="list-card__chevron" />
           </Tile>
         ))}
       </div>
 
-      <h2>Água</h2>
-      <Tile className="card">
-        <p>Meta diária: {water.goalMl} ml</p>
-        <p>Consumo atual: {water.consumedMl} ml</p>
-        <ProgressBar label="Progresso" helperText={`${progress}% concluído`} value={progress} max={100} />
-        <div className="row-actions">
+      <div className="section-title">
+        <div className="section-title__group">
+          <TemperatureWater size={24} />
+          <h2>Água</h2>
+        </div>
+      </div>
+      <Tile className="card metric-card water-card">
+        <div className="metric-row water-card__summary">
+          <strong>{water.consumedMl} ml / {water.goalMl} ml</strong>
+          <span>Meta diária: {water.goalMl} ml</span>
+        </div>
+        <div className="water-card__progress">
+          <ProgressBar label="" hideLabel helperText="" value={progress} max={100} />
+          <span>{progress}%</span>
+        </div>
+        <div className="actions-grid water-card__actions">
           <Button size="sm" onClick={() => onAddWater(250)}>+250 ml</Button>
           <Button size="sm" onClick={() => onAddWater(500)}>+500 ml</Button>
           <Button size="sm" kind="tertiary" onClick={() => {
@@ -42,12 +72,23 @@ export function HomePage({ workouts, water, weeklyDiet, onOpenWorkout, onOpenDie
         </div>
       </Tile>
 
-      <h2>Dieta semanal</h2>
+      <div className="section-title">
+        <div className="section-title__group">
+          <CalendarHeatMap size={24} />
+          <h2>Dieta semanal</h2>
+        </div>
+      </div>
       <div className="stack">
         {weeklyDiet.days.map((day) => (
-          <Tile key={day.id} className="card-click" onClick={() => onOpenDietDay(day.id)}>
-            <h3>{day.label}</h3>
-            <p>Refeições: {day.meals.length}</p>
+          <Tile key={day.id} className="card-click list-card list-card--compact" onClick={() => onOpenDietDay(day.id)}>
+            <div className="list-card__badge list-card__badge--purple">
+              <CalendarHeatMap size={20} />
+            </div>
+            <div className="list-card__content">
+              <h3>{day.label}</h3>
+              <span>{day.meals.length} refeições</span>
+            </div>
+            <ChevronRight size={24} className="list-card__chevron" />
           </Tile>
         ))}
       </div>

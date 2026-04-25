@@ -1,26 +1,34 @@
+import { Calendar, CalendarHeatMap, Home, UserAvatar } from '@carbon/icons-react';
 import { Button, Theme } from '@carbon/react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { HomePage } from './pages/HomePage';
 import { WorkoutPage } from './pages/WorkoutPage';
 import { DietDayPage } from './pages/DietDayPage';
 import { DietSetupPage } from './pages/DietSetupPage';
 import { NutritionGoalsPage } from './pages/NutritionGoalsPage';
 import { WorkoutSetupPage } from './pages/WorkoutSetupPage';
-import { mockNutritionTargets, mockUserProfile, mockWater, mockWeeklyDiet, mockWeightHistory, mockWorkouts } from './data/mockData';
+import { mockNutritionTargets } from './data/mockData';
 import { WeeklyDiet, Workout } from './data/types';
+import { loadAppState, saveAppState } from './lib/appState';
 
 export default function App() {
+  const initialState = useMemo(() => loadAppState(), []);
   const [view, setView] = useState<'home' | 'workout' | 'diet-day' | 'workout-setup' | 'diet-setup' | 'goals'>('home');
   const [selectedWorkoutId, setSelectedWorkoutId] = useState<string>('');
   const [selectedDayId, setSelectedDayId] = useState<string>('');
 
-  const [workouts, setWorkouts] = useState(mockWorkouts);
-  const [water, setWater] = useState(mockWater);
-  const [weeklyDiet, setWeeklyDiet] = useState(mockWeeklyDiet);
-  const [weightHistory, setWeightHistory] = useState(mockWeightHistory);
+  const [workouts, setWorkouts] = useState(initialState.workouts);
+  const [water, setWater] = useState(initialState.water);
+  const [weeklyDiet, setWeeklyDiet] = useState(initialState.weeklyDiet);
+  const [weightHistory, setWeightHistory] = useState(initialState.weightHistory);
+  const [profile, setProfile] = useState(initialState.profile);
 
   const selectedWorkout = useMemo(() => workouts.find((item) => item.id === selectedWorkoutId), [workouts, selectedWorkoutId]);
   const selectedDay = useMemo(() => weeklyDiet.days.find((item) => item.id === selectedDayId), [weeklyDiet.days, selectedDayId]);
+
+  useEffect(() => {
+    saveAppState({ profile, workouts, water, weeklyDiet, weightHistory });
+  }, [profile, workouts, water, weeklyDiet, weightHistory]);
 
   const updateWorkout = (workoutId: string, updater: (workout: Workout) => Workout) => {
     setWorkouts((prev) => prev.map((workout) => (workout.id === workoutId ? updater(workout) : workout)));
@@ -33,13 +41,6 @@ export default function App() {
   return (
     <Theme theme="g100">
       <div className="app-shell">
-        <nav className="top-actions">
-          <Button kind="ghost" size="sm" onClick={() => setView('home')}>Início</Button>
-          <Button kind="ghost" size="sm" onClick={() => setView('workout-setup')}>Cadastro treino</Button>
-          <Button kind="ghost" size="sm" onClick={() => setView('diet-setup')}>Cadastro dieta</Button>
-          <Button kind="ghost" size="sm" onClick={() => setView('goals')}>Metas</Button>
-        </nav>
-
         {view === 'home' ? (
           <HomePage
             workouts={workouts}
@@ -96,13 +97,34 @@ export default function App() {
 
         {view === 'goals' ? (
           <NutritionGoalsPage
-            profile={mockUserProfile}
+            profile={profile}
             targets={mockNutritionTargets}
             weightHistory={weightHistory}
             onBack={() => setView('home')}
+            onUpdateProfile={setProfile}
             onAddWeight={(weight) => setWeightHistory((prev) => [...prev, { date: new Date().toISOString().slice(0, 10), weight }])}
+            onRemoveWeight={(index) => setWeightHistory((prev) => prev.filter((_, itemIndex) => itemIndex !== index))}
           />
         ) : null}
+
+        <nav className="bottom-tabbar bottom-nav" aria-label="Navegação principal">
+          <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'home' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={() => setView('home')}>
+            <Home size={20} />
+            <span>Início</span>
+          </Button>
+          <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'workout-setup' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={() => setView('workout-setup')}>
+            <Calendar size={20} />
+            <span>Treinos</span>
+          </Button>
+          <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'diet-setup' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={() => setView('diet-setup')}>
+            <CalendarHeatMap size={20} />
+            <span>Dieta</span>
+          </Button>
+          <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'goals' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={() => setView('goals')}>
+            <UserAvatar size={20} />
+            <span>Perfil</span>
+          </Button>
+        </nav>
       </div>
     </Theme>
   );

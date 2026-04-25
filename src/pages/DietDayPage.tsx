@@ -1,3 +1,4 @@
+import { CalendarHeatMap, ChevronLeft, CheckmarkFilled } from '@carbon/icons-react';
 import { Button, Checkbox, Tile } from '@carbon/react';
 import { PageContainer } from '../components/PageContainer';
 import { DietDay } from '../data/types';
@@ -30,34 +31,91 @@ const sumMacros = (day: DietDay) => {
 
 export function DietDayPage({ day, onBack, onToggleMealDone }: Props) {
   const totals = sumMacros(day);
+  const completedMeals = day.meals.filter((meal) => meal.done).length;
 
   return (
     <PageContainer
       title={day.label}
       subtitle="Dieta semanal"
-      actions={<Button kind="ghost" size="sm" onClick={onBack}>Voltar</Button>}
+      actions={<Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button>}
     >
+      <Tile className="card metric-card diet-summary-card">
+        <div className="metric-row diet-summary-card__row">
+          <div>
+            <span className="meta-label">Refeições feitas</span>
+            <strong>{completedMeals}/{day.meals.length}</strong>
+          </div>
+          <div>
+            <span className="meta-label">Calorias planejadas</span>
+            <strong>{totals.plannedCalories}</strong>
+          </div>
+        </div>
+      </Tile>
+
       <div className="stack">
         {day.meals.map((meal) => (
-          <Tile key={meal.id} className="card">
-            <h3>{meal.name}</h3>
-            <ul>
+          <Tile key={meal.id} className={`card metric-card diet-meal-card ${meal.done ? 'diet-meal-card--done' : ''}`}>
+            <div className="card-head">
+              <div className="card-head__group">
+                <div className="icon-badge icon-badge--purple card-head__badge">
+                  <CalendarHeatMap size={20} />
+                </div>
+                <div className="card-head__title">
+                  <h3>{meal.name}</h3>
+                  <p>{meal.foods.length} itens</p>
+                </div>
+              </div>
+              {meal.done ? <CheckmarkFilled size={20} className="diet-meal-card__status" /> : null}
+            </div>
+
+            <ul className="diet-food-list">
               {meal.foods.map((food) => (
-                <li key={food.id}>{food.name} — {food.calories} kcal / {food.protein}g proteína</li>
+                <li key={food.id} className="diet-food-list__item">
+                  <div>
+                    <strong>{food.name}</strong>
+                  </div>
+                  <span>{food.calories} kcal • {food.protein}g proteína</span>
+                </li>
               ))}
             </ul>
-            <p>Calorias: {meal.foods.reduce((sum, food) => sum + food.calories, 0)}</p>
-            <p>Proteína: {meal.foods.reduce((sum, food) => sum + food.protein, 0)}g</p>
-            <Checkbox id={`meal-${meal.id}`} labelText="Refeição feita" checked={meal.done} onChange={() => onToggleMealDone(meal.id)} />
+
+            <div className="diet-meal-card__meta">
+              <div className="stat-pill">
+                <span>Calorias</span>
+                <strong>{meal.foods.reduce((sum, food) => sum + food.calories, 0)}</strong>
+              </div>
+              <div className="stat-pill">
+                <span>Proteína</span>
+                <strong>{meal.foods.reduce((sum, food) => sum + food.protein, 0)}g</strong>
+              </div>
+            </div>
+
+            <div className="diet-meal-card__footer">
+              <Checkbox id={`meal-${meal.id}`} labelText="Refeição feita" checked={meal.done} onChange={() => onToggleMealDone(meal.id)} />
+            </div>
           </Tile>
         ))}
 
-        <Tile className="card">
+        <Tile className="card metric-card diet-totals-card">
           <h3>Resumo do dia</h3>
-          <p>Calorias planejadas: {totals.plannedCalories}</p>
-          <p>Proteína planejada: {totals.plannedProtein}g</p>
-          <p>Calorias consumidas: {totals.consumedCalories}</p>
-          <p>Proteína consumida: {totals.consumedProtein}g</p>
+          <div className="diet-totals-card__grid">
+            <div className="stat-pill">
+              <span>Calorias planejadas</span>
+              <strong>{totals.plannedCalories}</strong>
+            </div>
+            <div className="stat-pill">
+              <span>Proteína planejada</span>
+              <strong>{totals.plannedProtein}g</strong>
+            </div>
+            <div className="stat-pill">
+              <span>Calorias consumidas</span>
+              <strong>{totals.consumedCalories}</strong>
+            </div>
+            <div className="stat-pill">
+              <span>Proteína consumida</span>
+              <strong>{totals.consumedProtein}g</strong>
+            </div>
+          </div>
         </Tile>
       </div>
     </PageContainer>
