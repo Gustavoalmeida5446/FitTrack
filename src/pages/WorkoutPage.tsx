@@ -18,10 +18,30 @@ function getSafeNumber(value: number, fallback: number) {
 export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateLoad }: Props) {
   const completedExercises = workout.exercises.filter((exercise) => exercise.done).length;
   const [activeImageIndexes, setActiveImageIndexes] = useState<Record<string, number>>({});
+  const [loadValues, setLoadValues] = useState<Record<string, number>>({});
+  const [recentlyUpdatedLoads, setRecentlyUpdatedLoads] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     setActiveImageIndexes({});
   }, [workout.id]);
+
+  useEffect(() => {
+    setLoadValues(Object.fromEntries(workout.exercises.map((exercise) => [exercise.id, exercise.loadKg])));
+  }, [workout.exercises]);
+
+  useEffect(() => {
+    const updatedExerciseIds = Object.keys(recentlyUpdatedLoads).filter((exerciseId) => recentlyUpdatedLoads[exerciseId]);
+
+    if (updatedExerciseIds.length === 0) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setRecentlyUpdatedLoads({});
+    }, 1800);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [recentlyUpdatedLoads]);
 
   const handleToggleExerciseImage = (exerciseId: string, imageCount: number) => {
     if (imageCount < 2) return;
@@ -29,6 +49,25 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateLoa
     setActiveImageIndexes((prev) => ({
       ...prev,
       [exerciseId]: prev[exerciseId] === 1 ? 0 : 1
+    }));
+  };
+
+  const handleUpdateLoad = (exerciseId: string, value: number | string, fallback: number) => {
+    const nextLoad = getSafeNumber(Number(value), fallback);
+
+    setLoadValues((prev) => ({
+      ...prev,
+      [exerciseId]: nextLoad
+    }));
+
+    if (nextLoad === fallback) {
+      return;
+    }
+
+    onUpdateLoad(exerciseId, nextLoad);
+    setRecentlyUpdatedLoads((prev) => ({
+      ...prev,
+      [exerciseId]: true
     }));
   };
 
@@ -59,6 +98,8 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateLoa
             : exercise.mediaUrl ? [exercise.mediaUrl] : [];
           const activeImageIndex = mediaUrls.length > 1 ? activeImageIndexes[exercise.id] ?? 0 : 0;
           const activeImageUrl = mediaUrls[activeImageIndex] ?? null;
+          const currentLoad = loadValues[exercise.id] ?? exercise.loadKg;
+          const loadWasUpdated = recentlyUpdatedLoads[exercise.id] ?? false;
 
           return (
             <Tile key={exercise.id} className={`card metric-card workout-exercise-card ${exercise.done ? 'workout-exercise-card--done' : ''}`}>
@@ -105,9 +146,12 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateLoa
                 id={`load-${exercise.id}`}
                 label="Carga (kg)"
                 min={0}
-                value={exercise.loadKg}
-                onChange={(event) => onUpdateLoad(exercise.id, getSafeNumber(Number((event.target as HTMLInputElement).value), exercise.loadKg))}
+                value={currentLoad}
+                onChange={(_, state) => handleUpdateLoad(exercise.id, state.value, exercise.loadKg)}
               />
+              <div className={`workout-load-status${loadWasUpdated ? ' workout-load-status--saved' : ''}`}>
+                {loadWasUpdated ? `Carga atualizada para ${currentLoad} kg` : `Carga atual: ${currentLoad} kg`}
+              </div>
               <div className="workout-exercise-card__footer">
                 <span className="meta-label">
                   {mediaUrls.length > 1 ? `Imagem ${activeImageIndex + 1} de ${mediaUrls.length}` : `Mídia: ${exercise.mediaType}`}

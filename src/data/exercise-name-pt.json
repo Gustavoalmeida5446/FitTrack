@@ -1,4 +1,7 @@
 {
+  "3_4_Sit-Up": {
+    "ptName": "Abdominal parcial"
+  },
   "90_90_Hamstring": {
     "ptName": "Alongamento 90/90 para posteriores"
   },
@@ -14,6 +17,24 @@
   "Alternate_Hammer_Curl": {
     "ptName": "Rosca martelo alternada"
   },
+  "Alternate_Incline_Dumbbell_Curl": {
+    "ptName": "Rosca inclinada alternada com halteres"
+  },
+  "Alternating_Cable_Shoulder_Press": {
+    "ptName": "Desenvolvimento alternado no cabo"
+  },
+  "Alternating_Floor_Press": {
+    "ptName": "Supino alternado no chão"
+  },
+  "Alternating_Kettlebell_Press": {
+    "ptName": "Desenvolvimento alternado com kettlebell"
+  },
+  "Alternating_Kettlebell_Row": {
+    "ptName": "Remada alternada com kettlebell"
+  },
+  "Alternating_Renegade_Row": {
+    "ptName": "Remada renegade alternada"
+  },
   "Arnold_Dumbbell_Press": {
     "ptName": "Desenvolvimento Arnold com halteres"
   },
@@ -24,10 +45,10 @@
     "ptName": "Abertura com elástico"
   },
   "Barbell_Ab_Rollout": {
-    "ptName": "Rollout abdominal com barra"
+    "ptName": "Ab wheel com barra"
   },
   "Barbell_Ab_Rollout_-_On_Knees": {
-    "ptName": "Rollout abdominal com barra ajoelhado"
+    "ptName": "Ab wheel com barra ajoelhado"
   },
   "Barbell_Bench_Press_-_Medium_Grip": {
     "ptName": "Supino reto com barra"
@@ -48,7 +69,7 @@
     "ptName": "Supino guilhotina com barra"
   },
   "Barbell_Hack_Squat": {
-    "ptName": "Hack squat com barra"
+    "ptName": "Agachamento hack com barra"
   },
   "Barbell_Hip_Thrust": {
     "ptName": "Elevação pélvica com barra"
@@ -58,6 +79,9 @@
   },
   "Barbell_Lunge": {
     "ptName": "Avanço com barra"
+  },
+  "Barbell_Rear_Delt_Row": {
+    "ptName": "Remada para deltoide posterior com barra"
   },
   "Barbell_Seated_Calf_Raise": {
     "ptName": "Panturrilha sentada com barra"
@@ -89,6 +113,33 @@
   "Bench_Press_with_Chains": {
     "ptName": "Supino com correntes"
   },
+  "Bent_Over_Barbell_Row": {
+    "ptName": "Remada curvada com barra"
+  },
+  "Bent_Over_Two-Dumbbell_Row": {
+    "ptName": "Remada curvada com dois halteres"
+  },
+  "Bent_Over_Two-Dumbbell_Row_With_Palms_In": {
+    "ptName": "Remada curvada com dois halteres e pegada neutra"
+  },
+  "Bodyweight_Squat": {
+    "ptName": "Agachamento livre"
+  },
+  "Bodyweight_Walking_Lunge": {
+    "ptName": "Avanço caminhando com peso corporal"
+  },
+  "Box_Squat": {
+    "ptName": "Agachamento no box"
+  },
+  "Box_Squat_with_Bands": {
+    "ptName": "Agachamento no box com elásticos"
+  },
+  "Box_Squat_with_Chains": {
+    "ptName": "Agachamento no box com correntes"
+  },
+  "Butterfly": {
+    "ptName": "Crucifixo na máquina"
+  },
   "Cable_Chest_Press": {
     "ptName": "Supino no cabo"
   },
@@ -98,14 +149,23 @@
   "Cable_Crunch": {
     "ptName": "Abdominal no cabo"
   },
+  "Cable_Deadlifts": {
+    "ptName": "Levantamento terra no cabo"
+  },
   "Cable_Hammer_Curls_-_Rope_Attachment": {
     "ptName": "Rosca martelo no cabo com corda"
   },
   "Cable_Hip_Adduction": {
     "ptName": "Adução de quadril no cabo"
   },
+  "Cable_Incline_Pushdown": {
+    "ptName": "Tríceps no cabo inclinado"
+  },
   "Cable_Incline_Triceps_Extension": {
     "ptName": "Extensão de tríceps no cabo inclinado"
+  },
+  "Cable_Lying_Triceps_Extension": {
+    "ptName": "Tríceps testa no cabo"
   },
   "Cable_One_Arm_Tricep_Extension": {
     "ptName": "Extensão unilateral de tríceps no cabo"
@@ -116,11 +176,23 @@
   "Cable_Rear_Delt_Fly": {
     "ptName": "Crucifixo invertido no cabo"
   },
+  "Cable_Reverse_Crunch": {
+    "ptName": "Abdominal reverso no cabo"
+  },
   "Cable_Rope_Overhead_Triceps_Extension": {
     "ptName": "Tríceps acima da cabeça no cabo com corda"
   },
+  "Cable_Rope_Rear-Delt_Rows": {
+    "ptName": "Remada alta com corda para deltoide posterior"
+  },
   "Cable_Russian_Twists": {
     "ptName": "Rotação russa no cabo"
+  },
+  "Cable_Seated_Crunch": {
+    "ptName": "Abdominal sentado no cabo"
+  },
+  "Cable_Seated_Lateral_Raise": {
+    "ptName": "Elevação lateral sentada no cabo"
   },
   "Cable_Shoulder_Press": {
     "ptName": "Desenvolvimento no cabo"
@@ -137,14 +209,35 @@
   "Chin-Up": {
     "ptName": "Barra fixa supinada"
   },
+  "Clean": {
+    "ptName": "Power clean"
+  },
+  "Clean_and_Jerk": {
+    "ptName": "Arremesso"
+  },
+  "Clean_and_Press": {
+    "ptName": "Clean and press"
+  },
+  "Close-Grip_Barbell_Bench_Press": {
+    "ptName": "Supino fechado com barra"
+  },
+  "Concentration_Curls": {
+    "ptName": "Rosca concentrada"
+  },
   "Crunches": {
-    "ptName": "Abdominal crunch"
+    "ptName": "Abdominal"
   },
   "Deadlift_with_Bands": {
     "ptName": "Levantamento terra com elásticos"
   },
   "Deadlift_with_Chains": {
     "ptName": "Levantamento terra com correntes"
+  },
+  "Decline_Barbell_Bench_Press": {
+    "ptName": "Supino declinado com barra"
+  },
+  "Decline_Dumbbell_Bench_Press": {
+    "ptName": "Supino declinado com halteres"
   },
   "Dip_Machine": {
     "ptName": "Mergulho na máquina"
@@ -203,8 +296,14 @@
   "Face_Pull": {
     "ptName": "Face pull"
   },
+  "Front_Dumbbell_Raise": {
+    "ptName": "Elevação frontal com halteres"
+  },
+  "Glute_Bridge": {
+    "ptName": "Ponte de glúteos"
+  },
   "Glute_Ham_Raise": {
-    "ptName": "Elevação glúteo-hamstring"
+    "ptName": "Glute ham raise"
   },
   "Glute_Kickback": {
     "ptName": "Coice de glúteo"
@@ -214,6 +313,12 @@
   },
   "Hammer_Grip_Incline_DB_Bench_Press": {
     "ptName": "Supino inclinado com halteres e pegada neutra"
+  },
+  "Incline_Dumbbell_Curl": {
+    "ptName": "Rosca inclinada com halteres"
+  },
+  "Lat_Pulldown": {
+    "ptName": "Puxada na frente"
   },
   "Leg_Extensions": {
     "ptName": "Cadeira extensora"
@@ -227,8 +332,14 @@
   "Mountain_Climbers": {
     "ptName": "Escalador"
   },
+  "One-Arm_Dumbbell_Row": {
+    "ptName": "Remada unilateral com halter"
+  },
   "Plank": {
     "ptName": "Prancha"
+  },
+  "Preacher_Curl": {
+    "ptName": "Rosca Scott"
   },
   "Pullups": {
     "ptName": "Barra fixa"
@@ -243,7 +354,7 @@
     "ptName": "Flexão com pés elevados"
   },
   "Push_Press": {
-    "ptName": "Push press"
+    "ptName": "Desenvolvimento com impulso"
   },
   "Pushups": {
     "ptName": "Flexão de braço"
@@ -251,17 +362,29 @@
   "Russian_Twist": {
     "ptName": "Rotação russa"
   },
+  "Seated_Bent-Over_Rear_Delt_Raise": {
+    "ptName": "Elevação posterior sentada"
+  },
+  "Seated_Cable_Rows": {
+    "ptName": "Remada baixa no cabo"
+  },
+  "Side_Lateral_Raise": {
+    "ptName": "Elevação lateral"
+  },
   "Sit-Up": {
-    "ptName": "Abdominal sit-up"
+    "ptName": "Abdominal completo"
   },
   "Smith_Machine_Bench_Press": {
-    "ptName": "Supino na máquina Smith"
+    "ptName": "Supino no Smith"
   },
   "Smith_Machine_Close-Grip_Bench_Press": {
-    "ptName": "Supino fechado na máquina Smith"
+    "ptName": "Supino fechado no Smith"
   },
   "Smith_Machine_Incline_Bench_Press": {
-    "ptName": "Supino inclinado na máquina Smith"
+    "ptName": "Supino inclinado no Smith"
+  },
+  "Standing_Biceps_Cable_Curl": {
+    "ptName": "Rosca bíceps no cabo em pé"
   },
   "Tricep_Dumbbell_Kickback": {
     "ptName": "Tríceps coice com halter"
@@ -277,5 +400,398 @@
   },
   "Triceps_Pushdown_-_V-Bar_Attachment": {
     "ptName": "Tríceps pulley com barra V"
+  },
+  "Alternating_Deltoid_Raise": {
+    "ptName": "Elevação alternada para deltoides"
+  },
+  "Anti-Gravity_Press": {
+    "ptName": "Desenvolvimento anti-gravidade"
+  },
+  "Axle_Deadlift": {
+    "ptName": "Levantamento terra com axle bar"
+  },
+  "Back_Flyes_-_With_Bands": {
+    "ptName": "Crucifixo invertido com elásticos"
+  },
+  "Ball_Leg_Curl": {
+    "ptName": "Flexão de joelhos na bola"
+  },
+  "Band_Hip_Adductions": {
+    "ptName": "Adução de quadril com elástico"
+  },
+  "Barbell_Curls_Lying_Against_An_Incline": {
+    "ptName": "Rosca com barra apoiado no banco inclinado"
+  },
+  "Barbell_Incline_Shoulder_Raise": {
+    "ptName": "Elevação para ombros com barra no banco inclinado"
+  },
+  "Barbell_Rollout_from_Bench": {
+    "ptName": "Ab wheel com barra a partir do banco"
+  },
+  "Barbell_Shrug_Behind_The_Back": {
+    "ptName": "Encolhimento com barra por trás do corpo"
+  },
+  "Barbell_Side_Bend": {
+    "ptName": "Flexão lateral com barra"
+  },
+  "Barbell_Side_Split_Squat": {
+    "ptName": "Agachamento lateral com barra"
+  },
+  "Barbell_Squat_To_A_Bench": {
+    "ptName": "Agachamento com barra até o banco"
+  },
+  "Bent-Arm_Barbell_Pullover": {
+    "ptName": "Pullover com barra e braços flexionados"
+  },
+  "Bent-Arm_Dumbbell_Pullover": {
+    "ptName": "Pullover com halter e braços flexionados"
+  },
+  "Bent-Knee_Hip_Raise": {
+    "ptName": "Elevação de quadril com joelhos flexionados"
+  },
+  "Bent_Over_Dumbbell_Rear_Delt_Raise_With_Head_On_Bench": {
+    "ptName": "Elevação posterior curvada com halteres e cabeça apoiada no banco"
+  },
+  "Bent_Over_Low-Pulley_Side_Lateral": {
+    "ptName": "Elevação lateral curvada na polia baixa"
+  },
+  "Bent_Over_One-Arm_Long_Bar_Row": {
+    "ptName": "Remada unilateral curvada com barra"
+  },
+  "Bent_Over_Two-Arm_Long_Bar_Row": {
+    "ptName": "Remada curvada com barra longa"
+  },
+  "Board_Press": {
+    "ptName": "Supino com tábua"
+  },
+  "Body_Tricep_Press": {
+    "ptName": "Flexão para tríceps"
+  },
+  "Bodyweight_Flyes": {
+    "ptName": "Crucifixo com peso corporal"
+  },
+  "Bodyweight_Mid_Row": {
+    "ptName": "Remada média com peso corporal"
+  },
+  "Bosu_Ball_Cable_Crunch_With_Side_Bends": {
+    "ptName": "Abdominal no cabo com flexão lateral na bosu"
+  },
+  "Bradford_Rocky_Presses": {
+    "ptName": "Desenvolvimento Bradford"
+  },
+  "Cable_Internal_Rotation": {
+    "ptName": "Rotação interna no cabo"
+  },
+  "Cable_Iron_Cross": {
+    "ptName": "Iron cross no cabo"
+  },
+  "Cable_Judo_Flip": {
+    "ptName": "Judo flip no cabo"
+  },
+  "Cable_Wrist_Curl": {
+    "ptName": "Rosca de punho no cabo"
+  },
+  "Calf-Machine_Shoulder_Shrug": {
+    "ptName": "Encolhimento na máquina"
+  },
+  "Calf_Raise_On_A_Dumbbell": {
+    "ptName": "Panturrilha em pé sobre halter"
+  },
+  "Calf_Raises_-_With_Bands": {
+    "ptName": "Panturrilha com elásticos"
+  },
+  "Car_Deadlift": {
+    "ptName": "Levantamento terra de strongman"
+  },
+  "Chain_Handle_Extension": {
+    "ptName": "Extensão de tríceps com corrente"
+  },
+  "Chain_Press": {
+    "ptName": "Supino com corrente"
+  },
+  "Chair_Squat": {
+    "ptName": "Agachamento na cadeira"
+  },
+  "Clean_Deadlift": {
+    "ptName": "Terra para clean"
+  },
+  "Clock_Push-Up": {
+    "ptName": "Flexão relógio"
+  },
+  "Close-Grip_Dumbbell_Press": {
+    "ptName": "Supino fechado com halteres"
+  },
+  "Close-Grip_EZ-Bar_Curl_with_Band": {
+    "ptName": "Rosca fechada com barra EZ e elástico"
+  },
+  "Close-Grip_EZ-Bar_Press": {
+    "ptName": "Supino fechado com barra EZ"
+  },
+  "Close-Grip_EZ_Bar_Curl": {
+    "ptName": "Rosca fechada com barra EZ"
+  },
+  "Close-Grip_Front_Lat_Pulldown": {
+    "ptName": "Puxada frontal com pegada fechada"
+  },
+  "Close-Grip_Push-Up_off_of_a_Dumbbell": {
+    "ptName": "Flexão fechada apoiada no halter"
+  },
+  "Close-Grip_Standing_Barbell_Curl": {
+    "ptName": "Rosca direta com barra e pegada fechada"
+  },
+  "Cross-Body_Crunch": {
+    "ptName": "Abdominal cruzado"
+  },
+  "Cross_Body_Hammer_Curl": {
+    "ptName": "Rosca martelo cruzada"
+  },
+  "Crunch_-_Hands_Overhead": {
+    "ptName": "Abdominal com braços acima da cabeça"
+  },
+  "Crunch_-_Legs_On_Exercise_Ball": {
+    "ptName": "Abdominal com pernas na bola"
+  },
+  "Decline_Close-Grip_Bench_To_Skull_Crusher": {
+    "ptName": "Supino fechado declinado com tríceps testa"
+  },
+  "Decline_Crunch": {
+    "ptName": "Abdominal declinado"
+  },
+  "Decline_Dumbbell_Flyes": {
+    "ptName": "Crucifixo declinado com halteres"
+  },
+  "Decline_Dumbbell_Triceps_Extension": {
+    "ptName": "Tríceps testa declinado com halteres"
+  },
+  "Decline_EZ_Bar_Triceps_Extension": {
+    "ptName": "Tríceps testa declinado com barra EZ"
+  },
+  "Decline_Oblique_Crunch": {
+    "ptName": "Abdominal oblíquo declinado"
+  },
+  "Decline_Push-Up": {
+    "ptName": "Flexão declinada"
+  },
+  "Decline_Reverse_Crunch": {
+    "ptName": "Abdominal reverso declinado"
+  },
+  "Decline_Smith_Press": {
+    "ptName": "Supino declinado no Smith"
+  },
+  "Deficit_Deadlift": {
+    "ptName": "Levantamento terra com déficit"
+  },
+  "Donkey_Calf_Raises": {
+    "ptName": "Panturrilha burrinho"
+  },
+  "Dumbbell_Incline_Shoulder_Raise": {
+    "ptName": "Elevação para ombros com halteres no banco inclinado"
+  },
+  "Dumbbell_Lying_One-Arm_Rear_Lateral_Raise": {
+    "ptName": "Elevação posterior unilateral deitado com halter"
+  },
+  "Dumbbell_Lying_Rear_Lateral_Raise": {
+    "ptName": "Elevação posterior deitado com halteres"
+  },
+  "Dumbbell_One-Arm_Upright_Row": {
+    "ptName": "Remada alta unilateral com halter"
+  },
+  "Dumbbell_Prone_Incline_Curl": {
+    "ptName": "Rosca inclinada pronada com halteres"
+  },
+  "Dumbbell_Raise": {
+    "ptName": "Elevação com halteres"
+  },
+  "Dumbbell_Seated_One-Leg_Calf_Raise": {
+    "ptName": "Panturrilha unilateral sentada com halter"
+  },
+  "Dumbbell_Squat_To_A_Bench": {
+    "ptName": "Agachamento com halteres até o banco"
+  },
+  "Dumbbell_Tricep_Extension_-Pronated_Grip": {
+    "ptName": "Extensão de tríceps com halter e pegada pronada"
+  },
+  "EZ-Bar_Curl": {
+    "ptName": "Rosca com barra EZ"
+  },
+  "Exercise_Ball_Crunch": {
+    "ptName": "Abdominal na bola"
+  },
+  "Flat_Bench_Cable_Flyes": {
+    "ptName": "Crossover reto no banco"
+  },
+  "Flat_Bench_Leg_Pull-In": {
+    "ptName": "Encolhimento de pernas no banco reto"
+  },
+  "Flat_Bench_Lying_Leg_Raise": {
+    "ptName": "Elevação de pernas deitado no banco"
+  },
+  "Floor_Glute-Ham_Raise": {
+    "ptName": "Glute ham raise no chão"
+  },
+  "Floor_Press": {
+    "ptName": "Supino no chão com barra"
+  },
+  "Floor_Press_with_Chains": {
+    "ptName": "Supino no chão com correntes"
+  },
+  "Front_Barbell_Squat": {
+    "ptName": "Agachamento frontal com barra"
+  },
+  "Front_Barbell_Squat_To_A_Bench": {
+    "ptName": "Agachamento frontal com barra até o banco"
+  },
+  "Front_Cable_Raise": {
+    "ptName": "Elevação frontal no cabo"
+  },
+  "Front_Incline_Dumbbell_Raise": {
+    "ptName": "Elevação frontal inclinada com halteres"
+  },
+  "Front_Plate_Raise": {
+    "ptName": "Elevação frontal com anilha"
+  },
+  "Front_Raise_And_Pullover": {
+    "ptName": "Elevação frontal com pullover"
+  },
+  "Front_Squat_Clean_Grip": {
+    "ptName": "Agachamento frontal com pegada de clean"
+  },
+  "Front_Squats_With_Two_Kettlebells": {
+    "ptName": "Agachamento frontal com dois kettlebells"
+  },
+  "Front_Two-Dumbbell_Raise": {
+    "ptName": "Elevação frontal com dois halteres"
+  },
+  "Full_Range-Of-Motion_Lat_Pulldown": {
+    "ptName": "Puxada na frente com amplitude completa"
+  },
+  "Goblet_Squat": {
+    "ptName": "Agachamento goblet"
+  },
+  "Hack_Squat": {
+    "ptName": "Hack squat"
+  },
+  "Hanging_Leg_Raise": {
+    "ptName": "Elevação de pernas na barra"
+  },
+  "High_Cable_Curls": {
+    "ptName": "Rosca alta no cabo"
+  },
+  "Incline_Barbell_Triceps_Extension": {
+    "ptName": "Tríceps testa inclinado com barra"
+  },
+  "Incline_Bench_Pull": {
+    "ptName": "Remada no banco inclinado"
+  },
+  "Incline_Cable_Chest_Press": {
+    "ptName": "Supino inclinado no cabo"
+  },
+  "Incline_Cable_Flye": {
+    "ptName": "Crossover inclinado"
+  },
+  "Incline_Dumbbell_Bench_With_Palms_Facing_In": {
+    "ptName": "Supino inclinado com halteres e pegada neutra"
+  },
+  "Incline_Dumbbell_Flyes": {
+    "ptName": "Crucifixo inclinado com halteres"
+  },
+  "Incline_Dumbbell_Flyes_-_With_A_Twist": {
+    "ptName": "Crucifixo inclinado com halteres e rotação"
+  },
+  "Incline_Dumbbell_Press": {
+    "ptName": "Supino inclinado com halteres"
+  },
+  "Incline_Hammer_Curls": {
+    "ptName": "Rosca martelo inclinada"
+  },
+  "Incline_Inner_Biceps_Curl": {
+    "ptName": "Rosca inclinada para bíceps interno"
+  },
+  "Incline_Push-Up": {
+    "ptName": "Flexão inclinada"
+  },
+  "Incline_Push-Up_Close-Grip": {
+    "ptName": "Flexão inclinada com pegada fechada"
+  },
+  "Incline_Push-Up_Depth_Jump": {
+    "ptName": "Flexão inclinada com salto"
+  },
+  "Incline_Push-Up_Medium": {
+    "ptName": "Flexão inclinada com pegada média"
+  },
+  "Incline_Push-Up_Reverse_Grip": {
+    "ptName": "Flexão inclinada com pegada invertida"
+  },
+  "Incline_Push-Up_Wide": {
+    "ptName": "Flexão inclinada com pegada aberta"
+  },
+  "Inverted_Row": {
+    "ptName": "Remada invertida"
+  },
+  "Inverted_Row_with_Straps": {
+    "ptName": "Remada invertida com alças"
+  },
+  "JM_Press": {
+    "ptName": "JM press"
+  },
+  "Jefferson_Squats": {
+    "ptName": "Agachamento Jefferson"
+  },
+  "Knee_Hip_Raise_On_Parallel_Bars": {
+    "ptName": "Elevação de joelhos e quadril nas paralelas"
+  },
+  "Kneeling_Cable_Crunch_With_Alternating_Oblique_Twists": {
+    "ptName": "Abdominal ajoelhado no cabo com rotação oblíqua alternada"
+  },
+  "Kneeling_Cable_Triceps_Extension": {
+    "ptName": "Extensão de tríceps ajoelhado no cabo"
+  },
+  "Kneeling_High_Pulley_Row": {
+    "ptName": "Remada ajoelhado na polia alta"
+  },
+  "Kneeling_Single-Arm_High_Pulley_Row": {
+    "ptName": "Remada unilateral ajoelhado na polia alta"
+  },
+  "Lateral_Raise_-_With_Bands": {
+    "ptName": "Elevação lateral com elásticos"
+  },
+  "Leg-Over_Floor_Press": {
+    "ptName": "Supino no chão com perna elevada"
+  },
+  "Leg_Lift": {
+    "ptName": "Elevação de pernas"
+  },
+  "Leg_Pull-In": {
+    "ptName": "Encolhimento de pernas"
+  },
+  "Leverage_Chest_Press": {
+    "ptName": "Supino articulado"
+  },
+  "Leverage_Deadlift": {
+    "ptName": "Levantamento terra articulado"
+  },
+  "Leverage_Decline_Chest_Press": {
+    "ptName": "Supino declinado articulado"
+  },
+  "Leverage_High_Row": {
+    "ptName": "Remada alta articulada"
+  },
+  "Leverage_Incline_Chest_Press": {
+    "ptName": "Supino inclinado articulado"
+  },
+  "Leverage_Iso_Row": {
+    "ptName": "Remada isoarticulada"
+  },
+  "Leverage_Shoulder_Press": {
+    "ptName": "Desenvolvimento articulado"
+  },
+  "Low_Cable_Crossover": {
+    "ptName": "Crossover na polia baixa"
+  },
+  "Low_Cable_Triceps_Extension": {
+    "ptName": "Extensão de tríceps na polia baixa"
+  },
+  "Low_Pulley_Row_To_Neck": {
+    "ptName": "Remada baixa ao pescoço"
   }
 }

@@ -91,7 +91,7 @@ export function DietDayPage({ day, meals, targets, onBack, onToggleMealDone }: P
                   <li key={food.id} className="diet-food-list__item">
                     <div>
                       <strong>{food.name}</strong>
-                      <span>{food.quantityGrams} g</span>
+                      <span>{food.quantity} {food.unit}</span>
                     </div>
                     <span>{food.calories} kcal • {food.protein}g proteína</span>
                   </li>

@@ -11,8 +11,26 @@ interface Props {
   onSaveDiet: (diet: WeeklyDiet) => void;
 }
 
-function scaleFood(food: TacoFood, quantityGrams: number): FoodItem {
-  const factor = quantityGrams / 100;
+function parsePortionBase(portionBase: string | null | undefined) {
+  const rawValue = portionBase?.trim() ?? '';
+  const match = rawValue.match(/^(\d+(?:[.,]\d+)?)\s*(.+)$/);
+
+  if (!match) {
+    return {
+      amount: 100,
+      unit: 'g'
+    };
+  }
+
+  return {
+    amount: Number(match[1].replace(',', '.')),
+    unit: match[2].trim()
+  };
+}
+
+function scaleFood(food: TacoFood, quantity: number): FoodItem {
+  const portionBase = parsePortionBase(food.porcaoBase);
+  const factor = quantity / portionBase.amount;
 
   return {
     id: crypto.randomUUID(),
@@ -23,8 +41,10 @@ function scaleFood(food: TacoFood, quantityGrams: number): FoodItem {
     carbs: Number(((food.carboidrato ?? 0) * factor).toFixed(1)),
     fat: Number(((food.gordura ?? 0) * factor).toFixed(1)),
     fiber: Number(((food.fibra ?? 0) * factor).toFixed(1)),
-    quantityGrams,
-    baseQuantityGrams: 100
+    quantity,
+    unit: portionBase.unit,
+    baseQuantity: portionBase.amount,
+    baseUnit: portionBase.unit
   };
 }
 
@@ -39,7 +59,8 @@ export function DietSetupPage({ onBack, diet, onSaveDiet }: Props) {
   const [foodQuery, setFoodQuery] = useState('');
   const [foodOptions, setFoodOptions] = useState<TacoFood[]>([]);
   const [mealName, setMealName] = useState('');
-  const [foodQuantityGrams, setFoodQuantityGrams] = useState(100);
+  const [selectedFood, setSelectedFood] = useState<TacoFood | null>(null);
+  const [foodQuantity, setFoodQuantity] = useState(100);
   const [selectedFoods, setSelectedFoods] = useState<FoodItem[]>([]);
   const [selectedDayMealIds, setSelectedDayMealIds] = useState<string[]>([]);
 
@@ -67,6 +88,12 @@ export function DietSetupPage({ onBack, diet, onSaveDiet }: Props) {
     fat: acc.fat + food.fat
   }), { calories: 0, protein: 0, carbs: 0, fat: 0 }), [selectedFoods]);
   const selectedDayMeals = useMemo(() => draftDiet.meals.filter((meal) => selectedDayMealIds.includes(meal.id)), [draftDiet.meals, selectedDayMealIds]);
+  const selectedDayTotals = useMemo(() => selectedDayMeals.reduce((acc, meal) => ({
+    calories: acc.calories + meal.foods.reduce((sum, food) => sum + food.calories, 0),
+    protein: acc.protein + meal.foods.reduce((sum, food) => sum + food.protein, 0)
+  }), { calories: 0, protein: 0 }), [selectedDayMeals]);
+  const selectedFoodPortionBase = useMemo(() => parsePortionBase(selectedFood?.porcaoBase), [selectedFood]);
+  const canAddSelectedFood = useMemo(() => Boolean(selectedFood) && foodQuantity > 0, [selectedFood, foodQuantity]);
 
   if (!selectedDay) {
     return (
@@ -90,7 +117,8 @@ export function DietSetupPage({ onBack, diet, onSaveDiet }: Props) {
     setSelectedFoods([]);
     setFoodQuery('');
     setFoodOptions([]);
-    setFoodQuantityGrams(100);
+    setSelectedFood(null);
+    setFoodQuantity(100);
   };
 
   const handleFoodSearch = (value: string) => {
@@ -99,11 +127,23 @@ export function DietSetupPage({ onBack, diet, onSaveDiet }: Props) {
   };
 
   const handleSelectFood = (food: TacoFood) => {
-    const quantity = Math.max(1, foodQuantityGrams || 100);
-    setSelectedFoods((prev) => [...prev, scaleFood(food, quantity)]);
+    const portionBase = parsePortionBase(food.porcaoBase);
+    setSelectedFood(food);
+    setFoodQuantity(portionBase.amount);
+    setFoodOptions([]);
+  };
+
+  const handleAddSelectedFood = () => {
+    if (!selectedFood) {
+      return;
+    }
+
+    const quantity = Math.max(0.1, foodQuantity || selectedFoodPortionBase.amount);
+    setSelectedFoods((prev) => [...prev, scaleFood(selectedFood, quantity)]);
+    setSelectedFood(null);
     setFoodQuery('');
     setFoodOptions([]);
-    setFoodQuantityGrams(100);
+    setFoodQuantity(100);
   };
 
   const handleRemoveDraftFood = (foodId: string) => {
@@ -136,6 +176,8 @@ export function DietSetupPage({ onBack, diet, onSaveDiet }: Props) {
     setSelectedFoods(meal.foods.map((food) => ({ ...food, id: crypto.randomUUID() })));
     setFoodQuery('');
     setFoodOptions([]);
+    setSelectedFood(null);
+    setFoodQuantity(100);
   };
 
   const handleRemoveMeal = (mealId: string) => {
@@ -212,18 +254,49 @@ export function DietSetupPage({ onBack, diet, onSaveDiet }: Props) {
               onChange={(event) => handleFoodSearch(event.target.value)}
               onBlur={() => window.setTimeout(() => setFoodOptions([]), 150)}
             />
-            <NumberInput id="food-quantity" label="Quantidade (g)" min={1} value={foodQuantityGrams} onChange={(event) => setFoodQuantityGrams(getSafeNumber(Number((event.target as HTMLInputElement).value), 100))} />
           </div>
           {foodOptions.length > 0 ? (
             <ul className="search-list">
               {foodOptions.map((food) => (
                 <li key={food.id}>
                   <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => handleSelectFood(food)}>
-                    {food.nome} ({food.kcal ?? 0} kcal / 100g)
+                    {food.nome} ({food.kcal ?? 0} kcal / {food.porcaoBase ?? '100 g'})
                   </button>
                 </li>
               ))}
             </ul>
+          ) : null}
+          {selectedFood ? (
+            <div className="setup-selection-card">
+              <div className="setup-selection-card__header">
+                <div>
+                  <span className="meta-label">Alimento selecionado</span>
+                  <p>{selectedFood.nome}</p>
+                </div>
+              </div>
+              <div className="setup-card__fields">
+                <NumberInput
+                  id="food-quantity"
+                  label={`Quantidade (${selectedFoodPortionBase.unit})`}
+                  min={0.1}
+                  step={selectedFoodPortionBase.unit === 'g' ? 1 : 0.1}
+                  value={foodQuantity}
+                  onChange={(_, state) => setFoodQuantity(getSafeNumber(Number(state.value), selectedFoodPortionBase.amount))}
+                />
+              </div>
+              <div className="setup-selection-card__meta">
+                <span>Base nutricional: {selectedFoodPortionBase.amount} {selectedFoodPortionBase.unit}</span>
+                <span>{selectedFood.kcal ?? 0} kcal por base</span>
+              </div>
+              <div className="inline-actions">
+                <Button kind="ghost" size="sm" onClick={() => setSelectedFood(null)}>
+                  Cancelar
+                </Button>
+                <Button size="sm" disabled={!canAddSelectedFood} onClick={handleAddSelectedFood}>
+                  Adicionar alimento
+                </Button>
+              </div>
+            </div>
           ) : null}
           <TextInput id="meal-name" labelText="Nome da refeição" value={mealName} onChange={(event) => setMealName(event.target.value)} />
           <div className="info-block">
@@ -239,7 +312,7 @@ export function DietSetupPage({ onBack, diet, onSaveDiet }: Props) {
               <div key={food.id} className="setup-selection-card">
                 <div className="setup-selection-card__header">
                   <div>
-                    <span className="meta-label">{food.quantityGrams} g</span>
+                    <span className="meta-label">{food.quantity} {food.unit}</span>
                     <p>{food.name}</p>
                   </div>
                   <Button kind="ghost" size="sm" renderIcon={TrashCan} iconDescription="Remover alimento" onClick={() => handleRemoveDraftFood(food.id)}>
@@ -326,6 +399,19 @@ export function DietSetupPage({ onBack, diet, onSaveDiet }: Props) {
                 {day.label}
               </button>
             ))}
+          </div>
+          <div className="diet-day-build-summary">
+            <span className="meta-label">Total do dia selecionado</span>
+            <div className="diet-totals-card__grid">
+              <div className="stat-pill">
+                <span>Calorias</span>
+                <strong>{selectedDayTotals.calories.toFixed(1)} kcal</strong>
+              </div>
+              <div className="stat-pill">
+                <span>Proteína</span>
+                <strong>{selectedDayTotals.protein.toFixed(1)} g</strong>
+              </div>
+            </div>
           </div>
           <div className="stack">
             {draftDiet.meals.length > 0 ? draftDiet.meals.map((meal) => {

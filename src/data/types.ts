@@ -2,6 +2,7 @@ export type MuscleGroup = 'Peito' | 'Costas' | 'Pernas' | 'Ombros' | 'Braços' |
 export type Sex = 'Masculino' | 'Feminino';
 export type ActivityLevel = 'Sedentario' | 'Leve' | 'Moderado' | 'Intenso' | 'Atleta';
 export type GoalType = 'Perda de gordura' | 'Manutenção' | 'Ganho de massa';
+export type DietType = 'Equilibrada' | 'Baixo carboidrato' | 'Alta em carboidrato';
 export type ExerciseMediaType = 'image' | 'video' | 'gif' | 'none';
 
 export interface WorkoutExercise {
@@ -43,8 +44,10 @@ export interface FoodItem {
   carbs: number;
   fat: number;
   fiber: number;
-  quantityGrams: number;
-  baseQuantityGrams: number;
+  quantity: number;
+  unit: string;
+  baseQuantity: number;
+  baseUnit: string;
 }
 
 export interface Meal {
@@ -73,6 +76,7 @@ export interface UserProfile {
   sex: Sex;
   activityLevel: ActivityLevel;
   goal: GoalType;
+  dietType: DietType;
 }
 
 export interface WeightLog {

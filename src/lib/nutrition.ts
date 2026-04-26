@@ -1,4 +1,4 @@
-import { ActivityLevel, DietDay, GoalType, Meal, NutritionTargets, Sex, UserProfile } from '../data/types';
+import { ActivityLevel, DietDay, DietType, GoalType, Meal, NutritionTargets, Sex, UserProfile } from '../data/types';
 
 const activityMultipliers: Record<ActivityLevel, number> = {
   Sedentario: 1.2,
@@ -19,9 +19,68 @@ function getBmr(weightKg: number, heightCm: number, age: number, sex: Sex): numb
   return 10 * weightKg + 6.25 * heightCm - 5 * age + sexAdjustment;
 }
 
-export function calculateNutritionTargets(profile: UserProfile): NutritionTargets {
+interface NutritionCalculationResult extends NutritionTargets {
+  bmr: number;
+  tdee: number;
+}
+
+function roundMacro(value: number): number {
+  return Math.max(0, Math.round(value));
+}
+
+function getProteinByDiet(weightKg: number, dietType: DietType): number {
+  const multipliers: Record<DietType, number> = {
+    Equilibrada: 1.8,
+    'Baixo carboidrato': 2,
+    'Alta em carboidrato': 1.7
+  };
+
+  return roundMacro(weightKg * multipliers[dietType]);
+}
+
+function getBaseFatByDiet(weightKg: number, dietType: DietType): number {
+  const multipliers: Record<DietType, number> = {
+    Equilibrada: 0.8,
+    'Baixo carboidrato': 0.6,
+    'Alta em carboidrato': 0.5
+  };
+
+  return roundMacro(weightKg * multipliers[dietType]);
+}
+
+function getBaseCarbsByDiet(weightKg: number, dietType: DietType): number {
+  const multipliers: Record<DietType, number> = {
+    Equilibrada: 0,
+    'Baixo carboidrato': 1.5,
+    'Alta em carboidrato': 0
+  };
+
+  return roundMacro(weightKg * multipliers[dietType]);
+}
+
+function distributeMacros(caloriesDaily: number, weightKg: number, dietType: DietType) {
+  const proteinDaily = getProteinByDiet(weightKg, dietType);
+
+  if (dietType === 'Baixo carboidrato') {
+    const carbsDaily = getBaseCarbsByDiet(weightKg, dietType);
+    const remainingCalories = caloriesDaily - proteinDaily * 4 - carbsDaily * 4;
+    const fatDaily = roundMacro(remainingCalories / 9);
+
+    return { proteinDaily, carbsDaily, fatDaily };
+  }
+
+  const fatDaily = getBaseFatByDiet(weightKg, dietType);
+  const remainingCalories = caloriesDaily - proteinDaily * 4 - fatDaily * 9;
+  const carbsDaily = roundMacro(remainingCalories / 4);
+
+  return { proteinDaily, carbsDaily, fatDaily };
+}
+
+export function calculateNutritionPlan(profile: UserProfile): NutritionCalculationResult {
   if (profile.currentWeight <= 0 || profile.heightCm <= 0 || profile.age <= 0) {
     return {
+      bmr: 0,
+      tdee: 0,
       caloriesDaily: 0,
       proteinDaily: 0,
       carbsDaily: 0,
@@ -31,13 +90,24 @@ export function calculateNutritionTargets(profile: UserProfile): NutritionTarget
   }
 
   const bmr = getBmr(profile.currentWeight, profile.heightCm, profile.age, profile.sex);
-  const maintenanceCalories = bmr * activityMultipliers[profile.activityLevel];
-  const caloriesDaily = Math.max(1200, Math.round(maintenanceCalories + goalAdjustments[profile.goal]));
-  const proteinDaily = Math.round(profile.currentWeight * (profile.goal === 'Ganho de massa' ? 2.1 : 1.9));
-  const fatDaily = Math.round(profile.currentWeight * 0.9);
-  const remainingCalories = caloriesDaily - proteinDaily * 4 - fatDaily * 9;
-  const carbsDaily = Math.max(80, Math.round(remainingCalories / 4));
+  const tdee = bmr * activityMultipliers[profile.activityLevel];
+  const caloriesDaily = Math.max(1200, Math.round(tdee + goalAdjustments[profile.goal]));
+  const { proteinDaily, carbsDaily, fatDaily } = distributeMacros(caloriesDaily, profile.currentWeight, profile.dietType);
   const waterDailyMl = Math.round(profile.currentWeight * 35);
+
+  return {
+    bmr: Math.round(bmr),
+    tdee: Math.round(tdee),
+    caloriesDaily,
+    proteinDaily,
+    carbsDaily,
+    fatDaily,
+    waterDailyMl
+  };
+}
+
+export function calculateNutritionTargets(profile: UserProfile): NutritionTargets {
+  const { caloriesDaily, proteinDaily, carbsDaily, fatDaily, waterDailyMl } = calculateNutritionPlan(profile);
 
   return {
     caloriesDaily,

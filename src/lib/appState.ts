@@ -1,5 +1,7 @@
 import {
   ActivityLevel,
+  FoodItem,
+  DietType,
   DietDay,
   GoalType,
   Meal,
@@ -78,6 +80,11 @@ type LegacyWorkoutState = {
 type LegacyMeal = Meal & { done?: boolean };
 type LegacyDietDay = { id: string; label: string; meals?: LegacyMeal[] };
 type LegacyWeeklyDiet = { id?: string; days?: LegacyDietDay[] };
+type LegacyFoodItem = FoodItem & {
+  quantityGrams?: number;
+  baseQuantityGrams?: number;
+};
+type LegacyProfile = Partial<UserProfile> | null | undefined;
 
 function createEmptyProfile(): UserProfile {
   return {
@@ -86,7 +93,28 @@ function createEmptyProfile(): UserProfile {
     age: 0,
     sex: 'Masculino' as Sex,
     activityLevel: 'Moderado' as ActivityLevel,
-    goal: 'Manutenção' as GoalType
+    goal: 'Manutenção' as GoalType,
+    dietType: 'Equilibrada' as DietType
+  };
+}
+
+export function normalizeProfile(profile?: LegacyProfile): UserProfile {
+  const fallback = createEmptyProfile();
+
+  return {
+    currentWeight: typeof profile?.currentWeight === 'number' ? profile.currentWeight : fallback.currentWeight,
+    heightCm: typeof profile?.heightCm === 'number' ? profile.heightCm : fallback.heightCm,
+    age: typeof profile?.age === 'number' ? profile.age : fallback.age,
+    sex: profile?.sex === 'Feminino' ? 'Feminino' : 'Masculino',
+    activityLevel: ['Sedentario', 'Leve', 'Moderado', 'Intenso', 'Atleta'].includes(String(profile?.activityLevel))
+      ? profile?.activityLevel as ActivityLevel
+      : fallback.activityLevel,
+    goal: ['Perda de gordura', 'Manutenção', 'Ganho de massa'].includes(String(profile?.goal))
+      ? profile?.goal as GoalType
+      : fallback.goal,
+    dietType: ['Equilibrada', 'Baixo carboidrato', 'Alta em carboidrato'].includes(String(profile?.dietType))
+      ? profile?.dietType as DietType
+      : fallback.dietType
   };
 }
 
@@ -135,7 +163,7 @@ function normalizeWorkoutExercise(exercise: LegacyExercise): WorkoutExercise {
 }
 
 export const defaultAppState: AppState = {
-  profile: createEmptyProfile(),
+  profile: normalizeProfile(),
   workouts: [],
   water: createEmptyWater(),
   weeklyDiet: createEmptyWeeklyDiet(),
@@ -204,7 +232,17 @@ export function normalizeWeeklyDiet(diet?: WeeklyDiet | LegacyWeeklyDiet | null)
       meals: diet.meals.map((meal) => ({
         id: meal.id,
         name: meal.name,
-        foods: Array.isArray(meal.foods) ? meal.foods.map((food) => ({ ...food })) : []
+        foods: Array.isArray(meal.foods) ? meal.foods.map((food) => {
+          const legacyFood = food as LegacyFoodItem;
+
+          return {
+          ...food,
+          quantity: typeof legacyFood.quantity === 'number' ? legacyFood.quantity : typeof legacyFood.quantityGrams === 'number' ? legacyFood.quantityGrams : 0,
+          unit: typeof food.unit === 'string' && food.unit.trim() ? food.unit : 'g',
+          baseQuantity: typeof legacyFood.baseQuantity === 'number' ? legacyFood.baseQuantity : typeof legacyFood.baseQuantityGrams === 'number' ? legacyFood.baseQuantityGrams : 100,
+          baseUnit: typeof food.baseUnit === 'string' && food.baseUnit.trim() ? food.baseUnit : 'g'
+          };
+        }) : []
       })),
       days: baseDays.map((baseDay) => {
         const existingDay = days.find((day) => day.id === baseDay.id);
@@ -238,7 +276,17 @@ export function normalizeWeeklyDiet(diet?: WeeklyDiet | LegacyWeeklyDiet | null)
       meals.push({
         id: meal.id,
         name: meal.name,
-        foods: Array.isArray(meal.foods) ? meal.foods.map((food) => ({ ...food })) : []
+        foods: Array.isArray(meal.foods) ? meal.foods.map((food) => {
+          const legacyFood = food as LegacyFoodItem;
+
+          return {
+          ...food,
+          quantity: typeof legacyFood.quantity === 'number' ? legacyFood.quantity : typeof legacyFood.quantityGrams === 'number' ? legacyFood.quantityGrams : 0,
+          unit: typeof food.unit === 'string' && food.unit.trim() ? food.unit : 'g',
+          baseQuantity: typeof legacyFood.baseQuantity === 'number' ? legacyFood.baseQuantity : typeof legacyFood.baseQuantityGrams === 'number' ? legacyFood.baseQuantityGrams : 100,
+          baseUnit: typeof food.baseUnit === 'string' && food.baseUnit.trim() ? food.baseUnit : 'g'
+          };
+        }) : []
       });
 
       return meal.id;

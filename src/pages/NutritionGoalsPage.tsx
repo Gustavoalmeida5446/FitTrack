@@ -2,7 +2,7 @@ import { ChartLine, CheckmarkFilled, ChevronLeft, Login, Logout, TrashCan, UserA
 import { Button, NumberInput, Select, SelectItem, Tile } from '@carbon/react';
 import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
-import { ActivityLevel, GoalType, NutritionTargets, UserProfile, WeightLog } from '../data/types';
+import { ActivityLevel, DietType, GoalType, NutritionTargets, UserProfile, WeightLog } from '../data/types';
 import { PageContainer } from '../components/PageContainer';
 
 interface Props {
@@ -20,6 +20,7 @@ interface Props {
 
 const activityLevels: ActivityLevel[] = ['Sedentario', 'Leve', 'Moderado', 'Intenso', 'Atleta'];
 const goals: GoalType[] = ['Perda de gordura', 'Manutenção', 'Ganho de massa'];
+const dietTypes: DietType[] = ['Equilibrada', 'Baixo carboidrato', 'Alta em carboidrato'];
 
 export function NutritionGoalsPage({ profile, targets, weightHistory, onBack, onUpdateProfile, onAddWeight, onRemoveWeight, session, onOpenLogin, onSignOut }: Props) {
   const [newWeight, setNewWeight] = useState(profile.currentWeight);
@@ -28,7 +29,7 @@ export function NutritionGoalsPage({ profile, targets, weightHistory, onBack, on
   }, [profile.currentWeight]);
 
   return (
-    <PageContainer title="Metas nutricionais" subtitle="Acompanhamento completo" actions={<Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button>}>
+    <PageContainer title="Metas nutricionais" subtitle="Defina suas metas do dia" actions={<Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button>}>
       <div className="stack">
         <Tile className="card metric-card goals-card">
           <div className="card-head">
@@ -88,6 +89,11 @@ export function NutritionGoalsPage({ profile, targets, weightHistory, onBack, on
             <Select id="profile-goal" labelText="Objetivo" value={profile.goal} onChange={(event) => onUpdateProfile({ ...profile, goal: event.target.value as GoalType })}>
               {goals.map((goal) => (
                 <SelectItem key={goal} value={goal} text={goal} />
+              ))}
+            </Select>
+            <Select id="profile-diet-type" labelText="Tipo de dieta" value={profile.dietType} onChange={(event) => onUpdateProfile({ ...profile, dietType: event.target.value as DietType })}>
+              {dietTypes.map((dietType) => (
+                <SelectItem key={dietType} value={dietType} text={dietType} />
               ))}
             </Select>
           </div>

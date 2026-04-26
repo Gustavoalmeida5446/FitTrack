@@ -1,5 +1,5 @@
 import type { Session } from '@supabase/supabase-js';
-import { AppState, defaultAppState, normalizeWaterData, normalizeWeeklyDiet, normalizeWorkoutState } from '../lib/appState';
+import { AppState, defaultAppState, normalizeProfile, normalizeWaterData, normalizeWeeklyDiet, normalizeWorkoutState } from '../lib/appState';
 import { supabase } from '../lib/supabaseClient';
 
 interface RemoteAppStateRow {
@@ -12,7 +12,7 @@ interface RemoteAppStateRow {
 
 function mapRemoteRow(row: RemoteAppStateRow): AppState {
   return {
-    profile: row.profile ?? defaultAppState.profile,
+    profile: normalizeProfile(row.profile),
     workouts: normalizeWorkoutState(row.workouts as AppState['workouts']),
     water: normalizeWaterData(row.water),
     weeklyDiet: normalizeWeeklyDiet(row.weekly_diet as AppState['weeklyDiet']),
