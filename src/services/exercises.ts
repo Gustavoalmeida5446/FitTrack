@@ -38,6 +38,18 @@ export interface ExerciseOption {
 const exercises = exercisesData as ExerciseRecord[];
 const exerciseNamePt = exerciseNamePtData as Record<string, ExerciseTranslationRecord>;
 const exerciseImageBaseUrl = 'https://yuhonas.github.io/free-exercise-db/exercises/';
+const exerciseAliases: Record<string, string[]> = {
+  Lat_Pulldown: ['pulley frente', 'puxada alta', 'pulley frontal'],
+  'Close-Grip_Front_Lat_Pulldown': ['pulley frente pegada fechada', 'puxada frontal pegada fechada'],
+  Seated_Leg_Curl: ['cadeira flexora', 'flexora sentada'],
+  Lying_Leg_Curls: ['mesa flexora', 'flexora deitado'],
+  Leg_Extensions: ['cadeira extensora', 'extensora'],
+  Smith_Machine_Bench_Press: ['supino maquina', 'supino barra guiada', 'supino smith'],
+  Chair_Squat: ['agachamento barra guiada', 'agachamento smith'],
+  Barbell_Squat: ['agachamento livre'],
+  Seated_Cable_Rows: ['remada baixa', 'remada sentado'],
+  Leverage_Chest_Press: ['supino articulado maquina']
+};
 const muscleGroupMap: Record<string, MuscleGroup> = {
   chest: 'Peito',
   lats: 'Costas',
@@ -72,21 +84,36 @@ function getSearchScore(name: string, query: string): number {
   const normalizedQuery = normalizeSearchValue(query);
 
   if (!normalizedQuery) return -1;
-  if (normalizedName === normalizedQuery) return 4;
-  if (normalizedName.startsWith(normalizedQuery)) return 3;
+  if (normalizedName === normalizedQuery) return 8;
+  if (normalizedName.startsWith(normalizedQuery)) return 7;
+  if (normalizedName.includes(` ${normalizedQuery}`) || normalizedName.includes(`${normalizedQuery} `)) return 6;
+  if (normalizedName.includes(normalizedQuery)) return 5;
 
   const queryTerms = normalizedQuery.split(/\s+/).filter(Boolean);
   if (queryTerms.length === 0) return -1;
 
-  const containsAllTerms = queryTerms.every((term) => normalizedName.includes(term));
-  if (!containsAllTerms) return -1;
+  const matchedTerms = queryTerms.filter((term) => normalizedName.includes(term)).length;
+  if (matchedTerms === queryTerms.length) return 4;
+  if (matchedTerms > 0) return 1;
 
-  return 2;
+  return -1;
 }
 
 function getExerciseDisplayName(exercise: ExerciseRecord): string {
   return exerciseNamePt[exercise.id]?.ptName?.trim()
     || exercise.name;
+}
+
+function getExerciseSearchTexts(exercise: ExerciseRecord): string[] {
+  return [
+    getExerciseDisplayName(exercise),
+    exercise.name,
+    exercise.equipment ?? '',
+    exercise.category ?? '',
+    ...(exercise.primaryMuscles ?? []),
+    ...(exercise.secondaryMuscles ?? []),
+    ...(exerciseAliases[exercise.id] ?? [])
+  ].filter(Boolean);
 }
 
 function inferMuscleGroup(exercise: ExerciseRecord): MuscleGroup {
@@ -138,10 +165,7 @@ export function searchExercises(query: string): ExerciseOption[] {
   return exercises
     .map((exercise) => ({
       exercise,
-      score: Math.max(
-        getSearchScore(exercise.name, normalizedQuery),
-        getSearchScore(getExerciseDisplayName(exercise), normalizedQuery)
-      )
+      score: Math.max(...getExerciseSearchTexts(exercise).map((text) => getSearchScore(text, normalizedQuery)))
     }))
     .filter((item) => item.score >= 0)
     .sort((a, b) => {

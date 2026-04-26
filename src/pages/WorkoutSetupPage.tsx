@@ -88,7 +88,7 @@ export function WorkoutSetupPage({
     }
 
     const timeoutId = window.setTimeout(() => {
-      setOptions(searchExercises(trimmedQuery).slice(0, 10));
+      setOptions(searchExercises(trimmedQuery).slice(0, 20));
     }, 200);
 
     return () => {
@@ -279,7 +279,11 @@ export function WorkoutSetupPage({
             <ul className="search-list">
               {options.map((option) => (
                 <li key={option.id}>
-                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => handleSelectExercise(option)}>{option.ptName ?? option.name}</button>
+                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => handleSelectExercise(option)}>
+                    <strong>{option.ptName ?? option.name}</strong>
+                    {option.ptName && option.ptName !== option.name ? <span>{option.name}</span> : null}
+                    <span>{option.muscleGroup}{option.equipment ? ` • ${option.equipment}` : ''}</span>
+                  </button>
                 </li>
               ))}
             </ul>

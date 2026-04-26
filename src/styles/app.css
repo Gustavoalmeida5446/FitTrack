@@ -341,11 +341,23 @@ body {
   max-width: 100%;
   text-align: left;
   padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
   background: #262626;
   border: 1px solid #393939;
   color: var(--color-text);
   border-radius: 6px;
   cursor: pointer;
+}
+
+.search-list button strong {
+  font-size: 0.95rem;
+}
+
+.search-list button span {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
 }
 
 .meta-label {

@@ -368,6 +368,9 @@
   "Seated_Cable_Rows": {
     "ptName": "Remada baixa no cabo"
   },
+  "Seated_Leg_Curl": {
+    "ptName": "Cadeira flexora"
+  },
   "Side_Lateral_Raise": {
     "ptName": "Elevação lateral"
   },
@@ -510,7 +513,7 @@
     "ptName": "Supino com corrente"
   },
   "Chair_Squat": {
-    "ptName": "Agachamento na cadeira"
+    "ptName": "Agachamento na barra guiada"
   },
   "Clean_Deadlift": {
     "ptName": "Terra para clean"
@@ -764,6 +767,9 @@
   "Leg_Pull-In": {
     "ptName": "Encolhimento de pernas"
   },
+  "Lying_Leg_Curls": {
+    "ptName": "Mesa flexora"
+  },
   "Leverage_Chest_Press": {
     "ptName": "Supino articulado"
   },
@@ -793,5 +799,95 @@
   },
   "Low_Pulley_Row_To_Neck": {
     "ptName": "Remada baixa ao pescoço"
+  },
+  "Cuban_Press": {
+    "ptName": "Desenvolvimento cubano"
+  },
+  "Drag_Curl": {
+    "ptName": "Rosca drag"
+  },
+  "Elevated_Back_Lunge": {
+    "ptName": "Afundo com perna traseira elevada"
+  },
+  "Elevated_Cable_Rows": {
+    "ptName": "Remada no cabo com apoio elevado"
+  },
+  "Finger_Curls": {
+    "ptName": "Rosca de dedos"
+  },
+  "Frankenstein_Squat": {
+    "ptName": "Agachamento Frankenstein"
+  },
+  "Freehand_Jump_Squat": {
+    "ptName": "Agachamento com salto"
+  },
+  "Hyperextensions_Back_Extensions": {
+    "ptName": "Hiperextensão lombar"
+  },
+  "Lying_Cable_Curl": {
+    "ptName": "Rosca no cabo deitado"
+  },
+  "Lying_Cambered_Barbell_Row": {
+    "ptName": "Remada com barra curvada deitado"
+  },
+  "Machine_Bicep_Curl": {
+    "ptName": "Rosca bíceps na máquina"
+  },
+  "Machine_Preacher_Curls": {
+    "ptName": "Rosca scott na máquina"
+  },
+  "Machine_Shoulder_Military_Press": {
+    "ptName": "Desenvolvimento militar na máquina"
+  },
+  "Machine_Triceps_Extension": {
+    "ptName": "Extensão de tríceps na máquina"
+  },
+  "Narrow_Stance_Leg_Press": {
+    "ptName": "Leg press com pés fechados"
+  },
+  "Oblique_Crunches": {
+    "ptName": "Abdominal oblíquo"
+  },
+  "One_Arm_Dumbbell_Bench_Press": {
+    "ptName": "Supino unilateral com halter"
+  },
+  "One_Arm_Dumbbell_Preacher_Curl": {
+    "ptName": "Rosca scott unilateral com halter"
+  },
+  "One_Arm_Lat_Pulldown": {
+    "ptName": "Pulley frente unilateral"
+  },
+  "Overhead_Squat": {
+    "ptName": "Agachamento acima da cabeça"
+  },
+  "Pallof_Press": {
+    "ptName": "Press Pallof"
+  },
+  "Reverse_Barbell_Curl": {
+    "ptName": "Rosca inversa com barra"
+  },
+  "Reverse_Crunch": {
+    "ptName": "Abdominal reverso"
+  },
+  "Romanian_Deadlift": {
+    "ptName": "Levantamento terra romeno"
+  },
+  "Rope_Crunch": {
+    "ptName": "Abdominal com corda"
+  },
+  "Rope_Straight-Arm_Pulldown": {
+    "ptName": "Pulldown com braços estendidos na corda"
+  },
+  "Seated_Barbell_Military_Press": {
+    "ptName": "Desenvolvimento militar sentado com barra"
+  },
+  "Seated_Calf_Raise": {
+    "ptName": "Panturrilha sentada"
+  },
+  "Seated_Dumbbell_Curl": {
+    "ptName": "Rosca sentada com halteres"
+  },
+  "Seated_Dumbbell_Press": {
+    "ptName": "Desenvolvimento sentado com halteres"
   }
 }
