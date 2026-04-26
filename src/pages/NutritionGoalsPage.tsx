@@ -2,6 +2,7 @@ import { ChartLine, CheckmarkFilled, ChevronLeft, Login, Logout, TrashCan, UserA
 import { Button, NumberInput, Select, SelectItem, Tile } from '@carbon/react';
 import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
+import { ContextualTutorialCard, type TutorialStepContent } from '../components/ContextualTutorialCard';
 import { ActivityLevel, DietType, GoalType, NutritionTargets, UserProfile, WeightLog } from '../data/types';
 import { PageContainer } from '../components/PageContainer';
 
@@ -9,6 +10,13 @@ interface Props {
   profile: UserProfile;
   targets: NutritionTargets;
   weightHistory: WeightLog[];
+  tutorialStep: TutorialStepContent | null;
+  tutorialStepIndex: number;
+  tutorialStepsTotal: number;
+  onTutorialBack: () => void;
+  onTutorialNext: () => void;
+  onTutorialSkip: () => void;
+  onReplayTutorial: () => void;
   onBack: () => void;
   onUpdateProfile: (profile: UserProfile) => void;
   onAddWeight: (weight: number) => void;
@@ -22,7 +30,25 @@ const activityLevels: ActivityLevel[] = ['Sedentario', 'Leve', 'Moderado', 'Inte
 const goals: GoalType[] = ['Perda de gordura', 'Manutenção', 'Ganho de massa'];
 const dietTypes: DietType[] = ['Equilibrada', 'Baixo carboidrato', 'Alta em carboidrato'];
 
-export function NutritionGoalsPage({ profile, targets, weightHistory, onBack, onUpdateProfile, onAddWeight, onRemoveWeight, session, onOpenLogin, onSignOut }: Props) {
+export function NutritionGoalsPage({
+  profile,
+  targets,
+  weightHistory,
+  tutorialStep,
+  tutorialStepIndex,
+  tutorialStepsTotal,
+  onTutorialBack,
+  onTutorialNext,
+  onTutorialSkip,
+  onReplayTutorial,
+  onBack,
+  onUpdateProfile,
+  onAddWeight,
+  onRemoveWeight,
+  session,
+  onOpenLogin,
+  onSignOut
+}: Props) {
   const [newWeight, setNewWeight] = useState(profile.currentWeight);
   useEffect(() => {
     setNewWeight(profile.currentWeight);
@@ -31,6 +57,18 @@ export function NutritionGoalsPage({ profile, targets, weightHistory, onBack, on
   return (
     <PageContainer title="Metas nutricionais" subtitle="Defina suas metas do dia" actions={<Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button>}>
       <div className="stack">
+        {tutorialStep ? (
+          <ContextualTutorialCard
+            step={tutorialStep}
+            currentStep={tutorialStepIndex}
+            totalSteps={tutorialStepsTotal}
+            isFirstStep={tutorialStepIndex === 0}
+            isLastStep={tutorialStepIndex === tutorialStepsTotal - 1}
+            onBack={onTutorialBack}
+            onNext={onTutorialNext}
+            onSkip={onTutorialSkip}
+          />
+        ) : null}
         <Tile className="card metric-card goals-card">
           <div className="card-head">
             <div className="card-head__group">
@@ -48,6 +86,9 @@ export function NutritionGoalsPage({ profile, targets, weightHistory, onBack, on
               <p>{session?.user.email ?? 'Nenhum usuário conectado'}</p>
             </div>
             <div className="row-actions">
+              <Button kind="tertiary" onClick={onReplayTutorial}>
+                Ver tutorial
+              </Button>
               {session ? (
                 <Button kind="ghost" renderIcon={Logout} onClick={() => void onSignOut()}>
                   Sair

@@ -1,6 +1,7 @@
 import { CheckmarkFilled, ChevronLeft, Search, TrashCan } from '@carbon/icons-react';
 import { Button, NumberInput, TextInput, Tile } from '@carbon/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { ContextualTutorialCard, type TutorialStepContent } from '../components/ContextualTutorialCard';
 import { MuscleGroup, Workout, WorkoutExercise } from '../data/types';
 import { searchExercises } from '../services/exercises';
 import { PageContainer } from '../components/PageContainer';
@@ -9,6 +10,12 @@ interface Props {
   onBack: () => void;
   workouts: Workout[];
   onSaveWorkouts: (workouts: Workout[]) => void;
+  tutorialStep: TutorialStepContent | null;
+  tutorialStepIndex: number;
+  tutorialStepsTotal: number;
+  onTutorialBack: () => void;
+  onTutorialNext: () => void;
+  onTutorialSkip: () => void;
 }
 
 const defaultExerciseValues = {
@@ -30,7 +37,17 @@ function getSafeNumber(value: number, fallback: number) {
   return Number.isFinite(value) ? value : fallback;
 }
 
-export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
+export function WorkoutSetupPage({
+  onBack,
+  workouts,
+  onSaveWorkouts,
+  tutorialStep,
+  tutorialStepIndex,
+  tutorialStepsTotal,
+  onTutorialBack,
+  onTutorialNext,
+  onTutorialSkip
+}: Props) {
   const skipNextSearchRef = useRef(false);
   const [editingWorkoutId, setEditingWorkoutId] = useState<string | null>(null);
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null);
@@ -212,6 +229,18 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
   return (
     <PageContainer title="Cadastro de treino" subtitle="Crie um treino, adicione exercícios e edite os treinos salvos" actions={<Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button>}>
       <div className="stack">
+        {tutorialStep ? (
+          <ContextualTutorialCard
+            step={tutorialStep}
+            currentStep={tutorialStepIndex}
+            totalSteps={tutorialStepsTotal}
+            isFirstStep={tutorialStepIndex === 0}
+            isLastStep={tutorialStepIndex === tutorialStepsTotal - 1}
+            onBack={onTutorialBack}
+            onNext={onTutorialNext}
+            onSkip={onTutorialSkip}
+          />
+        ) : null}
         <Tile className="card metric-card setup-card">
           <div className="card-head">
             <div className="card-head__group">

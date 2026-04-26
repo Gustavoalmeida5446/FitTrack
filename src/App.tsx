@@ -9,6 +9,7 @@ import { DietSetupPage } from './pages/DietSetupPage';
 import { NutritionGoalsPage } from './pages/NutritionGoalsPage';
 import { WorkoutSetupPage } from './pages/WorkoutSetupPage';
 import { LoginPage } from './pages/LoginPage';
+import { type TutorialStepContent } from './components/ContextualTutorialCard';
 import { WeeklyDiet, Workout } from './data/types';
 import { AppState, defaultAppState, normalizeWaterData } from './lib/appState';
 import { getTodayDateString } from './lib/date';
@@ -18,6 +19,37 @@ import { loadRemoteAppState, saveRemoteAppState } from './services/appStateServi
 
 type View = 'home' | 'workout' | 'diet-day' | 'workout-setup' | 'diet-setup' | 'goals';
 
+const onboardingSteps: Array<TutorialStepContent & { view: View }> = [
+  {
+    section: 'Etapa 1: Perfil',
+    title: 'Comece pelo perfil',
+    description: 'Preencha seus dados para liberar as metas.',
+    body: 'Nesta tela, preencha peso, altura, idade e sexo. Depois escolha atividade, objetivo e tipo de dieta. Assim que esses campos forem preenchidos, as metas aparecem logo abaixo automaticamente. Aqui também é onde você registra e acompanha seu peso ao longo do tempo.',
+    view: 'goals'
+  },
+  {
+    section: 'Etapa 2: Treinos',
+    title: 'Cadastre seu treino',
+    description: 'Monte um treino para usar no dia a dia.',
+    body: 'Digite um nome para o treino. Depois busque um exercício, escolha uma opção da lista e ajuste carga, repetições, séries e descanso. Quando adicionar os exercícios e salvar, o treino passa a aparecer na tela inicial.',
+    view: 'workout-setup'
+  },
+  {
+    section: 'Etapa 3: Dieta',
+    title: 'Monte sua dieta',
+    description: 'Cadastre uma refeição e ligue ela a um dia.',
+    body: 'Para montar a dieta, comece buscando um alimento e ajustando a quantidade. Adicione quantos alimentos quiser para formar uma refeição. Quando terminar, dê um nome para essa refeição e salve. Depois, na parte dos dias da semana, escolha o dia e marque quais refeições devem aparecer nele. Fazendo isso, sua dieta do dia passa a ficar organizada e fácil de acompanhar.',
+    view: 'diet-setup'
+  },
+  {
+    section: 'Etapa 4: Início',
+    title: 'Acompanhe seu dia',
+    description: 'Aqui você registra água e acompanha o dia.',
+    body: 'Na tela inicial, você abre seu treino para marcar os exercícios conforme for fazendo. Os botões de água servem para registrar quanto você bebeu no dia. Também é por aqui que você abre a dieta do dia e marca as refeições feitas para acompanhar calorias e proteína consumidas.',
+    view: 'home'
+  }
+];
+
 export default function App() {
   const [view, setView] = useState<View>('home');
   const [selectedWorkoutId, setSelectedWorkoutId] = useState<string>('');
@@ -25,6 +57,8 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isRemoteReady, setIsRemoteReady] = useState(false);
+  const [isTutorialOpen, setIsTutorialOpen] = useState(false);
+  const [tutorialStepIndex, setTutorialStepIndex] = useState(0);
 
   const [profile, setProfile] = useState(defaultAppState.profile);
   const [workouts, setWorkouts] = useState(defaultAppState.workouts);
@@ -51,6 +85,8 @@ export default function App() {
     return weeklyDiet.meals.filter((meal) => selectedDay.mealIds.includes(meal.id));
   }, [selectedDay, weeklyDiet.meals]);
   const userInitial = session?.user.email?.trim().charAt(0).toUpperCase() ?? 'U';
+  const tutorialStorageKey = session ? `fittrack:onboarding:${session.user.id}` : '';
+  const activeTutorialStep = isTutorialOpen ? onboardingSteps[tutorialStepIndex] : null;
 
   useEffect(() => {
     void getCurrentSession().then((currentSession) => {
@@ -114,6 +150,27 @@ export default function App() {
     };
   }, [appState, isRemoteReady, session]);
 
+  useEffect(() => {
+    if (!session || !isRemoteReady || !tutorialStorageKey) {
+      return;
+    }
+
+    const hasSeenTutorial = window.localStorage.getItem(tutorialStorageKey) === 'done';
+
+    if (!hasSeenTutorial) {
+      setTutorialStepIndex(0);
+      setIsTutorialOpen(true);
+    }
+  }, [isRemoteReady, session, tutorialStorageKey]);
+
+  useEffect(() => {
+    if (!isTutorialOpen) {
+      return;
+    }
+
+    setView(onboardingSteps[tutorialStepIndex].view);
+  }, [isTutorialOpen, tutorialStepIndex]);
+
   const updateWorkout = (workoutId: string, updater: (workout: Workout) => Workout) => {
     setWorkouts((prev) => prev.map((workout) => (workout.id === workoutId ? updater(workout) : workout)));
   };
@@ -142,6 +199,38 @@ export default function App() {
 
     setSession(null);
     setView('home');
+  };
+
+  const finishTutorial = () => {
+    if (tutorialStorageKey) {
+      window.localStorage.setItem(tutorialStorageKey, 'done');
+    }
+
+    setIsTutorialOpen(false);
+    setTutorialStepIndex(0);
+  };
+
+  const startTutorial = () => {
+    setTutorialStepIndex(0);
+    setIsTutorialOpen(true);
+    setView(onboardingSteps[0].view);
+  };
+
+  const handleTutorialNext = () => {
+    if (tutorialStepIndex >= onboardingSteps.length - 1) {
+      finishTutorial();
+      return;
+    }
+
+    const nextStepIndex = tutorialStepIndex + 1;
+    setTutorialStepIndex(nextStepIndex);
+    setView(onboardingSteps[nextStepIndex].view);
+  };
+
+  const handleTutorialBack = () => {
+    const previousStepIndex = Math.max(0, tutorialStepIndex - 1);
+    setTutorialStepIndex(previousStepIndex);
+    setView(onboardingSteps[previousStepIndex].view);
   };
 
   if (!isAuthReady) {
@@ -176,6 +265,12 @@ export default function App() {
             weeklyDiet={weeklyDiet}
             waterGoalMl={targets.waterDailyMl}
             targets={targets}
+            tutorialStep={activeTutorialStep?.view === 'home' ? activeTutorialStep : null}
+            tutorialStepIndex={tutorialStepIndex}
+            tutorialStepsTotal={onboardingSteps.length}
+            onTutorialBack={handleTutorialBack}
+            onTutorialNext={handleTutorialNext}
+            onTutorialSkip={finishTutorial}
             onOpenWorkout={(workoutId) => {
               setSelectedWorkoutId(workoutId);
               setView('workout');
@@ -226,11 +321,31 @@ export default function App() {
         ) : null}
 
         {view === 'workout-setup' ? (
-          <WorkoutSetupPage onBack={() => setView('home')} workouts={workouts} onSaveWorkouts={setWorkouts} />
+          <WorkoutSetupPage
+            onBack={() => setView('home')}
+            workouts={workouts}
+            onSaveWorkouts={setWorkouts}
+            tutorialStep={activeTutorialStep?.view === 'workout-setup' ? activeTutorialStep : null}
+            tutorialStepIndex={tutorialStepIndex}
+            tutorialStepsTotal={onboardingSteps.length}
+            onTutorialBack={handleTutorialBack}
+            onTutorialNext={handleTutorialNext}
+            onTutorialSkip={finishTutorial}
+          />
         ) : null}
 
         {view === 'diet-setup' ? (
-          <DietSetupPage onBack={() => setView('home')} diet={weeklyDiet} onSaveDiet={setWeeklyDiet} />
+          <DietSetupPage
+            onBack={() => setView('home')}
+            diet={weeklyDiet}
+            onSaveDiet={setWeeklyDiet}
+            tutorialStep={activeTutorialStep?.view === 'diet-setup' ? activeTutorialStep : null}
+            tutorialStepIndex={tutorialStepIndex}
+            tutorialStepsTotal={onboardingSteps.length}
+            onTutorialBack={handleTutorialBack}
+            onTutorialNext={handleTutorialNext}
+            onTutorialSkip={finishTutorial}
+          />
         ) : null}
 
         {view === 'goals' ? (
@@ -238,6 +353,13 @@ export default function App() {
             profile={profile}
             targets={targets}
             weightHistory={weightHistory}
+            tutorialStep={activeTutorialStep?.view === 'goals' ? activeTutorialStep : null}
+            tutorialStepIndex={tutorialStepIndex}
+            tutorialStepsTotal={onboardingSteps.length}
+            onTutorialBack={handleTutorialBack}
+            onTutorialNext={handleTutorialNext}
+            onTutorialSkip={finishTutorial}
+            onReplayTutorial={startTutorial}
             onBack={() => setView('home')}
             onUpdateProfile={setProfile}
             onAddWeight={(weight) => setWeightHistory((prev) => [...prev, { date: getTodayDateString(), weight }])}

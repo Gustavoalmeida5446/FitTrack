@@ -1,6 +1,7 @@
 import { CalendarHeatMap, CheckmarkFilled, ChevronLeft, Search, TrashCan } from '@carbon/icons-react';
 import { Button, NumberInput, TextInput, Tile } from '@carbon/react';
 import { useEffect, useMemo, useState } from 'react';
+import { ContextualTutorialCard, type TutorialStepContent } from '../components/ContextualTutorialCard';
 import { DietDay, FoodItem, Meal, WeeklyDiet } from '../data/types';
 import { convertFoodQuantityToGrams, getFoodDefaultQuantity, getFoodMeasurementUnit, searchFoods, type FoodItem as TacoFood } from '../services/foods';
 import { PageContainer } from '../components/PageContainer';
@@ -9,6 +10,12 @@ interface Props {
   onBack: () => void;
   diet: WeeklyDiet;
   onSaveDiet: (diet: WeeklyDiet) => void;
+  tutorialStep: TutorialStepContent | null;
+  tutorialStepIndex: number;
+  tutorialStepsTotal: number;
+  onTutorialBack: () => void;
+  onTutorialNext: () => void;
+  onTutorialSkip: () => void;
 }
 
 function parsePortionBase(portionBase: string | null | undefined) {
@@ -54,7 +61,17 @@ function getSafeNumber(value: number, fallback: number) {
   return Number.isFinite(value) ? value : fallback;
 }
 
-export function DietSetupPage({ onBack, diet, onSaveDiet }: Props) {
+export function DietSetupPage({
+  onBack,
+  diet,
+  onSaveDiet,
+  tutorialStep,
+  tutorialStepIndex,
+  tutorialStepsTotal,
+  onTutorialBack,
+  onTutorialNext,
+  onTutorialSkip
+}: Props) {
   const [draftDiet, setDraftDiet] = useState(diet);
   const [selectedDayId, setSelectedDayId] = useState(diet.days[0]?.id ?? 'd-1');
   const [editingMealId, setEditingMealId] = useState<string | null>(null);
@@ -237,6 +254,18 @@ export function DietSetupPage({ onBack, diet, onSaveDiet }: Props) {
   return (
     <PageContainer title="Cadastro de dieta" subtitle="Crie refeições com vários alimentos e monte os dias da semana" actions={<Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button>}>
       <div className="stack">
+        {tutorialStep ? (
+          <ContextualTutorialCard
+            step={tutorialStep}
+            currentStep={tutorialStepIndex}
+            totalSteps={tutorialStepsTotal}
+            isFirstStep={tutorialStepIndex === 0}
+            isLastStep={tutorialStepIndex === tutorialStepsTotal - 1}
+            onBack={onTutorialBack}
+            onNext={onTutorialNext}
+            onSkip={onTutorialSkip}
+          />
+        ) : null}
         <Tile className="card metric-card setup-card">
           <div className="card-head">
             <div className="card-head__group">

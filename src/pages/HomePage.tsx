@@ -1,5 +1,6 @@
 import { CalendarHeatMap, ChevronRight, TemperatureWater } from '@carbon/icons-react';
 import { Button, ProgressBar, Tile } from '@carbon/react';
+import { ContextualTutorialCard, type TutorialStepContent } from '../components/ContextualTutorialCard';
 import { PageContainer } from '../components/PageContainer';
 import { NutritionTargets, WaterData, WeeklyDiet, Workout } from '../data/types';
 import { getDietDayIdForDate } from '../lib/date';
@@ -11,6 +12,12 @@ interface Props {
   weeklyDiet: WeeklyDiet;
   waterGoalMl: number;
   targets: NutritionTargets;
+  tutorialStep: TutorialStepContent | null;
+  tutorialStepIndex: number;
+  tutorialStepsTotal: number;
+  onTutorialBack: () => void;
+  onTutorialNext: () => void;
+  onTutorialSkip: () => void;
   onOpenWorkout: (workoutId: string) => void;
   onOpenDietDay: (dayId: string) => void;
   onAddWater: (amount: number) => void;
@@ -24,7 +31,22 @@ function DumbbellIcon({ size = 24 }: { size?: number }) {
   );
 }
 
-export function HomePage({ workouts, water, weeklyDiet, waterGoalMl, targets, onOpenWorkout, onOpenDietDay, onAddWater }: Props) {
+export function HomePage({
+  workouts,
+  water,
+  weeklyDiet,
+  waterGoalMl,
+  targets,
+  tutorialStep,
+  tutorialStepIndex,
+  tutorialStepsTotal,
+  onTutorialBack,
+  onTutorialNext,
+  onTutorialSkip,
+  onOpenWorkout,
+  onOpenDietDay,
+  onAddWater
+}: Props) {
   const progress = waterGoalMl > 0 ? Math.min(100, Math.round((water.consumedMl / waterGoalMl) * 100)) : 0;
   const hasDiet = weeklyDiet.days.some((day) => day.mealIds.length > 0);
   const todayDietDay = weeklyDiet.days.find((day) => day.id === getDietDayIdForDate()) ?? weeklyDiet.days[0];
@@ -33,6 +55,18 @@ export function HomePage({ workouts, water, weeklyDiet, waterGoalMl, targets, on
 
   return (
     <PageContainer title="FitTrack">
+      {tutorialStep ? (
+        <ContextualTutorialCard
+          step={tutorialStep}
+          currentStep={tutorialStepIndex}
+          totalSteps={tutorialStepsTotal}
+          isFirstStep={tutorialStepIndex === 0}
+          isLastStep={tutorialStepIndex === tutorialStepsTotal - 1}
+          onBack={onTutorialBack}
+          onNext={onTutorialNext}
+          onSkip={onTutorialSkip}
+        />
+      ) : null}
       <div className="section-title">
         <div className="section-title__group">
           <DumbbellIcon size={24} />
