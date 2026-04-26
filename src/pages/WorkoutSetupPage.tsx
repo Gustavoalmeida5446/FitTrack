@@ -311,12 +311,7 @@ export function WorkoutSetupPage({
             <Button disabled={!canAddExercise} onClick={handleAddExercise}>{editingExerciseId ? 'Atualizar exercício' : 'Adicionar exercício'}</Button>
             {editingExerciseId ? <Button kind="ghost" onClick={resetExerciseForm}>Cancelar edição</Button> : null}
           </div>
-          {!canAddExercise ? (
-            <div className="info-block">
-              <span className="meta-label">Adicionar exercício</span>
-              <p>Escolha um exercício da base local para preencher automaticamente o grupo muscular e a mídia.</p>
-            </div>
-          ) : null}
+         
 
           <div className="stack">
             {draftExercises.length > 0 ? draftExercises.map((exercise, index) => (
