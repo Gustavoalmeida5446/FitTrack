@@ -109,7 +109,7 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateLoa
               />
               <div className="workout-exercise-card__footer">
                 <span className="meta-label">
-                  {mediaUrls.length > 1 ? `Imagem ${activeImageIndex + 1} de ${mediaUrls.length} • toque para alternar` : `Mídia: ${exercise.mediaType}`}
+                  {mediaUrls.length > 1 ? `Imagem ${activeImageIndex + 1} de ${mediaUrls.length}` : `Mídia: ${exercise.mediaType}`}
                 </span>
                 <Checkbox id={`done-${exercise.id}`} labelText="Feito" checked={exercise.done} onChange={() => onToggleExerciseDone(exercise.id)} />
               </div>

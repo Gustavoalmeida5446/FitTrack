@@ -33,6 +33,7 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
   const skipNextSearchRef = useRef(false);
   const [editingWorkoutId, setEditingWorkoutId] = useState<string | null>(null);
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null);
+  const [activePreviewImageIndex, setActivePreviewImageIndex] = useState(0);
   const [query, setQuery] = useState('');
   const [options, setOptions] = useState<ReturnType<typeof searchExercises>>([]);
   const [name, setName] = useState('');
@@ -90,6 +91,7 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
     setReps(defaultExerciseValues.reps);
     setSets(defaultExerciseValues.sets);
     setRestSeconds(defaultExerciseValues.restSeconds);
+    setActivePreviewImageIndex(0);
     setOptions([]);
   };
 
@@ -110,6 +112,7 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
     setExerciseMediaType(exercise.mediaType);
     setExerciseSource('local');
     setExerciseSourceId(exercise.sourceId);
+    setActivePreviewImageIndex(0);
     setOptions([]);
   };
 
@@ -154,6 +157,7 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
     setReps(exercise.reps);
     setSets(exercise.sets);
     setRestSeconds(exercise.restSeconds);
+    setActivePreviewImageIndex(0);
     setOptions([]);
   };
 
@@ -196,6 +200,9 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
     }
   };
 
+  const previewImageUrl = exerciseMediaUrls[activePreviewImageIndex] ?? exerciseMediaUrl;
+  const canTogglePreviewImage = exerciseMediaUrls.length > 1;
+
   return (
     <PageContainer title="Cadastro de treino" subtitle="Crie um treino, adicione exercícios e edite os treinos salvos" actions={<Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button>}>
       <div className="stack">
@@ -227,6 +234,7 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
                 setExerciseMediaType('none');
                 setExerciseSource('manual');
                 setExerciseSourceId(undefined);
+                setActivePreviewImageIndex(0);
               }}
               onBlur={() => window.setTimeout(() => setOptions([]), 150)}
             />
@@ -246,14 +254,23 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
             <NumberInput id="exercise-sets" label="Séries" min={1} value={sets} onChange={(event) => setSets(getSafeNumber(Number((event.target as HTMLInputElement).value), defaultExerciseValues.sets))} />
             <NumberInput id="exercise-rest" label="Descanso (s)" min={0} value={restSeconds} onChange={(event) => setRestSeconds(getSafeNumber(Number((event.target as HTMLInputElement).value), defaultExerciseValues.restSeconds))} />
           </div>
-          <div className="info-block">
-            <span className="meta-label">Imagem</span>
-            {exerciseMediaUrl ? (
-              <img src={exerciseMediaUrl} alt={exerciseName || 'Prévia do exercício'} className="exercise-media exercise-media--preview" />
-            ) : (
-              <p>Se não houver imagem na base, o exercício será salvo sem imagem.</p>
-            )}
-          </div>
+          {previewImageUrl ? (
+            <button
+              type="button"
+              className={`exercise-media-button exercise-media-button--preview${canTogglePreviewImage ? ' exercise-media-button--interactive' : ''}`}
+              onClick={() => {
+                if (!canTogglePreviewImage) return;
+                setActivePreviewImageIndex((current) => current === 0 ? 1 : 0);
+              }}
+              aria-label={canTogglePreviewImage ? `Alternar imagem do exercício ${exerciseName || 'selecionado'}` : `Imagem do exercício ${exerciseName || 'selecionado'}`}
+            >
+              <img
+                src={previewImageUrl}
+                alt={`${exerciseName || 'Exercício'} - ${activePreviewImageIndex === 0 ? 'posição inicial' : 'posição final'}`}
+                className="exercise-media exercise-media--preview"
+              />
+            </button>
+          ) : null}
           <div className="inline-actions">
             <Button disabled={!canAddExercise} onClick={handleAddExercise}>{editingExerciseId ? 'Atualizar exercício' : 'Adicionar exercício'}</Button>
             {editingExerciseId ? <Button kind="ghost" onClick={resetExerciseForm}>Cancelar edição</Button> : null}

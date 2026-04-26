@@ -1,4 +1,4 @@
-import { ActivityLevel, GoalType, NutritionTargets, Sex, UserProfile } from '../data/types';
+import { ActivityLevel, DietDay, GoalType, Meal, NutritionTargets, Sex, UserProfile } from '../data/types';
 
 const activityMultipliers: Record<ActivityLevel, number> = {
   Sedentario: 1.2,
@@ -46,4 +46,57 @@ export function calculateNutritionTargets(profile: UserProfile): NutritionTarget
     fatDaily,
     waterDailyMl
   };
+}
+
+export interface DietProgressTotals {
+  plannedCalories: number;
+  plannedProtein: number;
+  consumedCalories: number;
+  consumedProtein: number;
+}
+
+export function calculateDietProgress(meals: Meal[], completedMealIds: string[]): DietProgressTotals {
+  return meals.reduce<DietProgressTotals>((totals, meal) => {
+    const mealCalories = meal.foods.reduce((sum, food) => sum + food.calories, 0);
+    const mealProtein = meal.foods.reduce((sum, food) => sum + food.protein, 0);
+    const isCompleted = completedMealIds.includes(meal.id);
+
+    return {
+      plannedCalories: totals.plannedCalories + mealCalories,
+      plannedProtein: totals.plannedProtein + mealProtein,
+      consumedCalories: totals.consumedCalories + (isCompleted ? mealCalories : 0),
+      consumedProtein: totals.consumedProtein + (isCompleted ? mealProtein : 0)
+    };
+  }, {
+    plannedCalories: 0,
+    plannedProtein: 0,
+    consumedCalories: 0,
+    consumedProtein: 0
+  });
+}
+
+export function getDietStatusText(current: number, target: number, unit: string): string {
+  if (target <= 0) {
+    return 'Preencha as metas no perfil.';
+  }
+
+  const difference = Math.round((target - current) * 10) / 10;
+
+  if (Math.abs(difference) < 1) {
+    return `Na meta de ${unit}.`;
+  }
+
+  if (difference > 0) {
+    return `Faltam ${difference}${unit}.`;
+  }
+
+  return `${Math.abs(difference)}${unit} acima da meta.`;
+}
+
+export function getMealsForDietDay(day: DietDay | undefined, meals: Meal[]): Meal[] {
+  if (!day) {
+    return [];
+  }
+
+  return meals.filter((meal) => day.mealIds.includes(meal.id));
 }

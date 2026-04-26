@@ -175,6 +175,7 @@ export default function App() {
             water={water}
             weeklyDiet={weeklyDiet}
             waterGoalMl={targets.waterDailyMl}
+            targets={targets}
             onOpenWorkout={(workoutId) => {
               setSelectedWorkoutId(workoutId);
               setView('workout');
@@ -210,6 +211,7 @@ export default function App() {
           <DietDayPage
             day={selectedDay}
             meals={selectedDayMeals}
+            targets={targets}
             onBack={() => setView('home')}
             onToggleMealDone={(mealId) => updateDiet((diet) => ({
               ...diet,

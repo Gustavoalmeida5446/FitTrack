@@ -1,37 +1,19 @@
 import { CalendarHeatMap, ChevronLeft, CheckmarkFilled } from '@carbon/icons-react';
 import { Button, Checkbox, Tile } from '@carbon/react';
 import { PageContainer } from '../components/PageContainer';
-import { DietDay, Meal } from '../data/types';
+import { DietDay, Meal, NutritionTargets } from '../data/types';
+import { calculateDietProgress } from '../lib/nutrition';
 
 interface Props {
   day: DietDay;
   meals: Meal[];
+  targets: NutritionTargets;
   onBack: () => void;
   onToggleMealDone: (mealId: string) => void;
 }
 
-const sumMacros = (meals: Meal[], completedMealIds: string[]) => {
-  let plannedCalories = 0;
-  let plannedProtein = 0;
-  let consumedCalories = 0;
-  let consumedProtein = 0;
-
-  meals.forEach((meal) => {
-    meal.foods.forEach((food) => {
-      plannedCalories += food.calories;
-      plannedProtein += food.protein;
-      if (completedMealIds.includes(meal.id)) {
-        consumedCalories += food.calories;
-        consumedProtein += food.protein;
-      }
-    });
-  });
-
-  return { plannedCalories, plannedProtein, consumedCalories, consumedProtein };
-};
-
-export function DietDayPage({ day, meals, onBack, onToggleMealDone }: Props) {
-  const totals = sumMacros(meals, day.completedMealIds);
+export function DietDayPage({ day, meals, targets, onBack, onToggleMealDone }: Props) {
+  const totals = calculateDietProgress(meals, day.completedMealIds);
   const completedMeals = day.completedMealIds.length;
 
   return (
@@ -47,8 +29,40 @@ export function DietDayPage({ day, meals, onBack, onToggleMealDone }: Props) {
             <strong>{completedMeals}/{meals.length}</strong>
           </div>
           <div>
-            <span className="meta-label">Calorias planejadas</span>
-            <strong>{totals.plannedCalories}</strong>
+            <span className="meta-label">Consumido hoje</span>
+            <strong>{Math.round(totals.consumedCalories)} kcal</strong>
+          </div>
+        </div>
+      </Tile>
+
+      <Tile className="card metric-card diet-targets-card">
+        <div className="card-head">
+          <div className="card-head__group">
+            <div className="icon-badge icon-badge--purple card-head__badge">
+              <CheckmarkFilled size={20} />
+            </div>
+            <div className="card-head__title">
+              <h3>Meta Diária</h3>
+              <p>O que você precisa consumir e o que já consumiu hoje</p>
+            </div>
+          </div>
+        </div>
+        <div className="diet-totals-card__grid">
+          <div className="stat-pill">
+            <span>Meta de calorias</span>
+            <strong>{targets.caloriesDaily} kcal</strong>
+          </div>
+          <div className="stat-pill">
+            <span>Meta de proteína</span>
+            <strong>{targets.proteinDaily} g</strong>
+          </div>
+          <div className="stat-pill">
+            <span>Calorias consumidas</span>
+            <strong>{Math.round(totals.consumedCalories)} kcal</strong>
+          </div>
+          <div className="stat-pill">
+            <span>Proteína consumida</span>
+            <strong>{Math.round(totals.consumedProtein)} g</strong>
           </div>
         </div>
       </Tile>
@@ -106,20 +120,20 @@ export function DietDayPage({ day, meals, onBack, onToggleMealDone }: Props) {
           <h3>Resumo do dia</h3>
           <div className="diet-totals-card__grid">
             <div className="stat-pill">
-              <span>Calorias planejadas</span>
-              <strong>{totals.plannedCalories}</strong>
+              <span>Meta de calorias</span>
+              <strong>{targets.caloriesDaily} kcal</strong>
             </div>
             <div className="stat-pill">
-              <span>Proteína planejada</span>
-              <strong>{totals.plannedProtein}g</strong>
+              <span>Meta de proteína</span>
+              <strong>{targets.proteinDaily}g</strong>
             </div>
             <div className="stat-pill">
               <span>Calorias consumidas</span>
-              <strong>{totals.consumedCalories}</strong>
+              <strong>{Math.round(totals.consumedCalories)} kcal</strong>
             </div>
             <div className="stat-pill">
               <span>Proteína consumida</span>
-              <strong>{totals.consumedProtein}g</strong>
+              <strong>{Math.round(totals.consumedProtein)}g</strong>
             </div>
           </div>
         </Tile>

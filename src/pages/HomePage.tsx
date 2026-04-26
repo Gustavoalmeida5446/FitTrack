@@ -1,14 +1,16 @@
 import { CalendarHeatMap, ChevronRight, TemperatureWater } from '@carbon/icons-react';
 import { Button, ProgressBar, Tile } from '@carbon/react';
 import { PageContainer } from '../components/PageContainer';
-import { WaterData, WeeklyDiet, Workout } from '../data/types';
+import { NutritionTargets, WaterData, WeeklyDiet, Workout } from '../data/types';
 import { getDietDayIdForDate } from '../lib/date';
+import { calculateDietProgress, getMealsForDietDay } from '../lib/nutrition';
 
 interface Props {
   workouts: Workout[];
   water: WaterData;
   weeklyDiet: WeeklyDiet;
   waterGoalMl: number;
+  targets: NutritionTargets;
   onOpenWorkout: (workoutId: string) => void;
   onOpenDietDay: (dayId: string) => void;
   onAddWater: (amount: number) => void;
@@ -22,10 +24,12 @@ function DumbbellIcon({ size = 24 }: { size?: number }) {
   );
 }
 
-export function HomePage({ workouts, water, weeklyDiet, waterGoalMl, onOpenWorkout, onOpenDietDay, onAddWater }: Props) {
+export function HomePage({ workouts, water, weeklyDiet, waterGoalMl, targets, onOpenWorkout, onOpenDietDay, onAddWater }: Props) {
   const progress = waterGoalMl > 0 ? Math.min(100, Math.round((water.consumedMl / waterGoalMl) * 100)) : 0;
   const hasDiet = weeklyDiet.days.some((day) => day.mealIds.length > 0);
   const todayDietDay = weeklyDiet.days.find((day) => day.id === getDietDayIdForDate()) ?? weeklyDiet.days[0];
+  const todayMeals = getMealsForDietDay(todayDietDay, weeklyDiet.meals);
+  const todayDietProgress = calculateDietProgress(todayMeals, todayDietDay?.completedMealIds ?? []);
 
   return (
     <PageContainer title="FitTrack">
@@ -96,6 +100,8 @@ export function HomePage({ workouts, water, weeklyDiet, waterGoalMl, onOpenWorko
             <div className="list-card__content">
               <h3>{todayDietDay.label}</h3>
               <span>{todayDietDay.mealIds.length} refeições</span>
+              <span>Proteína hoje: {Math.round(todayDietProgress.consumedProtein)}g</span>
+              <span>Calorias hoje: {Math.round(todayDietProgress.consumedCalories)} kcal</span>
             </div>
             <ChevronRight size={24} className="list-card__chevron" />
           </Tile>
@@ -105,6 +111,28 @@ export function HomePage({ workouts, water, weeklyDiet, waterGoalMl, onOpenWorko
             <p>Monte sua dieta na aba de dieta para ver o planejamento semanal aqui.</p>
           </Tile>
         )}
+        {hasDiet && todayDietDay ? (
+          <Tile className="card metric-card diet-home-summary-card">
+            <div className="diet-home-summary-card__grid">
+              <div className="stat-pill">
+                <span>Meta de proteína</span>
+                <strong>{targets.proteinDaily}g</strong>
+              </div>
+              <div className="stat-pill">
+                <span>Proteína hoje</span>
+                <strong>{Math.round(todayDietProgress.consumedProtein)}g</strong>
+              </div>
+              <div className="stat-pill">
+                <span>Meta de calorias</span>
+                <strong>{targets.caloriesDaily} kcal</strong>
+              </div>
+              <div className="stat-pill">
+                <span>Calorias hoje</span>
+                <strong>{Math.round(todayDietProgress.consumedCalories)} kcal</strong>
+              </div>
+            </div>
+          </Tile>
+        ) : null}
       </div>
     </PageContainer>
   );

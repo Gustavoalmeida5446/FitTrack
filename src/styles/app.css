@@ -290,6 +290,12 @@ body {
 
 .exercise-media--preview {
   max-width: 220px;
+}
+
+.exercise-media-button--preview {
+  display: block;
+  width: 100%;
+  max-width: 220px;
   margin-bottom: 0;
 }
 
@@ -505,6 +511,19 @@ body {
 .diet-meal-card__footer {
   display: flex;
   justify-content: flex-end;
+}
+
+.diet-targets-card,
+.diet-home-summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.diet-home-summary-card__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
 }
 
 .setup-card {
