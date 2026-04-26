@@ -2,7 +2,7 @@ import { CalendarHeatMap, CheckmarkFilled, ChevronLeft, Search, TrashCan } from 
 import { Button, NumberInput, TextInput, Tile } from '@carbon/react';
 import { useEffect, useMemo, useState } from 'react';
 import { DietDay, FoodItem, Meal, WeeklyDiet } from '../data/types';
-import { searchFoods, type FoodItem as TacoFood } from '../services/foods';
+import { convertFoodQuantityToGrams, getFoodDefaultQuantity, getFoodMeasurementUnit, searchFoods, type FoodItem as TacoFood } from '../services/foods';
 import { PageContainer } from '../components/PageContainer';
 
 interface Props {
@@ -30,7 +30,9 @@ function parsePortionBase(portionBase: string | null | undefined) {
 
 function scaleFood(food: TacoFood, quantity: number): FoodItem {
   const portionBase = parsePortionBase(food.porcaoBase);
-  const factor = quantity / portionBase.amount;
+  const quantityInGrams = convertFoodQuantityToGrams(food, quantity);
+  const factor = quantityInGrams / portionBase.amount;
+  const measurementUnit = getFoodMeasurementUnit(food);
 
   return {
     id: crypto.randomUUID(),
@@ -42,7 +44,7 @@ function scaleFood(food: TacoFood, quantity: number): FoodItem {
     fat: Number(((food.gordura ?? 0) * factor).toFixed(1)),
     fiber: Number(((food.fibra ?? 0) * factor).toFixed(1)),
     quantity,
-    unit: portionBase.unit,
+    unit: measurementUnit,
     baseQuantity: portionBase.amount,
     baseUnit: portionBase.unit
   };
@@ -93,6 +95,8 @@ export function DietSetupPage({ onBack, diet, onSaveDiet }: Props) {
     protein: acc.protein + meal.foods.reduce((sum, food) => sum + food.protein, 0)
   }), { calories: 0, protein: 0 }), [selectedDayMeals]);
   const selectedFoodPortionBase = useMemo(() => parsePortionBase(selectedFood?.porcaoBase), [selectedFood]);
+  const selectedFoodUnit = useMemo(() => selectedFood ? getFoodMeasurementUnit(selectedFood) : 'g', [selectedFood]);
+  const selectedFoodDefaultQuantity = useMemo(() => selectedFood ? getFoodDefaultQuantity(selectedFood) : 100, [selectedFood]);
   const canAddSelectedFood = useMemo(() => Boolean(selectedFood) && foodQuantity > 0, [selectedFood, foodQuantity]);
 
   if (!selectedDay) {
@@ -127,9 +131,8 @@ export function DietSetupPage({ onBack, diet, onSaveDiet }: Props) {
   };
 
   const handleSelectFood = (food: TacoFood) => {
-    const portionBase = parsePortionBase(food.porcaoBase);
     setSelectedFood(food);
-    setFoodQuantity(portionBase.amount);
+    setFoodQuantity(getFoodDefaultQuantity(food));
     setFoodOptions([]);
   };
 
@@ -143,7 +146,7 @@ export function DietSetupPage({ onBack, diet, onSaveDiet }: Props) {
     setSelectedFood(null);
     setFoodQuery('');
     setFoodOptions([]);
-    setFoodQuantity(100);
+    setFoodQuantity(selectedFoodDefaultQuantity);
   };
 
   const handleRemoveDraftFood = (foodId: string) => {
@@ -277,15 +280,16 @@ export function DietSetupPage({ onBack, diet, onSaveDiet }: Props) {
               <div className="setup-card__fields">
                 <NumberInput
                   id="food-quantity"
-                  label={`Quantidade (${selectedFoodPortionBase.unit})`}
+                  label={`Quantidade (${selectedFoodUnit})`}
                   min={0.1}
-                  step={selectedFoodPortionBase.unit === 'g' ? 1 : 0.1}
+                  step={selectedFoodUnit === 'un' ? 1 : 1}
                   value={foodQuantity}
-                  onChange={(_, state) => setFoodQuantity(getSafeNumber(Number(state.value), selectedFoodPortionBase.amount))}
+                  onChange={(_, state) => setFoodQuantity(getSafeNumber(Number(state.value), selectedFoodDefaultQuantity))}
                 />
               </div>
               <div className="setup-selection-card__meta">
                 <span>Base nutricional: {selectedFoodPortionBase.amount} {selectedFoodPortionBase.unit}</span>
+                <span>{selectedFoodUnit === 'ml' ? 'Medida usada: ml' : selectedFoodUnit === 'un' ? 'Medida usada: unidade' : 'Medida usada: g'}</span>
                 <span>{selectedFood.kcal ?? 0} kcal por base</span>
               </div>
               <div className="inline-actions">

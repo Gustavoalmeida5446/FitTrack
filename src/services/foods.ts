@@ -1,5 +1,7 @@
 import tacoFoods from '../data/taco-foods.json';
 
+export type FoodMeasurementUnit = 'g' | 'ml' | 'un';
+
 export interface FoodItem {
   id: number;
   codigo: number;
@@ -11,6 +13,8 @@ export interface FoodItem {
   gordura: number | null;
   fibra: number | null;
   porcaoBase: string | null;
+  unidadeMedida?: FoodMeasurementUnit | null;
+  gramasPorUnidade?: number | null;
 }
 
 const foods = tacoFoods as FoodItem[];
@@ -70,4 +74,26 @@ export function searchFoods(query: string): FoodItem[] {
 
 export function getFoodById(id: number): FoodItem | undefined {
   return foods.find((food) => food.id === id);
+}
+
+export function getFoodMeasurementUnit(food: FoodItem): FoodMeasurementUnit {
+  if (food.unidadeMedida === 'ml' || food.unidadeMedida === 'un') {
+    return food.unidadeMedida;
+  }
+
+  return 'g';
+}
+
+export function getFoodDefaultQuantity(food: FoodItem): number {
+  return getFoodMeasurementUnit(food) === 'un' ? 1 : 100;
+}
+
+export function convertFoodQuantityToGrams(food: FoodItem, quantity: number): number {
+  const unit = getFoodMeasurementUnit(food);
+
+  if (unit === 'un') {
+    return quantity * (food.gramasPorUnidade ?? 0);
+  }
+
+  return quantity;
 }
