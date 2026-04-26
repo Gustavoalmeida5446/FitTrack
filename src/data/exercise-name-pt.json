@@ -1,0 +1,281 @@
+{
+  "90_90_Hamstring": {
+    "ptName": "Alongamento 90/90 para posteriores"
+  },
+  "Ab_Crunch_Machine": {
+    "ptName": "Abdominal na máquina"
+  },
+  "Ab_Roller": {
+    "ptName": "Roda abdominal"
+  },
+  "Air_Bike": {
+    "ptName": "Abdominal bicicleta"
+  },
+  "Alternate_Hammer_Curl": {
+    "ptName": "Rosca martelo alternada"
+  },
+  "Arnold_Dumbbell_Press": {
+    "ptName": "Desenvolvimento Arnold com halteres"
+  },
+  "Band_Assisted_Pull-Up": {
+    "ptName": "Barra fixa assistida com elástico"
+  },
+  "Band_Pull_Apart": {
+    "ptName": "Abertura com elástico"
+  },
+  "Barbell_Ab_Rollout": {
+    "ptName": "Rollout abdominal com barra"
+  },
+  "Barbell_Ab_Rollout_-_On_Knees": {
+    "ptName": "Rollout abdominal com barra ajoelhado"
+  },
+  "Barbell_Bench_Press_-_Medium_Grip": {
+    "ptName": "Supino reto com barra"
+  },
+  "Barbell_Curl": {
+    "ptName": "Rosca direta com barra"
+  },
+  "Barbell_Deadlift": {
+    "ptName": "Levantamento terra com barra"
+  },
+  "Barbell_Full_Squat": {
+    "ptName": "Agachamento livre completo"
+  },
+  "Barbell_Glute_Bridge": {
+    "ptName": "Ponte de glúteos com barra"
+  },
+  "Barbell_Guillotine_Bench_Press": {
+    "ptName": "Supino guilhotina com barra"
+  },
+  "Barbell_Hack_Squat": {
+    "ptName": "Hack squat com barra"
+  },
+  "Barbell_Hip_Thrust": {
+    "ptName": "Elevação pélvica com barra"
+  },
+  "Barbell_Incline_Bench_Press_-_Medium_Grip": {
+    "ptName": "Supino inclinado com barra"
+  },
+  "Barbell_Lunge": {
+    "ptName": "Avanço com barra"
+  },
+  "Barbell_Seated_Calf_Raise": {
+    "ptName": "Panturrilha sentada com barra"
+  },
+  "Barbell_Shoulder_Press": {
+    "ptName": "Desenvolvimento com barra"
+  },
+  "Barbell_Shrug": {
+    "ptName": "Encolhimento com barra"
+  },
+  "Barbell_Squat": {
+    "ptName": "Agachamento com barra"
+  },
+  "Barbell_Step_Ups": {
+    "ptName": "Subida no banco com barra"
+  },
+  "Barbell_Walking_Lunge": {
+    "ptName": "Avanço caminhando com barra"
+  },
+  "Bench_Dips": {
+    "ptName": "Mergulho no banco"
+  },
+  "Bench_Press_-_Powerlifting": {
+    "ptName": "Supino estilo powerlifting"
+  },
+  "Bench_Press_-_With_Bands": {
+    "ptName": "Supino com elásticos"
+  },
+  "Bench_Press_with_Chains": {
+    "ptName": "Supino com correntes"
+  },
+  "Cable_Chest_Press": {
+    "ptName": "Supino no cabo"
+  },
+  "Cable_Crossover": {
+    "ptName": "Crossover no cabo"
+  },
+  "Cable_Crunch": {
+    "ptName": "Abdominal no cabo"
+  },
+  "Cable_Hammer_Curls_-_Rope_Attachment": {
+    "ptName": "Rosca martelo no cabo com corda"
+  },
+  "Cable_Hip_Adduction": {
+    "ptName": "Adução de quadril no cabo"
+  },
+  "Cable_Incline_Triceps_Extension": {
+    "ptName": "Extensão de tríceps no cabo inclinado"
+  },
+  "Cable_One_Arm_Tricep_Extension": {
+    "ptName": "Extensão unilateral de tríceps no cabo"
+  },
+  "Cable_Preacher_Curl": {
+    "ptName": "Rosca Scott no cabo"
+  },
+  "Cable_Rear_Delt_Fly": {
+    "ptName": "Crucifixo invertido no cabo"
+  },
+  "Cable_Rope_Overhead_Triceps_Extension": {
+    "ptName": "Tríceps acima da cabeça no cabo com corda"
+  },
+  "Cable_Russian_Twists": {
+    "ptName": "Rotação russa no cabo"
+  },
+  "Cable_Shoulder_Press": {
+    "ptName": "Desenvolvimento no cabo"
+  },
+  "Cable_Shrugs": {
+    "ptName": "Encolhimento no cabo"
+  },
+  "Calf_Press": {
+    "ptName": "Panturrilha no leg press"
+  },
+  "Calf_Press_On_The_Leg_Press_Machine": {
+    "ptName": "Panturrilha no leg press 45"
+  },
+  "Chin-Up": {
+    "ptName": "Barra fixa supinada"
+  },
+  "Crunches": {
+    "ptName": "Abdominal crunch"
+  },
+  "Deadlift_with_Bands": {
+    "ptName": "Levantamento terra com elásticos"
+  },
+  "Deadlift_with_Chains": {
+    "ptName": "Levantamento terra com correntes"
+  },
+  "Dip_Machine": {
+    "ptName": "Mergulho na máquina"
+  },
+  "Dips_-_Chest_Version": {
+    "ptName": "Paralela para peito"
+  },
+  "Dips_-_Triceps_Version": {
+    "ptName": "Paralela para tríceps"
+  },
+  "Dumbbell_Alternate_Bicep_Curl": {
+    "ptName": "Rosca alternada com halteres"
+  },
+  "Dumbbell_Bench_Press": {
+    "ptName": "Supino com halteres"
+  },
+  "Dumbbell_Bench_Press_with_Neutral_Grip": {
+    "ptName": "Supino com halteres e pegada neutra"
+  },
+  "Dumbbell_Bicep_Curl": {
+    "ptName": "Rosca com halteres"
+  },
+  "Dumbbell_Floor_Press": {
+    "ptName": "Supino no chão com halteres"
+  },
+  "Dumbbell_Flyes": {
+    "ptName": "Crucifixo com halteres"
+  },
+  "Dumbbell_Incline_Row": {
+    "ptName": "Remada inclinada com halteres"
+  },
+  "Dumbbell_Lunges": {
+    "ptName": "Avanço com halteres"
+  },
+  "Dumbbell_One-Arm_Shoulder_Press": {
+    "ptName": "Desenvolvimento unilateral com halter"
+  },
+  "Dumbbell_One-Arm_Triceps_Extension": {
+    "ptName": "Tríceps unilateral com halter"
+  },
+  "Dumbbell_Rear_Lunge": {
+    "ptName": "Avanço para trás com halteres"
+  },
+  "Dumbbell_Shoulder_Press": {
+    "ptName": "Desenvolvimento com halteres"
+  },
+  "Dumbbell_Shrug": {
+    "ptName": "Encolhimento com halteres"
+  },
+  "Dumbbell_Squat": {
+    "ptName": "Agachamento com halteres"
+  },
+  "Dumbbell_Step_Ups": {
+    "ptName": "Subida no banco com halteres"
+  },
+  "Face_Pull": {
+    "ptName": "Face pull"
+  },
+  "Glute_Ham_Raise": {
+    "ptName": "Elevação glúteo-hamstring"
+  },
+  "Glute_Kickback": {
+    "ptName": "Coice de glúteo"
+  },
+  "Hammer_Curls": {
+    "ptName": "Rosca martelo"
+  },
+  "Hammer_Grip_Incline_DB_Bench_Press": {
+    "ptName": "Supino inclinado com halteres e pegada neutra"
+  },
+  "Leg_Extensions": {
+    "ptName": "Cadeira extensora"
+  },
+  "Leg_Press": {
+    "ptName": "Leg press"
+  },
+  "Machine_Bench_Press": {
+    "ptName": "Supino na máquina"
+  },
+  "Mountain_Climbers": {
+    "ptName": "Escalador"
+  },
+  "Plank": {
+    "ptName": "Prancha"
+  },
+  "Pullups": {
+    "ptName": "Barra fixa"
+  },
+  "Push-Up_Wide": {
+    "ptName": "Flexão com pegada aberta"
+  },
+  "Push-Ups_-_Close_Triceps_Position": {
+    "ptName": "Flexão fechada para tríceps"
+  },
+  "Push-Ups_With_Feet_Elevated": {
+    "ptName": "Flexão com pés elevados"
+  },
+  "Push_Press": {
+    "ptName": "Push press"
+  },
+  "Pushups": {
+    "ptName": "Flexão de braço"
+  },
+  "Russian_Twist": {
+    "ptName": "Rotação russa"
+  },
+  "Sit-Up": {
+    "ptName": "Abdominal sit-up"
+  },
+  "Smith_Machine_Bench_Press": {
+    "ptName": "Supino na máquina Smith"
+  },
+  "Smith_Machine_Close-Grip_Bench_Press": {
+    "ptName": "Supino fechado na máquina Smith"
+  },
+  "Smith_Machine_Incline_Bench_Press": {
+    "ptName": "Supino inclinado na máquina Smith"
+  },
+  "Tricep_Dumbbell_Kickback": {
+    "ptName": "Tríceps coice com halter"
+  },
+  "Triceps_Overhead_Extension_with_Rope": {
+    "ptName": "Tríceps acima da cabeça com corda"
+  },
+  "Triceps_Pushdown": {
+    "ptName": "Tríceps pulley"
+  },
+  "Triceps_Pushdown_-_Rope_Attachment": {
+    "ptName": "Tríceps pulley com corda"
+  },
+  "Triceps_Pushdown_-_V-Bar_Attachment": {
+    "ptName": "Tríceps pulley com barra V"
+  }
+}

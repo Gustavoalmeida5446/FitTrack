@@ -13,6 +13,7 @@ interface Props {
 
 const defaultExerciseValues = {
   name: '',
+  ptName: undefined as string | undefined,
   muscleGroup: 'Peito' as MuscleGroup,
   mediaUrl: null as string | null,
   mediaUrls: [] as string[],
@@ -39,6 +40,7 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
   const [name, setName] = useState('');
   const [draftExercises, setDraftExercises] = useState<WorkoutExercise[]>([]);
   const [exerciseName, setExerciseName] = useState(defaultExerciseValues.name);
+  const [exercisePtName, setExercisePtName] = useState<string | undefined>(defaultExerciseValues.ptName);
   const [exerciseGroup, setExerciseGroup] = useState<MuscleGroup>(defaultExerciseValues.muscleGroup);
   const [exerciseMediaUrl, setExerciseMediaUrl] = useState<string | null>(defaultExerciseValues.mediaUrl);
   const [exerciseMediaUrls, setExerciseMediaUrls] = useState<string[]>(defaultExerciseValues.mediaUrls);
@@ -81,6 +83,7 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
     setEditingExerciseId(null);
     setQuery('');
     setExerciseName(defaultExerciseValues.name);
+    setExercisePtName(defaultExerciseValues.ptName);
     setExerciseGroup(defaultExerciseValues.muscleGroup);
     setExerciseMediaUrl(defaultExerciseValues.mediaUrl);
     setExerciseMediaUrls(defaultExerciseValues.mediaUrls);
@@ -104,8 +107,9 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
 
   const handleSelectExercise = (exercise: ReturnType<typeof searchExercises>[number]) => {
     skipNextSearchRef.current = true;
-    setQuery(exercise.name);
+    setQuery(exercise.ptName ?? exercise.name);
     setExerciseName(exercise.name);
+    setExercisePtName(exercise.ptName);
     setExerciseGroup(exercise.muscleGroup);
     setExerciseMediaUrl(exercise.mediaUrl);
     setExerciseMediaUrls(exercise.mediaUrls);
@@ -124,6 +128,7 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
       source: exerciseSource,
       sourceId: exerciseSourceId,
       name: exerciseName.trim(),
+      ptName: exercisePtName,
       muscleGroup: exerciseGroup,
       mediaType: exerciseMediaType,
       mediaUrl: exerciseMediaUrl,
@@ -145,8 +150,9 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
   const handleEditExercise = (exercise: WorkoutExercise) => {
     skipNextSearchRef.current = true;
     setEditingExerciseId(exercise.id);
-    setQuery(exercise.name);
+    setQuery(exercise.ptName ?? exercise.name);
     setExerciseName(exercise.name);
+    setExercisePtName(exercise.ptName);
     setExerciseGroup(exercise.muscleGroup);
     setExerciseMediaUrl(exercise.mediaUrl);
     setExerciseMediaUrls(exercise.mediaUrls ?? (exercise.mediaUrl ? [exercise.mediaUrl] : []));
@@ -228,6 +234,7 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
                 const value = event.target.value;
                 setQuery(value);
                 setExerciseName(value);
+                setExercisePtName(undefined);
                 setExerciseGroup(defaultExerciseValues.muscleGroup);
                 setExerciseMediaUrl(null);
                 setExerciseMediaUrls([]);
@@ -243,7 +250,7 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
             <ul className="search-list">
               {options.map((option) => (
                 <li key={option.id}>
-                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => handleSelectExercise(option)}>{option.name}</button>
+                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => handleSelectExercise(option)}>{option.ptName ?? option.name}</button>
                 </li>
               ))}
             </ul>
@@ -266,10 +273,10 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
             >
               <img
                 src={previewImageUrl}
-                alt={`${exerciseName || 'Exercício'} - ${activePreviewImageIndex === 0 ? 'posição inicial' : 'posição final'}`}
-                className="exercise-media exercise-media--preview"
-              />
-            </button>
+                  alt={`${exercisePtName || exerciseName || 'Exercício'} - ${activePreviewImageIndex === 0 ? 'posição inicial' : 'posição final'}`}
+                  className="exercise-media exercise-media--preview"
+                />
+              </button>
           ) : null}
           <div className="inline-actions">
             <Button disabled={!canAddExercise} onClick={handleAddExercise}>{editingExerciseId ? 'Atualizar exercício' : 'Adicionar exercício'}</Button>
@@ -288,7 +295,7 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
                 <div className="setup-selection-card__header">
                   <div>
                     <span className="meta-label">Exercício {index + 1}</span>
-                    <p>{exercise.name}</p>
+                    <p>{exercise.ptName ?? exercise.name}</p>
                   </div>
                   <div className="inline-actions">
                     <Button kind="ghost" size="sm" onClick={() => handleEditExercise(exercise)}>Editar</Button>

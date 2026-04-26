@@ -1,26 +1,30 @@
-import exercisesPt from '../data/exercises-pt.json';
+import exercisesData from '../../exercises.json';
+import exerciseNamePtData from '../data/exercise-name-pt.json';
 import type { ExerciseMediaType, MuscleGroup } from '../data/types';
 
 export interface ExerciseRecord {
   id: string;
-  nome: string;
-  nomeOriginal: string;
-  forca: string | null;
-  nivel: string | null;
-  mecanica: string | null;
-  equipamento: string | null;
-  musculosPrimarios: string[];
-  musculosSecundarios: string[];
-  instrucoes: string[];
-  instrucoesOriginais: string[];
-  categoria: string | null;
-  imagens: string[];
+  name: string;
+  force: string | null;
+  level: string | null;
+  mechanic: string | null;
+  equipment: string | null;
+  primaryMuscles: string[];
+  secondaryMuscles: string[];
+  instructions: string[];
+  category: string | null;
+  images: string[];
+}
+
+interface ExerciseTranslationRecord {
+  ptName?: string;
 }
 
 export interface ExerciseOption {
   id: string;
   sourceId: string;
   name: string;
+  ptName?: string;
   muscleGroup: MuscleGroup;
   mediaType: ExerciseMediaType;
   mediaUrl: string | null;
@@ -31,20 +35,27 @@ export interface ExerciseOption {
   secondaryMuscles: string[];
 }
 
-const exercises = exercisesPt as ExerciseRecord[];
+const exercises = exercisesData as ExerciseRecord[];
+const exerciseNamePt = exerciseNamePtData as Record<string, ExerciseTranslationRecord>;
+const exerciseImageBaseUrl = 'https://yuhonas.github.io/free-exercise-db/exercises/';
 const muscleGroupMap: Record<string, MuscleGroup> = {
-  peito: 'Peito',
-  costas: 'Costas',
+  chest: 'Peito',
+  lats: 'Costas',
+  middle_back: 'Costas',
+  lower_back: 'Costas',
+  traps: 'Costas',
+  neck: 'Costas',
   quadriceps: 'Pernas',
-  isquiotibiais: 'Pernas',
-  gluteos: 'Pernas',
-  panturrilhas: 'Pernas',
-  ombros: 'Ombros',
+  hamstrings: 'Pernas',
+  glutes: 'Pernas',
+  calves: 'Pernas',
+  abductors: 'Pernas',
+  adductors: 'Pernas',
+  shoulders: 'Ombros',
   biceps: 'Braços',
   triceps: 'Braços',
-  antebracos: 'Braços',
-  abdominais: 'Core',
-  lombar: 'Core'
+  forearms: 'Braços',
+  abdominals: 'Core'
 };
 
 function normalizeSearchValue(value: string): string {
@@ -73,8 +84,13 @@ function getSearchScore(name: string, query: string): number {
   return 2;
 }
 
+function getExerciseDisplayName(exercise: ExerciseRecord): string {
+  return exerciseNamePt[exercise.id]?.ptName?.trim()
+    || exercise.name;
+}
+
 function inferMuscleGroup(exercise: ExerciseRecord): MuscleGroup {
-  const muscles = [...(exercise.musculosPrimarios ?? []), ...(exercise.musculosSecundarios ?? [])];
+  const muscles = [...(exercise.primaryMuscles ?? []), ...(exercise.secondaryMuscles ?? [])];
 
   for (const muscle of muscles) {
     const normalizedMuscle = normalizeSearchValue(muscle);
@@ -89,20 +105,22 @@ function inferMuscleGroup(exercise: ExerciseRecord): MuscleGroup {
 }
 
 function mapExerciseOption(exercise: ExerciseRecord): ExerciseOption {
-  const mediaUrls = exercise.imagens.slice(0, 2);
+  const mediaUrls = exercise.images.slice(0, 2).map((imagePath) => `${exerciseImageBaseUrl}${imagePath}`);
+  const ptName = getExerciseDisplayName(exercise);
 
   return {
     id: exercise.id,
     sourceId: exercise.id,
-    name: exercise.nome,
+    name: exercise.name,
+    ptName,
     muscleGroup: inferMuscleGroup(exercise),
     mediaType: mediaUrls.length > 0 ? 'image' : 'none',
     mediaUrl: mediaUrls[0] ?? null,
     mediaUrls,
-    category: exercise.categoria ?? null,
-    equipment: exercise.equipamento ?? null,
-    primaryMuscles: exercise.musculosPrimarios ?? [],
-    secondaryMuscles: exercise.musculosSecundarios ?? []
+    category: exercise.category ?? null,
+    equipment: exercise.equipment ?? null,
+    primaryMuscles: exercise.primaryMuscles ?? [],
+    secondaryMuscles: exercise.secondaryMuscles ?? []
   };
 }
 
@@ -120,7 +138,10 @@ export function searchExercises(query: string): ExerciseOption[] {
   return exercises
     .map((exercise) => ({
       exercise,
-      score: getSearchScore(exercise.nome, normalizedQuery)
+      score: Math.max(
+        getSearchScore(exercise.name, normalizedQuery),
+        getSearchScore(getExerciseDisplayName(exercise), normalizedQuery)
+      )
     }))
     .filter((item) => item.score >= 0)
     .sort((a, b) => {
@@ -128,7 +149,7 @@ export function searchExercises(query: string): ExerciseOption[] {
         return b.score - a.score;
       }
 
-      return a.exercise.nome.localeCompare(b.exercise.nome, 'pt-BR');
+      return getExerciseDisplayName(a.exercise).localeCompare(getExerciseDisplayName(b.exercise), 'pt-BR');
     })
     .map((item) => mapExerciseOption(item.exercise));
 }
@@ -142,7 +163,7 @@ export function getExercisesByMuscle(muscle: string): ExerciseOption[] {
   const normalizedMuscle = normalizeSearchValue(muscle);
 
   return exercises
-    .filter((exercise) => [...exercise.musculosPrimarios, ...exercise.musculosSecundarios].some((item) => normalizeSearchValue(item) === normalizedMuscle))
+    .filter((exercise) => [...exercise.primaryMuscles, ...exercise.secondaryMuscles].some((item) => normalizeSearchValue(item) === normalizedMuscle))
     .map(mapExerciseOption);
 }
 
@@ -150,7 +171,7 @@ export function getExercisesByEquipment(equipment: string): ExerciseOption[] {
   const normalizedEquipment = normalizeSearchValue(equipment);
 
   return exercises
-    .filter((exercise) => normalizeSearchValue(exercise.equipamento ?? '') === normalizedEquipment)
+    .filter((exercise) => normalizeSearchValue(exercise.equipment ?? '') === normalizedEquipment)
     .map(mapExerciseOption);
 }
 
@@ -158,6 +179,6 @@ export function getExercisesByCategory(category: string): ExerciseOption[] {
   const normalizedCategory = normalizeSearchValue(category);
 
   return exercises
-    .filter((exercise) => normalizeSearchValue(exercise.categoria ?? '') === normalizedCategory)
+    .filter((exercise) => normalizeSearchValue(exercise.category ?? '') === normalizedCategory)
     .map(mapExerciseOption);
 }

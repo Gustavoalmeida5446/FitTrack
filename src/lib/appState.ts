@@ -28,6 +28,7 @@ type LegacyExercise = WorkoutExercise | {
   source?: 'manual' | 'local';
   sourceId?: string;
   name: string;
+  ptName?: string;
   muscleGroup: MuscleGroup;
   mediaType?: WorkoutExercise['mediaType'];
   mediaUrl?: string | null;
@@ -52,6 +53,7 @@ type LegacyWorkoutState = {
     source?: 'manual' | 'local';
     sourceId?: string;
     name: string;
+    ptName?: string;
     muscleGroup: MuscleGroup;
     mediaType?: WorkoutExercise['mediaType'];
     mediaUrl?: string | null;
@@ -119,6 +121,7 @@ function normalizeWorkoutExercise(exercise: LegacyExercise): WorkoutExercise {
     source: exercise.source ?? 'manual',
     sourceId: exercise.sourceId,
     name: exercise.name,
+    ptName: exercise.ptName,
     muscleGroup: exercise.muscleGroup,
     mediaType: exercise.mediaType ?? (mediaUrls.length > 0 ? 'image' : 'none'),
     mediaUrl: mediaUrls[0] ?? exercise.mediaUrl ?? null,
@@ -171,6 +174,7 @@ export function normalizeWorkoutState(workouts?: Workout[] | LegacyWorkoutState 
         source: definition?.source ?? 'manual',
         sourceId: definition?.sourceId,
         name: definition?.name ?? 'Exercício',
+        ptName: definition?.ptName,
         muscleGroup: definition?.muscleGroup ?? 'Peito',
         mediaType: definition?.mediaType ?? (mediaUrls.length > 0 ? 'image' : 'none'),
         mediaUrl: mediaUrls[0] ?? definition?.mediaUrl ?? null,

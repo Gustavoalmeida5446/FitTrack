@@ -53,6 +53,7 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateLoa
 
       <div className="stack">
         {workout.exercises.map((exercise) => {
+          const displayName = exercise.ptName ?? exercise.name;
           const mediaUrls = Array.isArray(exercise.mediaUrls) && exercise.mediaUrls.length > 0
             ? exercise.mediaUrls
             : exercise.mediaUrl ? [exercise.mediaUrl] : [];
@@ -67,7 +68,7 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateLoa
                     <CheckmarkFilled size={20} />
                   </div>
                   <div className="card-head__title">
-                    <h3>{exercise.name}</h3>
+                    <h3>{displayName}</h3>
                     <p>{exercise.muscleGroup}</p>
                   </div>
                 </div>
@@ -77,11 +78,11 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateLoa
                   type="button"
                   className={`exercise-media-button${mediaUrls.length > 1 ? ' exercise-media-button--interactive' : ''}`}
                   onClick={() => handleToggleExerciseImage(exercise.id, mediaUrls.length)}
-                  aria-label={mediaUrls.length > 1 ? `Alternar imagem do exercício ${exercise.name}` : `Imagem do exercício ${exercise.name}`}
+                  aria-label={mediaUrls.length > 1 ? `Alternar imagem do exercício ${displayName}` : `Imagem do exercício ${displayName}`}
                 >
                   <img
                     src={activeImageUrl}
-                    alt={`${exercise.name} - ${activeImageIndex === 0 ? 'posição inicial' : 'posição final'}`}
+                    alt={`${displayName} - ${activeImageIndex === 0 ? 'posição inicial' : 'posição final'}`}
                     className="exercise-media"
                   />
                 </button>

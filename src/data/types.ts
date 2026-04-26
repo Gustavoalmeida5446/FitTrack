@@ -9,6 +9,7 @@ export interface WorkoutExercise {
   source: 'manual' | 'local';
   sourceId?: string;
   name: string;
+  ptName?: string;
   muscleGroup: MuscleGroup;
   mediaType: ExerciseMediaType;
   mediaUrl: string | null;
