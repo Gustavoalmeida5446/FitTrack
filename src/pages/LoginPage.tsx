@@ -103,7 +103,7 @@ export function LoginPage({ onBack, onLogin, onSignUp }: Props) {
               </div>
               <div className="card-head__title">
                 <h3>{mode === 'login' ? 'Entrar' : 'Criar conta'}</h3>
-                <p>{mode === 'login' ? 'Acesse sua conta do Supabase' : 'Cadastre-se para começar a usar o app'}</p>
+                <p>{mode === 'login' ? 'Acesse sua conta' : 'Cadastre-se para começar a usar o app'}</p>
               </div>
             </div>
           </div>

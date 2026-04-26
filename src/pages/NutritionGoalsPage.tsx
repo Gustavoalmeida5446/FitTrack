@@ -38,7 +38,7 @@ export function NutritionGoalsPage({ profile, targets, weightHistory, onBack, on
               </div>
               <div className="card-head__title">
                 <h3>Status da conta</h3>
-                <p>{session ? 'Você está logado no Supabase' : 'Você ainda não fez login'}</p>
+                <p>{session ? 'Você está logado como:' : 'Você ainda não fez login'}</p>
               </div>
             </div>
           </div>
