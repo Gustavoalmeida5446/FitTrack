@@ -12,6 +12,7 @@ export interface WorkoutExercise {
   muscleGroup: MuscleGroup;
   mediaType: ExerciseMediaType;
   mediaUrl: string | null;
+  mediaUrls?: string[];
   loadKg: number;
   reps: number;
   sets: number;

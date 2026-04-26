@@ -1,5 +1,5 @@
 import { CheckmarkFilled, ChevronLeft, Search, TrashCan } from '@carbon/icons-react';
-import { Button, Checkbox, NumberInput, Select, SelectItem, TextInput, Tile } from '@carbon/react';
+import { Button, NumberInput, TextInput, Tile } from '@carbon/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { MuscleGroup, Workout, WorkoutExercise } from '../data/types';
 import { searchExercises } from '../services/exercises';
@@ -11,12 +11,11 @@ interface Props {
   onSaveWorkouts: (workouts: Workout[]) => void;
 }
 
-const groups: MuscleGroup[] = ['Peito', 'Costas', 'Pernas', 'Ombros', 'Braços', 'Core'];
-
 const defaultExerciseValues = {
   name: '',
   muscleGroup: 'Peito' as MuscleGroup,
   mediaUrl: null as string | null,
+  mediaUrls: [] as string[],
   mediaType: 'none' as WorkoutExercise['mediaType'],
   source: 'manual' as WorkoutExercise['source'],
   sourceId: undefined as string | undefined,
@@ -37,11 +36,11 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
   const [query, setQuery] = useState('');
   const [options, setOptions] = useState<ReturnType<typeof searchExercises>>([]);
   const [name, setName] = useState('');
-  const [selectedGroups, setSelectedGroups] = useState<MuscleGroup[]>([]);
   const [draftExercises, setDraftExercises] = useState<WorkoutExercise[]>([]);
   const [exerciseName, setExerciseName] = useState(defaultExerciseValues.name);
   const [exerciseGroup, setExerciseGroup] = useState<MuscleGroup>(defaultExerciseValues.muscleGroup);
   const [exerciseMediaUrl, setExerciseMediaUrl] = useState<string | null>(defaultExerciseValues.mediaUrl);
+  const [exerciseMediaUrls, setExerciseMediaUrls] = useState<string[]>(defaultExerciseValues.mediaUrls);
   const [exerciseMediaType, setExerciseMediaType] = useState<WorkoutExercise['mediaType']>(defaultExerciseValues.mediaType);
   const [exerciseSource, setExerciseSource] = useState<WorkoutExercise['source']>(defaultExerciseValues.source);
   const [exerciseSourceId, setExerciseSourceId] = useState<string | undefined>(defaultExerciseValues.sourceId);
@@ -50,8 +49,9 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
   const [sets, setSets] = useState(defaultExerciseValues.sets);
   const [restSeconds, setRestSeconds] = useState(defaultExerciseValues.restSeconds);
 
-  const canAddExercise = useMemo(() => exerciseName.trim().length > 0, [exerciseName]);
-  const canSaveWorkout = useMemo(() => name.trim().length > 0 && selectedGroups.length > 0 && draftExercises.length > 0, [name, selectedGroups.length, draftExercises.length]);
+  const canAddExercise = useMemo(() => exerciseName.trim().length > 0 && exerciseSource === 'local' && Boolean(exerciseSourceId), [exerciseName, exerciseSource, exerciseSourceId]);
+  const derivedWorkoutGroups = useMemo(() => Array.from(new Set(draftExercises.map((exercise) => exercise.muscleGroup))), [draftExercises]);
+  const canSaveWorkout = useMemo(() => name.trim().length > 0 && draftExercises.length > 0, [name, draftExercises.length]);
 
   useEffect(() => {
     const trimmedQuery = query.trim();
@@ -82,6 +82,7 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
     setExerciseName(defaultExerciseValues.name);
     setExerciseGroup(defaultExerciseValues.muscleGroup);
     setExerciseMediaUrl(defaultExerciseValues.mediaUrl);
+    setExerciseMediaUrls(defaultExerciseValues.mediaUrls);
     setExerciseMediaType(defaultExerciseValues.mediaType);
     setExerciseSource(defaultExerciseValues.source);
     setExerciseSourceId(defaultExerciseValues.sourceId);
@@ -95,20 +96,17 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
   const resetWorkoutForm = () => {
     setEditingWorkoutId(null);
     setName('');
-    setSelectedGroups([]);
     setDraftExercises([]);
     resetExerciseForm();
-  };
-
-  const handleToggleGroup = (group: MuscleGroup) => {
-    setSelectedGroups((prev) => prev.includes(group) ? prev.filter((item) => item !== group) : [...prev, group]);
   };
 
   const handleSelectExercise = (exercise: ReturnType<typeof searchExercises>[number]) => {
     skipNextSearchRef.current = true;
     setQuery(exercise.name);
     setExerciseName(exercise.name);
+    setExerciseGroup(exercise.muscleGroup);
     setExerciseMediaUrl(exercise.mediaUrl);
+    setExerciseMediaUrls(exercise.mediaUrls);
     setExerciseMediaType(exercise.mediaType);
     setExerciseSource('local');
     setExerciseSourceId(exercise.sourceId);
@@ -126,6 +124,7 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
       muscleGroup: exerciseGroup,
       mediaType: exerciseMediaType,
       mediaUrl: exerciseMediaUrl,
+      mediaUrls: exerciseMediaUrls,
       loadKg,
       reps,
       sets,
@@ -147,6 +146,7 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
     setExerciseName(exercise.name);
     setExerciseGroup(exercise.muscleGroup);
     setExerciseMediaUrl(exercise.mediaUrl);
+    setExerciseMediaUrls(exercise.mediaUrls ?? (exercise.mediaUrl ? [exercise.mediaUrl] : []));
     setExerciseMediaType(exercise.mediaType);
     setExerciseSource(exercise.source);
     setExerciseSourceId(exercise.sourceId);
@@ -170,7 +170,7 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
     const nextWorkout: Workout = {
       id: editingWorkoutId ?? crypto.randomUUID(),
       name: name.trim(),
-      muscleGroups: selectedGroups,
+      muscleGroups: derivedWorkoutGroups,
       exercises: draftExercises.map((exercise) => ({
         ...exercise,
         done: false
@@ -184,7 +184,6 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
   const handleEditWorkout = (workout: Workout) => {
     setEditingWorkoutId(workout.id);
     setName(workout.name);
-    setSelectedGroups(workout.muscleGroups);
     setDraftExercises(workout.exercises.map((exercise) => ({ ...exercise })));
     resetExerciseForm();
   };
@@ -213,16 +212,7 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
             </div>
           </div>
           <TextInput id="workout-name" labelText="Nome do treino" value={name} onChange={(event) => setName(event.target.value)} />
-          <div className="stack">
-            <span className="meta-label">Grupos do treino</span>
-            <div className="checkbox-grid">
-              {groups.map((group) => (
-                <Checkbox key={group} id={`workout-group-${group}`} labelText={group} checked={selectedGroups.includes(group)} onChange={() => handleToggleGroup(group)} />
-              ))}
-            </div>
-          </div>
-
-          <div className="setup-card__fields">
+          <div className="setup-card__fields setup-card__fields--single">
             <TextInput
               id="exercise-search"
               labelText="Buscar exercício"
@@ -231,18 +221,15 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
                 const value = event.target.value;
                 setQuery(value);
                 setExerciseName(value);
+                setExerciseGroup(defaultExerciseValues.muscleGroup);
                 setExerciseMediaUrl(null);
+                setExerciseMediaUrls([]);
                 setExerciseMediaType('none');
                 setExerciseSource('manual');
                 setExerciseSourceId(undefined);
               }}
               onBlur={() => window.setTimeout(() => setOptions([]), 150)}
             />
-            <Select id="exercise-group" labelText="Grupo muscular do exercício" value={exerciseGroup} onChange={(event) => setExerciseGroup(event.target.value as MuscleGroup)}>
-              {groups.map((group) => (
-                <SelectItem key={group} value={group} text={group} />
-              ))}
-            </Select>
           </div>
           {options.length > 0 ? (
             <ul className="search-list">
@@ -261,12 +248,22 @@ export function WorkoutSetupPage({ onBack, workouts, onSaveWorkouts }: Props) {
           </div>
           <div className="info-block">
             <span className="meta-label">Imagem</span>
-            <p>{exerciseMediaUrl ? 'Este exercício vai usar a imagem certa da base local.' : 'Se não houver imagem na base, o exercício será salvo sem imagem.'}</p>
+            {exerciseMediaUrl ? (
+              <img src={exerciseMediaUrl} alt={exerciseName || 'Prévia do exercício'} className="exercise-media exercise-media--preview" />
+            ) : (
+              <p>Se não houver imagem na base, o exercício será salvo sem imagem.</p>
+            )}
           </div>
           <div className="inline-actions">
             <Button disabled={!canAddExercise} onClick={handleAddExercise}>{editingExerciseId ? 'Atualizar exercício' : 'Adicionar exercício'}</Button>
             {editingExerciseId ? <Button kind="ghost" onClick={resetExerciseForm}>Cancelar edição</Button> : null}
           </div>
+          {!canAddExercise ? (
+            <div className="info-block">
+              <span className="meta-label">Adicionar exercício</span>
+              <p>Escolha um exercício da base local para preencher automaticamente o grupo muscular e a mídia.</p>
+            </div>
+          ) : null}
 
           <div className="stack">
             {draftExercises.length > 0 ? draftExercises.map((exercise, index) => (

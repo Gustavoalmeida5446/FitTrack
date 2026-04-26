@@ -12,7 +12,7 @@ import {
   Workout,
   WorkoutExercise
 } from '../data/types';
-import { getTodayDateString } from './date';
+import { getTodayDateString, weekDayLabels } from './date';
 
 export interface AppState {
   profile: UserProfile;
@@ -31,6 +31,7 @@ type LegacyExercise = WorkoutExercise | {
   muscleGroup: MuscleGroup;
   mediaType?: WorkoutExercise['mediaType'];
   mediaUrl?: string | null;
+  mediaUrls?: string[];
   loadKg: number;
   reps: number;
   sets: number;
@@ -54,6 +55,7 @@ type LegacyWorkoutState = {
     muscleGroup: MuscleGroup;
     mediaType?: WorkoutExercise['mediaType'];
     mediaUrl?: string | null;
+    mediaUrls?: string[];
   }>;
   workouts?: Array<{
     id: string;
@@ -90,9 +92,9 @@ function createEmptyWeeklyDiet(): WeeklyDiet {
   return {
     id: 'diet-empty',
     meals: [],
-    days: Array.from({ length: 7 }, (_, index) => ({
+    days: weekDayLabels.map((label, index) => ({
       id: `d-${index + 1}`,
-      label: `Dia ${index + 1}`,
+      label,
       mealIds: [],
       completedMealIds: []
     }))
@@ -108,14 +110,19 @@ function createEmptyWater(): WaterData {
 }
 
 function normalizeWorkoutExercise(exercise: LegacyExercise): WorkoutExercise {
+  const mediaUrls = Array.isArray(exercise.mediaUrls)
+    ? exercise.mediaUrls.filter(Boolean).slice(0, 2)
+    : exercise.mediaUrl ? [exercise.mediaUrl] : [];
+
   return {
     id: exercise.id,
     source: exercise.source ?? 'manual',
     sourceId: exercise.sourceId,
     name: exercise.name,
     muscleGroup: exercise.muscleGroup,
-    mediaType: exercise.mediaType ?? (exercise.mediaUrl ? 'image' : 'none'),
-    mediaUrl: exercise.mediaUrl ?? null,
+    mediaType: exercise.mediaType ?? (mediaUrls.length > 0 ? 'image' : 'none'),
+    mediaUrl: mediaUrls[0] ?? exercise.mediaUrl ?? null,
+    mediaUrls,
     loadKg: exercise.loadKg,
     reps: exercise.reps,
     sets: exercise.sets,
@@ -155,6 +162,9 @@ export function normalizeWorkoutState(workouts?: Workout[] | LegacyWorkoutState 
     muscleGroups: Array.isArray(workout.muscleGroups) ? workout.muscleGroups : [],
     exercises: Array.isArray(workout.exercises) ? workout.exercises.map((exercise) => {
       const definition = library.find((item) => item.id === exercise.exerciseId);
+      const mediaUrls = Array.isArray(definition?.mediaUrls)
+        ? definition.mediaUrls.filter(Boolean).slice(0, 2)
+        : definition?.mediaUrl ? [definition.mediaUrl] : [];
 
       return {
         id: exercise.id,
@@ -162,8 +172,9 @@ export function normalizeWorkoutState(workouts?: Workout[] | LegacyWorkoutState 
         sourceId: definition?.sourceId,
         name: definition?.name ?? 'Exercício',
         muscleGroup: definition?.muscleGroup ?? 'Peito',
-        mediaType: definition?.mediaType ?? (definition?.mediaUrl ? 'image' : 'none'),
-        mediaUrl: definition?.mediaUrl ?? null,
+        mediaType: definition?.mediaType ?? (mediaUrls.length > 0 ? 'image' : 'none'),
+        mediaUrl: mediaUrls[0] ?? definition?.mediaUrl ?? null,
+        mediaUrls,
         loadKg: exercise.loadKg,
         reps: exercise.reps,
         sets: exercise.sets,
@@ -200,7 +211,7 @@ export function normalizeWeeklyDiet(diet?: WeeklyDiet | LegacyWeeklyDiet | null)
 
         return {
           id: existingDay.id,
-          label: existingDay.label ?? baseDay.label,
+          label: !existingDay.label || /^Dia \d+$/i.test(existingDay.label) ? baseDay.label : existingDay.label,
           mealIds: Array.isArray(existingDay.mealIds) ? existingDay.mealIds : [],
           completedMealIds: Array.isArray(existingDay.completedMealIds) ? existingDay.completedMealIds : []
         };
@@ -231,7 +242,7 @@ export function normalizeWeeklyDiet(diet?: WeeklyDiet | LegacyWeeklyDiet | null)
 
     return {
       id: legacyDay.id,
-      label: legacyDay.label ?? baseDay.label,
+      label: !legacyDay.label || /^Dia \d+$/i.test(legacyDay.label) ? baseDay.label : legacyDay.label,
       mealIds,
       completedMealIds: dayMeals.filter((meal) => Boolean(meal.done)).map((meal) => meal.id)
     };

@@ -1,5 +1,5 @@
 import exercisesPt from '../data/exercises-pt.json';
-import type { ExerciseMediaType } from '../data/types';
+import type { ExerciseMediaType, MuscleGroup } from '../data/types';
 
 export interface ExerciseRecord {
   id: string;
@@ -21,8 +21,10 @@ export interface ExerciseOption {
   id: string;
   sourceId: string;
   name: string;
+  muscleGroup: MuscleGroup;
   mediaType: ExerciseMediaType;
   mediaUrl: string | null;
+  mediaUrls: string[];
   category: string | null;
   equipment: string | null;
   primaryMuscles: string[];
@@ -30,6 +32,20 @@ export interface ExerciseOption {
 }
 
 const exercises = exercisesPt as ExerciseRecord[];
+const muscleGroupMap: Record<string, MuscleGroup> = {
+  peito: 'Peito',
+  costas: 'Costas',
+  quadriceps: 'Pernas',
+  isquiotibiais: 'Pernas',
+  gluteos: 'Pernas',
+  panturrilhas: 'Pernas',
+  ombros: 'Ombros',
+  biceps: 'Braços',
+  triceps: 'Braços',
+  antebracos: 'Braços',
+  abdominais: 'Core',
+  lombar: 'Core'
+};
 
 function normalizeSearchValue(value: string): string {
   return value
@@ -57,13 +73,32 @@ function getSearchScore(name: string, query: string): number {
   return 2;
 }
 
+function inferMuscleGroup(exercise: ExerciseRecord): MuscleGroup {
+  const muscles = [...(exercise.musculosPrimarios ?? []), ...(exercise.musculosSecundarios ?? [])];
+
+  for (const muscle of muscles) {
+    const normalizedMuscle = normalizeSearchValue(muscle);
+    const mappedGroup = muscleGroupMap[normalizedMuscle];
+
+    if (mappedGroup) {
+      return mappedGroup;
+    }
+  }
+
+  return 'Peito';
+}
+
 function mapExerciseOption(exercise: ExerciseRecord): ExerciseOption {
+  const mediaUrls = exercise.imagens.slice(0, 2);
+
   return {
     id: exercise.id,
     sourceId: exercise.id,
     name: exercise.nome,
-    mediaType: exercise.imagens.length > 0 ? 'image' : 'none',
-    mediaUrl: exercise.imagens[0] ?? null,
+    muscleGroup: inferMuscleGroup(exercise),
+    mediaType: mediaUrls.length > 0 ? 'image' : 'none',
+    mediaUrl: mediaUrls[0] ?? null,
+    mediaUrls,
     category: exercise.categoria ?? null,
     equipment: exercise.equipamento ?? null,
     primaryMuscles: exercise.musculosPrimarios ?? [],

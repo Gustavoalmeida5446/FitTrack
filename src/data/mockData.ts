@@ -1,4 +1,5 @@
 import { UserProfile, WaterData, WeeklyDiet, WeightLog, Workout } from './types';
+import { weekDayLabels } from '../lib/date';
 
 const exerciseMedia = 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800';
 
@@ -49,9 +50,9 @@ export const mockWeeklyDiet: WeeklyDiet = {
       ]
     }
   ],
-  days: Array.from({ length: 7 }, (_, index) => ({
+  days: weekDayLabels.map((label, index) => ({
     id: `d-${index + 1}`,
-    label: `Dia ${index + 1}`,
+    label,
     mealIds: index === 0 ? ['m11', 'm12'] : [],
     completedMealIds: index === 0 ? ['m11'] : []
   }))

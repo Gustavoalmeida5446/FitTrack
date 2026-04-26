@@ -2,6 +2,7 @@ import { CalendarHeatMap, ChevronRight, TemperatureWater } from '@carbon/icons-r
 import { Button, ProgressBar, Tile } from '@carbon/react';
 import { PageContainer } from '../components/PageContainer';
 import { WaterData, WeeklyDiet, Workout } from '../data/types';
+import { getDietDayIdForDate } from '../lib/date';
 
 interface Props {
   workouts: Workout[];
@@ -24,6 +25,7 @@ function DumbbellIcon({ size = 24 }: { size?: number }) {
 export function HomePage({ workouts, water, weeklyDiet, waterGoalMl, onOpenWorkout, onOpenDietDay, onAddWater }: Props) {
   const progress = waterGoalMl > 0 ? Math.min(100, Math.round((water.consumedMl / waterGoalMl) * 100)) : 0;
   const hasDiet = weeklyDiet.days.some((day) => day.mealIds.length > 0);
+  const todayDietDay = weeklyDiet.days.find((day) => day.id === getDietDayIdForDate()) ?? weeklyDiet.days[0];
 
   return (
     <PageContainer title="FitTrack">
@@ -86,18 +88,18 @@ export function HomePage({ workouts, water, weeklyDiet, waterGoalMl, onOpenWorko
         </div>
       </div>
       <div className="stack">
-        {hasDiet ? weeklyDiet.days.map((day) => (
-          <Tile key={day.id} className="card-click list-card list-card--compact" onClick={() => onOpenDietDay(day.id)}>
+        {hasDiet && todayDietDay ? (
+          <Tile key={todayDietDay.id} className="card-click list-card list-card--compact" onClick={() => onOpenDietDay(todayDietDay.id)}>
             <div className="list-card__badge list-card__badge--purple">
               <CalendarHeatMap size={20} />
             </div>
             <div className="list-card__content">
-              <h3>{day.label}</h3>
-              <span>{day.mealIds.length} refeições</span>
+              <h3>{todayDietDay.label}</h3>
+              <span>{todayDietDay.mealIds.length} refeições</span>
             </div>
             <ChevronRight size={24} className="list-card__chevron" />
           </Tile>
-        )) : (
+        ) : (
           <Tile className="card metric-card empty-state-card">
             <h3>Nenhuma dieta cadastrada</h3>
             <p>Monte sua dieta na aba de dieta para ver o planejamento semanal aqui.</p>
