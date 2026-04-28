@@ -1,6 +1,6 @@
 import { Calendar, CalendarHeatMap, Home } from '@carbon/icons-react';
 import { Button, Theme } from '@carbon/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { HomePage } from './pages/HomePage';
 import { WorkoutPage } from './pages/WorkoutPage';
@@ -57,6 +57,7 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isRemoteReady, setIsRemoteReady] = useState(false);
+  const [hasPendingRemoteSave, setHasPendingRemoteSave] = useState(false);
   const [isTutorialOpen, setIsTutorialOpen] = useState(false);
   const [tutorialStepIndex, setTutorialStepIndex] = useState(0);
 
@@ -66,6 +67,7 @@ export default function App() {
   const [water, setWater] = useState(normalizeWaterData(defaultAppState.water));
   const [weeklyDiet, setWeeklyDiet] = useState(defaultAppState.weeklyDiet);
   const [weightHistory, setWeightHistory] = useState(defaultAppState.weightHistory);
+  const sessionUserIdRef = useRef<string | null>(null);
 
   const appState = useMemo<AppState>(() => ({
     profile,
@@ -91,13 +93,39 @@ export default function App() {
   const activeTutorialStep = isTutorialOpen ? onboardingSteps[tutorialStepIndex] : null;
 
   useEffect(() => {
+    sessionUserIdRef.current = session?.user.id ?? null;
+  }, [session]);
+
+  useEffect(() => {
     void getCurrentSession().then((currentSession) => {
       setSession(currentSession);
       setIsRemoteReady(false);
       setIsAuthReady(true);
     });
 
-    const { data } = onAuthStateChange((nextSession) => {
+    const { data } = onAuthStateChange((event, nextSession) => {
+      const previousUserId = sessionUserIdRef.current;
+      const nextUserId = nextSession?.user.id ?? null;
+
+      if (event === 'SIGNED_OUT') {
+        setSession(null);
+        setIsRemoteReady(false);
+        setIsAuthReady(true);
+        return;
+      }
+
+      if (!nextSession) {
+        setIsAuthReady(true);
+        return;
+      }
+
+      // Ignore token refreshes and same-user revalidation so tab focus does not
+      // relaunch onboarding or reset the current in-app view.
+      if (previousUserId === nextUserId) {
+        setIsAuthReady(true);
+        return;
+      }
+
       setSession(nextSession);
       setIsRemoteReady(false);
       setIsAuthReady(true);
@@ -116,6 +144,7 @@ export default function App() {
       setWater(normalizeWaterData(defaultAppState.water));
       setWeeklyDiet(defaultAppState.weeklyDiet);
       setWeightHistory(defaultAppState.weightHistory);
+      setHasPendingRemoteSave(false);
       setIsRemoteReady(true);
       return;
     }
@@ -132,6 +161,7 @@ export default function App() {
       setWater(normalizeWaterData(remoteState.water));
       setWeeklyDiet(remoteState.weeklyDiet);
       setWeightHistory(remoteState.weightHistory);
+      setHasPendingRemoteSave(false);
       setIsRemoteReady(true);
     });
 
@@ -141,18 +171,22 @@ export default function App() {
   }, [session]);
 
   useEffect(() => {
-    if (!session || !isRemoteReady) {
+    if (!session || !isRemoteReady || !hasPendingRemoteSave) {
       return;
     }
 
     const timeoutId = window.setTimeout(() => {
-      void saveRemoteAppState(session, appState);
+      void saveRemoteAppState(session, appState).then((didSave) => {
+        if (didSave) {
+          setHasPendingRemoteSave(false);
+        }
+      });
     }, 400);
 
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [appState, isRemoteReady, session]);
+  }, [appState, hasPendingRemoteSave, isRemoteReady, session]);
 
   useEffect(() => {
     if (!session || !isRemoteReady || !tutorialStorageKey) {
@@ -189,6 +223,7 @@ export default function App() {
 
       setWorkouts(normalizedState.workouts);
       setWorkoutsUpdatedAt(normalizedState.workoutsUpdatedAt);
+      setHasPendingRemoteSave(true);
     };
 
     syncWorkoutProgressDate();
@@ -202,12 +237,56 @@ export default function App() {
   }, [isRemoteReady, session, workouts, workoutsUpdatedAt]);
 
   const updateWorkout = (workoutId: string, updater: (workout: Workout) => Workout) => {
+    setHasPendingRemoteSave(true);
     setWorkoutsUpdatedAt(getTodayDateString());
     setWorkouts((prev) => prev.map((workout) => (workout.id === workoutId ? updater(workout) : workout)));
   };
 
   const updateDiet = (updater: (diet: WeeklyDiet) => WeeklyDiet) => {
+    setHasPendingRemoteSave(true);
     setWeeklyDiet((prev) => updater(prev));
+  };
+
+  const handleUpdateProfile = (nextProfile: AppState['profile']) => {
+    setHasPendingRemoteSave(true);
+    setProfile(nextProfile);
+  };
+
+  const handleSaveWorkouts = (nextWorkouts: Workout[]) => {
+    setHasPendingRemoteSave(true);
+    setWorkoutsUpdatedAt(getTodayDateString());
+    setWorkouts(nextWorkouts);
+  };
+
+  const handleAddWeight = (weight: number) => {
+    setHasPendingRemoteSave(true);
+    setWeightHistory((prev) => [{
+      date: new Date().toLocaleDateString('pt-BR'),
+      weight
+    }, ...prev].slice(0, 10));
+    setProfile((prev) => ({
+      ...prev,
+      currentWeight: weight
+    }));
+  };
+
+  const handleRemoveWeight = (index: number) => {
+    setHasPendingRemoteSave(true);
+    setWeightHistory((prev) => prev.filter((_, itemIndex) => itemIndex !== index));
+  };
+
+  const handleAddWater = (amount: number) => {
+    setHasPendingRemoteSave(true);
+    setWater((prev) => ({
+      ...prev,
+      consumedMl: prev.consumedMl + amount,
+      updatedAt: getTodayDateString()
+    }));
+  };
+
+  const handleSaveDiet = (nextDiet: WeeklyDiet) => {
+    setHasPendingRemoteSave(true);
+    setWeeklyDiet(nextDiet);
   };
 
   const handleLogin = async (email: string, password: string) => {
@@ -310,11 +389,7 @@ export default function App() {
               setSelectedDayId(dayId);
               setView('diet-day');
             }}
-            onAddWater={(amount) => setWater((prev) => ({
-              ...prev,
-              consumedMl: prev.consumedMl + amount,
-              updatedAt: getTodayDateString()
-            }))}
+            onAddWater={handleAddWater}
           />
         ) : null}
 
@@ -355,7 +430,7 @@ export default function App() {
           <WorkoutSetupPage
             onBack={() => setView('home')}
             workouts={workouts}
-            onSaveWorkouts={setWorkouts}
+            onSaveWorkouts={handleSaveWorkouts}
             tutorialStep={activeTutorialStep?.view === 'workout-setup' ? activeTutorialStep : null}
             tutorialStepIndex={tutorialStepIndex}
             tutorialStepsTotal={onboardingSteps.length}
@@ -369,7 +444,7 @@ export default function App() {
           <DietSetupPage
             onBack={() => setView('home')}
             diet={weeklyDiet}
-            onSaveDiet={setWeeklyDiet}
+            onSaveDiet={handleSaveDiet}
             tutorialStep={activeTutorialStep?.view === 'diet-setup' ? activeTutorialStep : null}
             tutorialStepIndex={tutorialStepIndex}
             tutorialStepsTotal={onboardingSteps.length}
@@ -392,9 +467,9 @@ export default function App() {
             onTutorialSkip={finishTutorial}
             onReplayTutorial={startTutorial}
             onBack={() => setView('home')}
-            onUpdateProfile={setProfile}
-            onAddWeight={(weight) => setWeightHistory((prev) => [...prev, { date: getTodayDateString(), weight }])}
-            onRemoveWeight={(index) => setWeightHistory((prev) => prev.filter((_, itemIndex) => itemIndex !== index))}
+            onUpdateProfile={handleUpdateProfile}
+            onAddWeight={handleAddWeight}
+            onRemoveWeight={handleRemoveWeight}
             session={session}
             onOpenLogin={() => undefined}
             onSignOut={handleSignOut}

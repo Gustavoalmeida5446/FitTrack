@@ -193,6 +193,30 @@ function resetWorkoutProgress(workouts: Workout[]): Workout[] {
   }));
 }
 
+function isPersistedWorkoutState(workouts: unknown): workouts is PersistedWorkoutState {
+  if (!workouts || Array.isArray(workouts) || typeof workouts !== 'object' || !('workouts' in workouts)) {
+    return false;
+  }
+
+  const workoutList = workouts.workouts;
+
+  if (!Array.isArray(workoutList)) {
+    return false;
+  }
+
+  return workoutList.every((workout) => {
+    if (!workout || typeof workout !== 'object') {
+      return false;
+    }
+
+    const candidate = workout as Partial<Workout>;
+    return typeof candidate.id === 'string'
+      && typeof candidate.name === 'string'
+      && Array.isArray(candidate.muscleGroups)
+      && Array.isArray(candidate.exercises);
+  });
+}
+
 function normalizeWorkoutList(workouts?: Workout[] | LegacyWorkoutState | LegacyWorkout[] | null): Workout[] {
   if (!workouts) {
     return [];
@@ -200,6 +224,15 @@ function normalizeWorkoutList(workouts?: Workout[] | LegacyWorkoutState | Legacy
 
   if (Array.isArray(workouts)) {
     return workouts.map((workout) => ({
+      id: workout.id,
+      name: workout.name,
+      muscleGroups: Array.isArray(workout.muscleGroups) ? workout.muscleGroups : [],
+      exercises: Array.isArray(workout.exercises) ? workout.exercises.map(normalizeWorkoutExercise) : []
+    }));
+  }
+
+  if (isPersistedWorkoutState(workouts)) {
+    return workouts.workouts.map((workout) => ({
       id: workout.id,
       name: workout.name,
       muscleGroups: Array.isArray(workout.muscleGroups) ? workout.muscleGroups : [],

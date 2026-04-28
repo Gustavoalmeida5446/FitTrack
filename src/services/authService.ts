@@ -1,9 +1,17 @@
-import type { Session } from '@supabase/supabase-js';
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 
 export interface AuthActionResult {
   success: boolean;
   requiresEmailConfirmation?: boolean;
+}
+
+function getAppRedirectUrl() {
+  if (typeof window === 'undefined') {
+    return undefined;
+  }
+
+  return new URL(import.meta.env.BASE_URL, window.location.origin).toString();
 }
 
 export async function getCurrentSession() {
@@ -34,7 +42,10 @@ export async function signInWithEmail(email: string, password: string) {
 export async function signUpWithEmail(email: string, password: string): Promise<AuthActionResult> {
   const { data, error } = await supabase.auth.signUp({
     email,
-    password
+    password,
+    options: {
+      emailRedirectTo: getAppRedirectUrl()
+    }
   });
 
   if (error) {
@@ -59,8 +70,8 @@ export async function signOut() {
   return true;
 }
 
-export function onAuthStateChange(callback: (session: Session | null) => void) {
-  return supabase.auth.onAuthStateChange((_, session) => {
-    callback(session);
+export function onAuthStateChange(callback: (event: AuthChangeEvent, session: Session | null) => void) {
+  return supabase.auth.onAuthStateChange((event, session) => {
+    callback(event, session);
   });
 }
