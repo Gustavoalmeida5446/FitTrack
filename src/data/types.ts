@@ -72,6 +72,7 @@ export interface WeeklyDiet {
 export interface UserProfile {
   currentWeight: number;
   heightCm: number;
+  birthDate: string;
   age: number;
   sex: Sex;
   activityLevel: ActivityLevel;

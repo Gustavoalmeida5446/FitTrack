@@ -934,6 +934,26 @@ body {
   gap: var(--space-3);
 }
 
+.goals-form-grid__date-picker,
+.goals-form-grid__date-picker.cds--form-item,
+.goals-form-grid__date-picker .cds--date-picker,
+.goals-form-grid__date-picker .cds--date-picker-container,
+.goals-form-grid__date-picker .cds--date-picker-input__wrapper,
+.goals-form-grid__date-picker .cds--date-picker__input {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.goals-form-grid__date-picker {
+  position: relative;
+}
+
+.goals-form-grid__date-picker .flatpickr-calendar,
+.goals-form-grid__date-picker .cds--date-picker__calendar {
+  z-index: 9000;
+}
+
 .goals-grid--compact {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }

@@ -14,11 +14,12 @@ import {
   Workout,
   WorkoutExercise
 } from '../data/types';
-import { getTodayDateString, weekDayLabels } from './date';
+import { calculateAgeFromBirthDate, getTodayDateString, normalizeBirthDateDisplay, weekDayLabels } from './date';
 
 export interface AppState {
   profile: UserProfile;
   workouts: Workout[];
+  workoutsUpdatedAt: string;
   water: WaterData;
   weeklyDiet: WeeklyDiet;
   weightHistory: WeightLog[];
@@ -50,6 +51,8 @@ type LegacyWorkout = {
 };
 
 type LegacyWorkoutState = {
+  updatedAt?: string;
+  progressUpdatedAt?: string;
   exerciseLibrary?: Array<{
     id: string;
     source?: 'manual' | 'local';
@@ -61,9 +64,9 @@ type LegacyWorkoutState = {
     mediaUrl?: string | null;
     mediaUrls?: string[];
   }>;
-  workouts?: Array<{
-    id: string;
-    name: string;
+    workouts?: Array<{
+      id: string;
+      name: string;
     muscleGroups: MuscleGroup[];
     exercises: Array<{
       id: string;
@@ -75,6 +78,11 @@ type LegacyWorkoutState = {
       done: boolean;
     }>;
   }>;
+};
+
+type PersistedWorkoutState = {
+  updatedAt?: string;
+  workouts?: Workout[];
 };
 
 type LegacyMeal = Meal & { done?: boolean };
@@ -90,6 +98,7 @@ function createEmptyProfile(): UserProfile {
   return {
     currentWeight: 0,
     heightCm: 0,
+    birthDate: '',
     age: 0,
     sex: 'Masculino' as Sex,
     activityLevel: 'Moderado' as ActivityLevel,
@@ -104,7 +113,10 @@ export function normalizeProfile(profile?: LegacyProfile): UserProfile {
   return {
     currentWeight: typeof profile?.currentWeight === 'number' ? profile.currentWeight : fallback.currentWeight,
     heightCm: typeof profile?.heightCm === 'number' ? profile.heightCm : fallback.heightCm,
-    age: typeof profile?.age === 'number' ? profile.age : fallback.age,
+    birthDate: typeof profile?.birthDate === 'string' ? normalizeBirthDateDisplay(profile.birthDate) : fallback.birthDate,
+    age: typeof profile?.birthDate === 'string' && profile.birthDate
+      ? calculateAgeFromBirthDate(profile.birthDate)
+      : typeof profile?.age === 'number' ? profile.age : fallback.age,
     sex: profile?.sex === 'Feminino' ? 'Feminino' : 'Masculino',
     activityLevel: ['Sedentario', 'Leve', 'Moderado', 'Intenso', 'Atleta'].includes(String(profile?.activityLevel))
       ? profile?.activityLevel as ActivityLevel
@@ -165,12 +177,23 @@ function normalizeWorkoutExercise(exercise: LegacyExercise): WorkoutExercise {
 export const defaultAppState: AppState = {
   profile: normalizeProfile(),
   workouts: [],
+  workoutsUpdatedAt: getTodayDateString(),
   water: createEmptyWater(),
   weeklyDiet: createEmptyWeeklyDiet(),
   weightHistory: [] as WeightLog[]
 };
 
-export function normalizeWorkoutState(workouts?: Workout[] | LegacyWorkoutState | LegacyWorkout[] | null): Workout[] {
+function resetWorkoutProgress(workouts: Workout[]): Workout[] {
+  return workouts.map((workout) => ({
+    ...workout,
+    exercises: workout.exercises.map((exercise) => ({
+      ...exercise,
+      done: false
+    }))
+  }));
+}
+
+function normalizeWorkoutList(workouts?: Workout[] | LegacyWorkoutState | LegacyWorkout[] | null): Workout[] {
   if (!workouts) {
     return [];
   }
@@ -215,6 +238,57 @@ export function normalizeWorkoutState(workouts?: Workout[] | LegacyWorkoutState 
       };
     }) : []
   }));
+}
+
+export function normalizeWorkoutState(workouts?: Workout[] | LegacyWorkoutState | LegacyWorkout[] | null): Workout[] {
+  return normalizeWorkoutList(workouts);
+}
+
+export function normalizeWorkoutProgressState(workouts?: Workout[] | PersistedWorkoutState | LegacyWorkoutState | LegacyWorkout[] | null): Pick<AppState, 'workouts' | 'workoutsUpdatedAt'> {
+  const today = getTodayDateString();
+  const rawUpdatedAt = workouts && !Array.isArray(workouts) && typeof workouts === 'object'
+    ? 'updatedAt' in workouts && typeof workouts.updatedAt === 'string'
+      ? workouts.updatedAt
+      : 'progressUpdatedAt' in workouts && typeof workouts.progressUpdatedAt === 'string'
+        ? workouts.progressUpdatedAt
+        : ''
+    : '';
+  const normalizedWorkouts = normalizeWorkoutList(workouts);
+
+  if (rawUpdatedAt === today) {
+    return {
+      workouts: normalizedWorkouts,
+      workoutsUpdatedAt: today
+    };
+  }
+
+  return {
+    workouts: resetWorkoutProgress(normalizedWorkouts),
+    workoutsUpdatedAt: today
+  };
+}
+
+export function serializeWorkoutProgressState(workouts: Workout[], workoutsUpdatedAt: string): PersistedWorkoutState {
+  return {
+    updatedAt: workoutsUpdatedAt,
+    workouts
+  };
+}
+
+export function normalizeWorkoutProgressForToday(workouts: Workout[], workoutsUpdatedAt: string): Pick<AppState, 'workouts' | 'workoutsUpdatedAt'> {
+  const today = getTodayDateString();
+
+  if (workoutsUpdatedAt === today) {
+    return {
+      workouts,
+      workoutsUpdatedAt
+    };
+  }
+
+  return {
+    workouts: resetWorkoutProgress(workouts),
+    workoutsUpdatedAt: today
+  };
 }
 
 export function normalizeWeeklyDiet(diet?: WeeklyDiet | LegacyWeeklyDiet | null): WeeklyDiet {

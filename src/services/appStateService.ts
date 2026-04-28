@@ -1,5 +1,13 @@
 import type { Session } from '@supabase/supabase-js';
-import { AppState, defaultAppState, normalizeProfile, normalizeWaterData, normalizeWeeklyDiet, normalizeWorkoutState } from '../lib/appState';
+import {
+  AppState,
+  defaultAppState,
+  normalizeProfile,
+  normalizeWaterData,
+  normalizeWeeklyDiet,
+  normalizeWorkoutProgressState,
+  serializeWorkoutProgressState
+} from '../lib/appState';
 import { supabase } from '../lib/supabaseClient';
 
 interface RemoteAppStateRow {
@@ -11,9 +19,12 @@ interface RemoteAppStateRow {
 }
 
 function mapRemoteRow(row: RemoteAppStateRow): AppState {
+  const workoutState = normalizeWorkoutProgressState(row.workouts as AppState['workouts']);
+
   return {
     profile: normalizeProfile(row.profile),
-    workouts: normalizeWorkoutState(row.workouts as AppState['workouts']),
+    workouts: workoutState.workouts,
+    workoutsUpdatedAt: workoutState.workoutsUpdatedAt,
     water: normalizeWaterData(row.water),
     weeklyDiet: normalizeWeeklyDiet(row.weekly_diet as AppState['weeklyDiet']),
     weightHistory: Array.isArray(row.weight_history) ? row.weight_history : []
@@ -34,7 +45,7 @@ async function replaceRemoteAppState(session: Session, state: AppState) {
     .upsert({
       user_id: session.user.id,
       profile: state.profile,
-      workouts: state.workouts,
+      workouts: serializeWorkoutProgressState(state.workouts, state.workoutsUpdatedAt),
       water: state.water,
       weekly_diet: state.weeklyDiet,
       weight_history: state.weightHistory
@@ -54,7 +65,7 @@ async function createRemoteAppState(session: Session, state: AppState) {
     .insert({
       user_id: session.user.id,
       profile: state.profile,
-      workouts: state.workouts,
+      workouts: serializeWorkoutProgressState(state.workouts, state.workoutsUpdatedAt),
       water: state.water,
       weekly_diet: state.weeklyDiet,
       weight_history: state.weightHistory
@@ -105,7 +116,7 @@ export async function saveRemoteAppState(session: Session, state: AppState) {
     .upsert({
       user_id: session.user.id,
       profile: state.profile,
-      workouts: state.workouts,
+      workouts: serializeWorkoutProgressState(state.workouts, state.workoutsUpdatedAt),
       water: state.water,
       weekly_diet: state.weeklyDiet,
       weight_history: state.weightHistory

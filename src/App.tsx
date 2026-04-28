@@ -11,7 +11,7 @@ import { WorkoutSetupPage } from './pages/WorkoutSetupPage';
 import { LoginPage } from './pages/LoginPage';
 import { type TutorialStepContent } from './components/ContextualTutorialCard';
 import { WeeklyDiet, Workout } from './data/types';
-import { AppState, defaultAppState, normalizeWaterData } from './lib/appState';
+import { AppState, defaultAppState, normalizeWaterData, normalizeWorkoutProgressForToday } from './lib/appState';
 import { getTodayDateString } from './lib/date';
 import { calculateNutritionTargets } from './lib/nutrition';
 import { getCurrentSession, onAuthStateChange, signInWithEmail, signOut, signUpWithEmail } from './services/authService';
@@ -24,7 +24,7 @@ const onboardingSteps: Array<TutorialStepContent & { view: View }> = [
     section: 'Etapa 1: Perfil',
     title: 'Comece pelo perfil',
     description: 'Preencha seus dados para liberar as metas.',
-    body: 'Nesta tela, preencha peso, altura, idade e sexo. Depois escolha atividade, objetivo e tipo de dieta. Assim que esses campos forem preenchidos, as metas aparecem logo abaixo automaticamente. Aqui também é onde você registra e acompanha seu peso ao longo do tempo.',
+    body: 'Nesta tela, preencha peso, altura, data de nascimento e sexo. Depois escolha atividade, objetivo e tipo de dieta. Assim que esses campos forem preenchidos, as metas aparecem logo abaixo automaticamente. Aqui também é onde você registra e acompanha seu peso ao longo do tempo.',
     view: 'goals'
   },
   {
@@ -62,6 +62,7 @@ export default function App() {
 
   const [profile, setProfile] = useState(defaultAppState.profile);
   const [workouts, setWorkouts] = useState(defaultAppState.workouts);
+  const [workoutsUpdatedAt, setWorkoutsUpdatedAt] = useState(defaultAppState.workoutsUpdatedAt);
   const [water, setWater] = useState(normalizeWaterData(defaultAppState.water));
   const [weeklyDiet, setWeeklyDiet] = useState(defaultAppState.weeklyDiet);
   const [weightHistory, setWeightHistory] = useState(defaultAppState.weightHistory);
@@ -69,10 +70,11 @@ export default function App() {
   const appState = useMemo<AppState>(() => ({
     profile,
     workouts,
+    workoutsUpdatedAt,
     water,
     weeklyDiet,
     weightHistory
-  }), [profile, workouts, water, weeklyDiet, weightHistory]);
+  }), [profile, workouts, workoutsUpdatedAt, water, weeklyDiet, weightHistory]);
 
   const targets = useMemo(() => calculateNutritionTargets(profile), [profile]);
   const selectedWorkout = useMemo(() => workouts.find((item) => item.id === selectedWorkoutId), [workouts, selectedWorkoutId]);
@@ -110,6 +112,7 @@ export default function App() {
     if (!session) {
       setProfile(defaultAppState.profile);
       setWorkouts(defaultAppState.workouts);
+      setWorkoutsUpdatedAt(defaultAppState.workoutsUpdatedAt);
       setWater(normalizeWaterData(defaultAppState.water));
       setWeeklyDiet(defaultAppState.weeklyDiet);
       setWeightHistory(defaultAppState.weightHistory);
@@ -125,6 +128,7 @@ export default function App() {
 
       setProfile(remoteState.profile);
       setWorkouts(remoteState.workouts);
+      setWorkoutsUpdatedAt(remoteState.workoutsUpdatedAt);
       setWater(normalizeWaterData(remoteState.water));
       setWeeklyDiet(remoteState.weeklyDiet);
       setWeightHistory(remoteState.weightHistory);
@@ -171,7 +175,34 @@ export default function App() {
     setView(onboardingSteps[tutorialStepIndex].view);
   }, [isTutorialOpen, tutorialStepIndex]);
 
+  useEffect(() => {
+    if (!session || !isRemoteReady) {
+      return;
+    }
+
+    const syncWorkoutProgressDate = () => {
+      const normalizedState = normalizeWorkoutProgressForToday(workouts, workoutsUpdatedAt);
+
+      if (normalizedState.workoutsUpdatedAt === workoutsUpdatedAt) {
+        return;
+      }
+
+      setWorkouts(normalizedState.workouts);
+      setWorkoutsUpdatedAt(normalizedState.workoutsUpdatedAt);
+    };
+
+    syncWorkoutProgressDate();
+    window.addEventListener('focus', syncWorkoutProgressDate);
+    document.addEventListener('visibilitychange', syncWorkoutProgressDate);
+
+    return () => {
+      window.removeEventListener('focus', syncWorkoutProgressDate);
+      document.removeEventListener('visibilitychange', syncWorkoutProgressDate);
+    };
+  }, [isRemoteReady, session, workouts, workoutsUpdatedAt]);
+
   const updateWorkout = (workoutId: string, updater: (workout: Workout) => Workout) => {
+    setWorkoutsUpdatedAt(getTodayDateString());
     setWorkouts((prev) => prev.map((workout) => (workout.id === workoutId ? updater(workout) : workout)));
   };
 

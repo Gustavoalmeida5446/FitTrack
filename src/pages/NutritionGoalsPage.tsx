@@ -1,10 +1,12 @@
 import { ChartLine, CheckmarkFilled, ChevronLeft, Login, Logout, TrashCan, UserAvatar } from '@carbon/icons-react';
-import { Button, NumberInput, Select, SelectItem, Tile } from '@carbon/react';
+import { Button, DatePicker, DatePickerInput, NumberInput, Select, SelectItem, Tile } from '@carbon/react';
 import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
+import { Portuguese } from 'flatpickr/dist/l10n/pt.js';
 import { ContextualTutorialCard, type TutorialStepContent } from '../components/ContextualTutorialCard';
 import { ActivityLevel, DietType, GoalType, NutritionTargets, UserProfile, WeightLog } from '../data/types';
 import { PageContainer } from '../components/PageContainer';
+import { calculateAgeFromBirthDate } from '../lib/date';
 
 interface Props {
   profile: UserProfile;
@@ -117,7 +119,24 @@ export function NutritionGoalsPage({
           <div className="goals-form-grid">
             <NumberInput id="profile-weight" label="Peso (kg)" min={1} value={profile.currentWeight} onChange={(event) => onUpdateProfile({ ...profile, currentWeight: Number((event.target as HTMLInputElement).value) })} />
             <NumberInput id="profile-height" label="Altura (cm)" min={1} value={profile.heightCm} onChange={(event) => onUpdateProfile({ ...profile, heightCm: Number((event.target as HTMLInputElement).value) })} />
-            <NumberInput id="profile-age" label="Idade" min={1} value={profile.age} onChange={(event) => onUpdateProfile({ ...profile, age: Number((event.target as HTMLInputElement).value) })} />
+            <DatePicker
+              className="goals-form-grid__date-picker"
+              datePickerType="single"
+              dateFormat="d-m-Y"
+              locale={{ ...Portuguese, locale: 'pt' }}
+              maxDate={new Date()}
+              onChange={(_, dateString) => {
+                const birthDate = Array.isArray(dateString) ? dateString[0] ?? '' : dateString ?? '';
+                onUpdateProfile({ ...profile, birthDate, age: calculateAgeFromBirthDate(birthDate) });
+              }}
+              value={profile.birthDate}
+            >
+              <DatePickerInput
+                id="profile-birth-date"
+                labelText="Data de nascimento"
+                placeholder="dd-mm-aaaa"
+              />
+            </DatePicker>
             <Select id="profile-sex" labelText="Sexo" value={profile.sex} onChange={(event) => onUpdateProfile({ ...profile, sex: event.target.value as UserProfile['sex'] })}>
               <SelectItem value="Masculino" text="Masculino" />
               <SelectItem value="Feminino" text="Feminino" />
