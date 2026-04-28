@@ -87,7 +87,7 @@ Status:
 - [x] preferir sempre `state.value` do Carbon
 - [x] centralizar sanitização num helper
 
-### 7. Decidir se exercício manual existe ou não
+### [x] 7. Decidir se exercício manual existe ou não
 - Objetivo: alinhar modelo de dados com a UI real.
 - Risco atual: médio.
 - Arquivos:
@@ -95,8 +95,9 @@ Status:
 - [src/pages/WorkoutSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/WorkoutSetupPage.tsx)
 - [src/lib/appState.ts](/home/gustavo/projects/FitTrack/src/lib/appState.ts)
 - Tarefas:
-- ou habilitar fluxo completo de exercício manual
-- ou remover `source: 'manual'` e simplificar o código
+- [x] parar de produzir exercícios manuais no fluxo atual da UI
+- [x] remover `source: 'manual'` do modelo atual e simplificar o código de ponta a ponta
+- [x] manter compatibilidade de leitura no fluxo legado
 
 ## Prioridade 3
 
@@ -153,7 +154,7 @@ Status:
 
 ## Prioridade 4
 
-### [-] 12. Consolidar utilitários pequenos
+### [x] 12. Consolidar utilitários pequenos
 - Objetivo: reduzir duplicação e facilitar onboarding no código.
 - Risco atual: baixo.
 - Arquivos:
@@ -171,9 +172,10 @@ Status:
 - [x] unificar normalização de busca
 - [x] unificar parse e arredondamento de alimento
 - [x] avançar na unificação de parsing numérico simples
-- [ ] unificar parse de datas e números
+- [x] extrair helpers pequenos de formatação numérica para telas de dieta
+- [x] unificar parse de datas e números
 
-### [-] 13. Extrair componentes de UI repetidos
+### [x] 13. Extrair componentes de UI repetidos
 - Objetivo: simplificar páginas longas.
 - Risco atual: baixo.
 - Arquivos:
@@ -184,16 +186,21 @@ Status:
 - [src/pages/NutritionGoalsPage.tsx](/home/gustavo/projects/FitTrack/src/pages/NutritionGoalsPage.tsx)
 - [src/pages/LoginPage.tsx](/home/gustavo/projects/FitTrack/src/pages/LoginPage.tsx)
 - [src/components/CardHeader.tsx](/home/gustavo/projects/FitTrack/src/components/CardHeader.tsx)
+- [src/components/InfoBlock.tsx](/home/gustavo/projects/FitTrack/src/components/InfoBlock.tsx)
+- [src/components/SelectionSummaryCard.tsx](/home/gustavo/projects/FitTrack/src/components/SelectionSummaryCard.tsx)
 - [src/components/StatPill.tsx](/home/gustavo/projects/FitTrack/src/components/StatPill.tsx)
+- [src/components/StatsGrid.tsx](/home/gustavo/projects/FitTrack/src/components/StatsGrid.tsx)
+- [src/components/SummaryStatsCard.tsx](/home/gustavo/projects/FitTrack/src/components/SummaryStatsCard.tsx)
 - [src/styles/app.css](/home/gustavo/projects/FitTrack/src/styles/app.css)
 - Tarefas:
 - [x] extrair bloco `stat-pill`
 - [x] extrair cabeçalho de card
-- [ ] extrair cards de resumo
-- extrair blocos de métricas
-- extrair listas reutilizáveis
+- [x] extrair cards de resumo
+- [x] extrair bloco `info-block`
+- [x] extrair blocos de métricas
+- [x] extrair listas reutilizáveis
 
-### 14. Revisar schema e modelo persistido
+### [x] 14. Revisar schema e modelo persistido
 - Objetivo: alinhar melhor o shape salvo com o shape usado na UI.
 - Risco atual: baixo/médio.
 - Arquivos:
@@ -201,9 +208,9 @@ Status:
 - [src/services/appStateService.ts](/home/gustavo/projects/FitTrack/src/services/appStateService.ts)
 - [src/lib/appState.ts](/home/gustavo/projects/FitTrack/src/lib/appState.ts)
 - Tarefas:
-- avaliar versionamento de payload
-- documentar formatos persistidos
-- preparar migrações futuras com menos heurística
+- [x] avaliar versionamento de payload
+- [x] documentar formatos persistidos
+- [x] preparar migrações futuras com menos heurística
 
 ### 15. Adicionar testes mínimos
 - Objetivo: reduzir regressões em persistência e cálculos.

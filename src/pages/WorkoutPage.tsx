@@ -3,7 +3,8 @@ import { Button, Checkbox, NumberInput, Tile } from '@carbon/react';
 import { useEffect, useState } from 'react';
 import { CardHeader } from '../components/CardHeader';
 import { PageContainer } from '../components/PageContainer';
-import { StatPill } from '../components/StatPill';
+import { StatsGrid } from '../components/StatsGrid';
+import { SummaryStatsCard } from '../components/SummaryStatsCard';
 import { Workout } from '../data/types';
 import { getSafeNumber } from '../lib/number';
 
@@ -52,7 +53,7 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateLoa
   };
 
   const handleUpdateLoad = (exerciseId: string, value: number | string, fallback: number) => {
-    const nextLoad = getSafeNumber(Number(value), fallback);
+    const nextLoad = getSafeNumber(value, fallback);
 
     setLoadValues((prev) => ({
       ...prev,
@@ -76,18 +77,13 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateLoa
       subtitle={workout.muscleGroups.join(' • ')}
       actions={<Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button>}
     >
-      <Tile className="card metric-card workout-summary-card">
-        <div className="metric-row workout-summary-card__row">
-          <div>
-            <span className="meta-label">Progresso</span>
-            <strong>{completedExercises}/{workout.exercises.length} exercícios</strong>
-          </div>
-          <div>
-            <span className="meta-label">Grupos</span>
-            <strong>{workout.muscleGroups.length}</strong>
-          </div>
-        </div>
-      </Tile>
+      <SummaryStatsCard
+        className="workout-summary-card"
+        items={[
+          { label: 'Progresso', value: `${completedExercises}/${workout.exercises.length} exercícios` },
+          { label: 'Grupos', value: workout.muscleGroups.length }
+        ]}
+      />
 
       <div className="stack">
         {workout.exercises.map((exercise) => {
@@ -121,11 +117,14 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateLoa
                   />
                 </button>
               ) : null}
-              <div className="workout-exercise-card__meta">
-                <StatPill label="Repetições" value={exercise.reps} />
-                <StatPill label="Séries" value={exercise.sets} />
-                <StatPill label={<span className="stat-pill__icon"><Timer size={14} /></span>} value={`${exercise.restSeconds}s`} />
-              </div>
+              <StatsGrid
+                className="workout-exercise-card__meta"
+                items={[
+                  { label: 'Repetições', value: exercise.reps },
+                  { label: 'Séries', value: exercise.sets },
+                  { label: <span className="stat-pill__icon"><Timer size={14} /></span>, value: `${exercise.restSeconds}s` }
+                ]}
+              />
               <NumberInput
                 id={`load-${exercise.id}`}
                 label="Carga (kg)"

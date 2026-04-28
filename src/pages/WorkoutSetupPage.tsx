@@ -2,6 +2,8 @@ import { CheckmarkFilled, ChevronLeft, Search, TrashCan } from '@carbon/icons-re
 import { Button, NumberInput, TextInput, Tile } from '@carbon/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ContextualTutorialCard, type TutorialStepContent } from '../components/ContextualTutorialCard';
+import { InfoBlock } from '../components/InfoBlock';
+import { SelectionSummaryCard } from '../components/SelectionSummaryCard';
 import { MuscleGroup, Workout, WorkoutExercise } from '../data/types';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { searchExercises } from '../services/exercises';
@@ -27,7 +29,6 @@ const defaultExerciseValues = {
   mediaUrl: null as string | null,
   mediaUrls: [] as string[],
   mediaType: 'none' as WorkoutExercise['mediaType'],
-  source: 'manual' as WorkoutExercise['source'],
   sourceId: undefined as string | undefined,
   loadKg: 10,
   reps: 10,
@@ -60,7 +61,6 @@ export function WorkoutSetupPage({
   const [exerciseMediaUrl, setExerciseMediaUrl] = useState<string | null>(defaultExerciseValues.mediaUrl);
   const [exerciseMediaUrls, setExerciseMediaUrls] = useState<string[]>(defaultExerciseValues.mediaUrls);
   const [exerciseMediaType, setExerciseMediaType] = useState<WorkoutExercise['mediaType']>(defaultExerciseValues.mediaType);
-  const [exerciseSource, setExerciseSource] = useState<WorkoutExercise['source']>(defaultExerciseValues.source);
   const [exerciseSourceId, setExerciseSourceId] = useState<string | undefined>(defaultExerciseValues.sourceId);
   const [loadKg, setLoadKg] = useState(defaultExerciseValues.loadKg);
   const [reps, setReps] = useState(defaultExerciseValues.reps);
@@ -68,7 +68,7 @@ export function WorkoutSetupPage({
   const [restSeconds, setRestSeconds] = useState(defaultExerciseValues.restSeconds);
   const debouncedQuery = useDebouncedValue(query, 200);
 
-  const canAddExercise = useMemo(() => exerciseName.trim().length > 0 && exerciseSource === 'local' && Boolean(exerciseSourceId), [exerciseName, exerciseSource, exerciseSourceId]);
+  const canAddExercise = useMemo(() => exerciseName.trim().length > 0 && Boolean(exerciseSourceId), [exerciseName, exerciseSourceId]);
   const derivedWorkoutGroups = useMemo(() => Array.from(new Set(draftExercises.map((exercise) => exercise.muscleGroup))), [draftExercises]);
   const canSaveWorkout = useMemo(() => name.trim().length > 0 && draftExercises.length > 0, [name, draftExercises.length]);
 
@@ -98,7 +98,6 @@ export function WorkoutSetupPage({
     setExerciseMediaUrl(defaultExerciseValues.mediaUrl);
     setExerciseMediaUrls(defaultExerciseValues.mediaUrls);
     setExerciseMediaType(defaultExerciseValues.mediaType);
-    setExerciseSource(defaultExerciseValues.source);
     setExerciseSourceId(defaultExerciseValues.sourceId);
     setLoadKg(defaultExerciseValues.loadKg);
     setReps(defaultExerciseValues.reps);
@@ -124,7 +123,6 @@ export function WorkoutSetupPage({
     setExerciseMediaUrl(exercise.mediaUrl);
     setExerciseMediaUrls(exercise.mediaUrls);
     setExerciseMediaType(exercise.mediaType);
-    setExerciseSource('local');
     setExerciseSourceId(exercise.sourceId);
     setActivePreviewImageIndex(0);
     setOptions([]);
@@ -135,7 +133,7 @@ export function WorkoutSetupPage({
 
     const nextExercise: WorkoutExercise = {
       id: editingExerciseId ?? crypto.randomUUID(),
-      source: exerciseSource,
+      source: 'local',
       sourceId: exerciseSourceId,
       name: exerciseName.trim(),
       ptName: exercisePtName,
@@ -167,7 +165,6 @@ export function WorkoutSetupPage({
     setExerciseMediaUrl(exercise.mediaUrl);
     setExerciseMediaUrls(exercise.mediaUrls ?? (exercise.mediaUrl ? [exercise.mediaUrl] : []));
     setExerciseMediaType(exercise.mediaType);
-    setExerciseSource(exercise.source);
     setExerciseSourceId(exercise.sourceId);
     setLoadKg(exercise.loadKg);
     setReps(exercise.reps);
@@ -261,7 +258,6 @@ export function WorkoutSetupPage({
                 setExerciseMediaUrl(null);
                 setExerciseMediaUrls([]);
                 setExerciseMediaType('none');
-                setExerciseSource('manual');
                 setExerciseSourceId(undefined);
                 setActivePreviewImageIndex(0);
               }}
@@ -312,29 +308,27 @@ export function WorkoutSetupPage({
 
           <div className="stack">
             {draftExercises.length > 0 ? draftExercises.map((exercise, index) => (
-              <div key={exercise.id} className="setup-selection-card">
-                <div className="setup-selection-card__header">
-                  <div>
-                    <span className="meta-label">Exercício {index + 1}</span>
-                    <p>{exercise.ptName ?? exercise.name}</p>
-                  </div>
-                  <div className="inline-actions">
+              <SelectionSummaryCard
+                key={exercise.id}
+                label={`Exercício ${index + 1}`}
+                title={exercise.ptName ?? exercise.name}
+                actions={(
+                  <>
                     <Button kind="ghost" size="sm" onClick={() => handleEditExercise(exercise)}>Editar</Button>
                     <Button kind="ghost" size="sm" renderIcon={TrashCan} iconDescription="Remover exercício" onClick={() => handleRemoveExercise(exercise.id)}>Remover</Button>
-                  </div>
-                </div>
-                <div className="setup-selection-card__meta">
-                  <span>{exercise.muscleGroup}</span>
-                  <span>{exercise.loadKg} kg</span>
-                  <span>{exercise.sets}x{exercise.reps}</span>
-                  <span>{exercise.restSeconds}s</span>
-                </div>
-              </div>
+                  </>
+                )}
+                meta={[
+                  exercise.muscleGroup,
+                  `${exercise.loadKg} kg`,
+                  `${exercise.sets}x${exercise.reps}`,
+                  `${exercise.restSeconds}s`
+                ]}
+              />
             )) : (
-              <div className="info-block">
-                <span className="meta-label">Exercícios do treino</span>
-                <p>Adicione pelo menos um exercício para salvar o treino.</p>
-              </div>
+              <InfoBlock label="Exercícios do treino">
+                Adicione pelo menos um exercício para salvar o treino.
+              </InfoBlock>
             )}
           </div>
           <div className="setup-card__footer">
@@ -359,26 +353,22 @@ export function WorkoutSetupPage({
           </div>
           <div className="stack">
             {workouts.length > 0 ? workouts.map((workout) => (
-              <div key={workout.id} className="setup-selection-card">
-                <div className="setup-selection-card__header">
-                  <div>
-                    <span className="meta-label">{workout.exercises.length} exercício(s)</span>
-                    <p>{workout.name}</p>
-                  </div>
-                  <div className="inline-actions">
+              <SelectionSummaryCard
+                key={workout.id}
+                label={`${workout.exercises.length} exercício(s)`}
+                title={workout.name}
+                actions={(
+                  <>
                     <Button kind="ghost" size="sm" onClick={() => handleEditWorkout(workout)}>Editar</Button>
                     <Button kind="ghost" size="sm" renderIcon={TrashCan} iconDescription="Remover treino" onClick={() => handleRemoveWorkout(workout.id)}>Remover</Button>
-                  </div>
-                </div>
-                <div className="setup-selection-card__meta">
-                  {workout.muscleGroups.map((group) => <span key={group}>{group}</span>)}
-                </div>
-              </div>
+                  </>
+                )}
+                meta={workout.muscleGroups}
+              />
             )) : (
-              <div className="info-block">
-                <span className="meta-label">Treinos</span>
-                <p>Nenhum treino salvo ainda.</p>
-              </div>
+              <InfoBlock label="Treinos">
+                Nenhum treino salvo ainda.
+              </InfoBlock>
             )}
           </div>
         </Tile>

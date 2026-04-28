@@ -10,6 +10,10 @@ export function formatDatePtBr(date = new Date()): string {
   return date.toLocaleDateString('pt-BR');
 }
 
+export function getSingleDatePickerValue(value: string | string[] | undefined | null): string {
+  return Array.isArray(value) ? value[0] ?? '' : value ?? '';
+}
+
 function parseBirthDateParts(birthDate: string): { year: number; month: number; day: number } | null {
   const parts = birthDate.split('-').map(Number);
 

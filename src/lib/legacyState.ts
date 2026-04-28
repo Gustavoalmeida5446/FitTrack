@@ -58,9 +58,12 @@ export type LegacyWorkoutState = {
 };
 
 export type PersistedWorkoutState = {
+  version?: 1;
   updatedAt?: string;
   workouts?: Workout[];
 };
+
+export type WorkoutStateFormat = 'empty' | 'array' | 'current' | 'legacy-library' | 'unknown';
 
 type LegacyMeal = Meal & { done?: boolean };
 type LegacyDietDay = { id: string; label: string; meals?: LegacyMeal[] };
@@ -99,7 +102,7 @@ function normalizeWorkoutExercise(exercise: LegacyExercise): WorkoutExercise {
 
   return {
     id: exercise.id,
-    source: exercise.source ?? 'manual',
+    source: 'local',
     sourceId: exercise.sourceId,
     name: exercise.name,
     ptName: exercise.ptName,
@@ -115,7 +118,7 @@ function normalizeWorkoutExercise(exercise: LegacyExercise): WorkoutExercise {
   };
 }
 
-function isPersistedWorkoutState(workouts: unknown): workouts is PersistedWorkoutState {
+export function isPersistedWorkoutState(workouts: unknown): workouts is PersistedWorkoutState {
   if (!workouts || Array.isArray(workouts) || typeof workouts !== 'object' || !('workouts' in workouts)) {
     return false;
   }
@@ -139,22 +142,60 @@ function isPersistedWorkoutState(workouts: unknown): workouts is PersistedWorkou
   });
 }
 
-export function normalizeLegacyWorkoutList(workouts?: Workout[] | LegacyWorkoutState | LegacyWorkout[] | null): Workout[] {
+export function isLegacyWorkoutLibraryState(workouts: unknown): workouts is LegacyWorkoutState {
+  return Boolean(
+    workouts
+    && !Array.isArray(workouts)
+    && typeof workouts === 'object'
+    && ('exerciseLibrary' in workouts || 'progressUpdatedAt' in workouts)
+  );
+}
+
+export function getWorkoutStateFormat(workouts: unknown): WorkoutStateFormat {
   if (!workouts) {
-    return [];
+    return 'empty';
   }
 
   if (Array.isArray(workouts)) {
-    return workouts.map((workout) => ({
-      id: workout.id,
-      name: workout.name,
-      muscleGroups: Array.isArray(workout.muscleGroups) ? workout.muscleGroups : [],
-      exercises: Array.isArray(workout.exercises) ? workout.exercises.map(normalizeWorkoutExercise) : []
-    }));
+    return 'array';
   }
 
   if (isPersistedWorkoutState(workouts)) {
-    return workouts.workouts.map((workout) => ({
+    return 'current';
+  }
+
+  if (isLegacyWorkoutLibraryState(workouts)) {
+    return 'legacy-library';
+  }
+
+  return 'unknown';
+}
+
+export function getWorkoutProgressUpdatedAt(workouts: unknown): string {
+  if (!workouts || Array.isArray(workouts) || typeof workouts !== 'object') {
+    return '';
+  }
+
+  if ('updatedAt' in workouts && typeof workouts.updatedAt === 'string') {
+    return workouts.updatedAt;
+  }
+
+  if ('progressUpdatedAt' in workouts && typeof workouts.progressUpdatedAt === 'string') {
+    return workouts.progressUpdatedAt;
+  }
+
+  return '';
+}
+
+export function normalizeLegacyWorkoutList(workouts?: Workout[] | LegacyWorkoutState | LegacyWorkout[] | null): Workout[] {
+  const workoutStateFormat = getWorkoutStateFormat(workouts);
+
+  if (workoutStateFormat === 'empty' || workoutStateFormat === 'unknown') {
+    return [];
+  }
+
+  if (workoutStateFormat === 'array') {
+    return (workouts as Workout[]).map((workout) => ({
       id: workout.id,
       name: workout.name,
       muscleGroups: Array.isArray(workout.muscleGroups) ? workout.muscleGroups : [],
@@ -162,8 +203,18 @@ export function normalizeLegacyWorkoutList(workouts?: Workout[] | LegacyWorkoutS
     }));
   }
 
-  const library = Array.isArray(workouts.exerciseLibrary) ? workouts.exerciseLibrary : [];
-  const nextWorkouts = Array.isArray(workouts.workouts) ? workouts.workouts : [];
+  if (workoutStateFormat === 'current') {
+    return (workouts as PersistedWorkoutState).workouts?.map((workout) => ({
+      id: workout.id,
+      name: workout.name,
+      muscleGroups: Array.isArray(workout.muscleGroups) ? workout.muscleGroups : [],
+      exercises: Array.isArray(workout.exercises) ? workout.exercises.map(normalizeWorkoutExercise) : []
+    })) ?? [];
+  }
+
+  const legacyWorkouts = workouts as LegacyWorkoutState;
+  const library = Array.isArray(legacyWorkouts.exerciseLibrary) ? legacyWorkouts.exerciseLibrary : [];
+  const nextWorkouts = Array.isArray(legacyWorkouts.workouts) ? legacyWorkouts.workouts : [];
 
   return nextWorkouts.map((workout) => ({
     id: workout.id,
@@ -177,7 +228,7 @@ export function normalizeLegacyWorkoutList(workouts?: Workout[] | LegacyWorkoutS
 
       return {
         id: exercise.id,
-        source: definition?.source ?? 'manual',
+        source: 'local',
         sourceId: definition?.sourceId,
         name: definition?.name ?? 'Exercício',
         ptName: definition?.ptName,

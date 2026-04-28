@@ -2,10 +2,10 @@ import { CalendarHeatMap, ChevronRight, TemperatureWater } from '@carbon/icons-r
 import { Button, ProgressBar, Tile } from '@carbon/react';
 import { ContextualTutorialCard, type TutorialStepContent } from '../components/ContextualTutorialCard';
 import { PageContainer } from '../components/PageContainer';
-import { StatPill } from '../components/StatPill';
+import { StatsGrid } from '../components/StatsGrid';
 import { NutritionTargets, WaterData, WeeklyDiet, Workout } from '../data/types';
 import { getDietDayIdForDate } from '../lib/date';
-import { parseDecimalNumber } from '../lib/number';
+import { calculateClampedPercentage, formatRoundedInteger, parseDecimalNumber } from '../lib/number';
 import { calculateDietProgress, getMealsForDietDay } from '../lib/nutrition';
 
 interface Props {
@@ -49,7 +49,7 @@ export function HomePage({
   onOpenDietDay,
   onAddWater
 }: Props) {
-  const progress = waterGoalMl > 0 ? Math.min(100, Math.round((water.consumedMl / waterGoalMl) * 100)) : 0;
+  const progress = calculateClampedPercentage(water.consumedMl, waterGoalMl);
   const hasDiet = weeklyDiet.days.some((day) => day.mealIds.length > 0);
   const todayDietDay = weeklyDiet.days.find((day) => day.id === getDietDayIdForDate()) ?? weeklyDiet.days[0];
   const todayMeals = getMealsForDietDay(todayDietDay, weeklyDiet.meals);
@@ -136,8 +136,8 @@ export function HomePage({
             <div className="list-card__content">
               <h3>{todayDietDay.label}</h3>
               <span>{todayDietDay.mealIds.length} refeições</span>
-              <span>Proteína hoje: {Math.round(todayDietProgress.consumedProtein)}g</span>
-              <span>Calorias hoje: {Math.round(todayDietProgress.consumedCalories)} kcal</span>
+              <span>Proteína hoje: {formatRoundedInteger(todayDietProgress.consumedProtein)}g</span>
+              <span>Calorias hoje: {formatRoundedInteger(todayDietProgress.consumedCalories)} kcal</span>
             </div>
             <ChevronRight size={24} className="list-card__chevron" />
           </Tile>
@@ -149,12 +149,15 @@ export function HomePage({
         )}
         {hasDiet && todayDietDay ? (
           <Tile className="card metric-card diet-home-summary-card">
-            <div className="diet-home-summary-card__grid">
-              <StatPill label="Meta de proteína" value={`${targets.proteinDaily}g`} />
-              <StatPill label="Proteína hoje" value={`${Math.round(todayDietProgress.consumedProtein)}g`} />
-              <StatPill label="Meta de calorias" value={`${targets.caloriesDaily} kcal`} />
-              <StatPill label="Calorias hoje" value={`${Math.round(todayDietProgress.consumedCalories)} kcal`} />
-            </div>
+            <StatsGrid
+              className="diet-home-summary-card__grid"
+              items={[
+                { label: 'Meta de proteína', value: `${targets.proteinDaily}g` },
+                { label: 'Proteína hoje', value: `${formatRoundedInteger(todayDietProgress.consumedProtein)}g` },
+                { label: 'Meta de calorias', value: `${targets.caloriesDaily} kcal` },
+                { label: 'Calorias hoje', value: `${formatRoundedInteger(todayDietProgress.consumedCalories)} kcal` }
+              ]}
+            />
           </Tile>
         ) : null}
       </div>

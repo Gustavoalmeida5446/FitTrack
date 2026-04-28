@@ -18,3 +18,19 @@ export function parseDecimalNumber(value: number | string, fallback = 0): number
 export function roundToDecimalPlaces(value: number, decimalPlaces = 1): number {
   return Number(value.toFixed(decimalPlaces));
 }
+
+export function formatFixedDecimal(value: number, decimalPlaces = 1): string {
+  return roundToDecimalPlaces(value, decimalPlaces).toFixed(decimalPlaces);
+}
+
+export function formatRoundedInteger(value: number): string {
+  return String(Math.round(value));
+}
+
+export function calculateClampedPercentage(current: number, total: number): number {
+  if (total <= 0) {
+    return 0;
+  }
+
+  return Math.min(100, Math.round((current / total) * 100));
+}

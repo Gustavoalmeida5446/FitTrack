@@ -11,6 +11,8 @@ import {
 } from '../data/types';
 import { getTodayDateString, weekDayLabels } from './date';
 import {
+  getWorkoutProgressUpdatedAt,
+  getWorkoutStateFormat,
   LegacyProfile,
   LegacyWeeklyDiet,
   LegacyWorkout,
@@ -29,6 +31,15 @@ export interface AppState {
   weeklyDiet: WeeklyDiet;
   weightHistory: WeightLog[];
 }
+
+export const PERSISTED_WORKOUT_STATE_VERSION = 1;
+
+// AppState é o shape em memória usado pela UI.
+// Para persistência remota, o único formato novo que escrevemos para treinos é:
+// { version: 1, updatedAt: 'YYYY-MM-DD', workouts: Workout[] }
+//
+// A leitura ainda aceita formatos antigos via legacyState.ts para manter compatibilidade,
+// mas esse arquivo trata o formato acima como o caminho principal do projeto.
 
 function createEmptyProfile(): UserProfile {
   return {
@@ -99,14 +110,16 @@ export function normalizeWorkoutState(workouts?: Workout[] | LegacyWorkoutState 
 
 export function normalizeWorkoutProgressState(workouts?: Workout[] | PersistedWorkoutState | LegacyWorkoutState | LegacyWorkout[] | null): Pick<AppState, 'workouts' | 'workoutsUpdatedAt'> {
   const today = getTodayDateString();
-  const rawUpdatedAt = workouts && !Array.isArray(workouts) && typeof workouts === 'object'
-    ? 'updatedAt' in workouts && typeof workouts.updatedAt === 'string'
-      ? workouts.updatedAt
-      : 'progressUpdatedAt' in workouts && typeof workouts.progressUpdatedAt === 'string'
-        ? workouts.progressUpdatedAt
-        : ''
-    : '';
+  const workoutStateFormat = getWorkoutStateFormat(workouts);
+  const rawUpdatedAt = getWorkoutProgressUpdatedAt(workouts);
   const normalizedWorkouts = normalizeWorkoutList(workouts);
+
+  if (workoutStateFormat === 'empty' || workoutStateFormat === 'unknown') {
+    return {
+      workouts: [],
+      workoutsUpdatedAt: today
+    };
+  }
 
   if (rawUpdatedAt === today) {
     return {
@@ -123,6 +136,7 @@ export function normalizeWorkoutProgressState(workouts?: Workout[] | PersistedWo
 
 export function serializeWorkoutProgressState(workouts: Workout[], workoutsUpdatedAt: string): PersistedWorkoutState {
   return {
+    version: PERSISTED_WORKOUT_STATE_VERSION,
     updatedAt: workoutsUpdatedAt,
     workouts
   };

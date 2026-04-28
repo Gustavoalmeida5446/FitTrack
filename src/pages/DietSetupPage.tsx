@@ -2,7 +2,9 @@ import { CalendarHeatMap, CheckmarkFilled, ChevronLeft, Search, TrashCan } from 
 import { Button, NumberInput, TextInput, Tile } from '@carbon/react';
 import { useEffect, useMemo, useState } from 'react';
 import { ContextualTutorialCard, type TutorialStepContent } from '../components/ContextualTutorialCard';
-import { StatPill } from '../components/StatPill';
+import { InfoBlock } from '../components/InfoBlock';
+import { SelectionSummaryCard } from '../components/SelectionSummaryCard';
+import { StatsGrid } from '../components/StatsGrid';
 import { FoodItem, Meal, WeeklyDiet } from '../data/types';
 import { clearDietDayMeals, syncCompletedMealsWithSelection } from '../lib/appUpdates';
 import { parsePortionBase, roundFoodMacro } from '../lib/food';
@@ -10,7 +12,7 @@ import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { calculateFoodTotals, calculateMealTotals, calculateMealsTotals } from '../lib/nutrition';
 import { convertFoodQuantityToGrams, getFoodDefaultQuantity, getFoodMeasurementUnit, searchFoods, type FoodItem as TacoFood } from '../services/foods';
 import { PageContainer } from '../components/PageContainer';
-import { parseDecimalNumber } from '../lib/number';
+import { formatFixedDecimal, parseDecimalNumber } from '../lib/number';
 
 interface Props {
   onBack: () => void;
@@ -314,38 +316,35 @@ export function DietSetupPage({
             </div>
           ) : null}
           <TextInput id="meal-name" labelText="Nome da refeição" value={mealName} onChange={(event) => setMealName(event.target.value)} />
-          <div className="info-block">
-            <span className="meta-label">Resumo da refeição atual</span>
-            <p>{selectedFoods.length} alimento(s) • {selectedMealTotals.calories.toFixed(1)} kcal • {selectedMealTotals.protein.toFixed(1)}g proteína</p>
-          </div>
+          <InfoBlock label="Resumo da refeição atual">
+            {selectedFoods.length} alimento(s) • {formatFixedDecimal(selectedMealTotals.calories)} kcal • {formatFixedDecimal(selectedMealTotals.protein)}g proteína
+          </InfoBlock>
           <div className="inline-actions">
             {selectedFoods.length > 0 ? <Button kind="ghost" size="sm" onClick={() => setSelectedFoods([])}>Limpar alimentos</Button> : null}
             {editingMealId ? <Button kind="ghost" size="sm" onClick={resetMealForm}>Cancelar edição</Button> : null}
           </div>
           <div className="stack">
             {selectedFoods.length > 0 ? selectedFoods.map((food) => (
-              <div key={food.id} className="setup-selection-card">
-                <div className="setup-selection-card__header">
-                  <div>
-                    <span className="meta-label">{food.quantity} {food.unit}</span>
-                    <p>{food.name}</p>
-                  </div>
+              <SelectionSummaryCard
+                key={food.id}
+                label={`${food.quantity} ${food.unit}`}
+                title={food.name}
+                actions={(
                   <Button kind="ghost" size="sm" renderIcon={TrashCan} iconDescription="Remover alimento" onClick={() => handleRemoveDraftFood(food.id)}>
                     Remover
                   </Button>
-                </div>
-                <div className="setup-selection-card__meta">
-                  <span>{food.calories} kcal</span>
-                  <span>{food.protein}g proteína</span>
-                  <span>{food.carbs}g carb</span>
-                  <span>{food.fat}g gordura</span>
-                </div>
-              </div>
+                )}
+                meta={[
+                  `${food.calories} kcal`,
+                  `${food.protein}g proteína`,
+                  `${food.carbs}g carb`,
+                  `${food.fat}g gordura`
+                ]}
+              />
             )) : (
-              <div className="info-block">
-                <span className="meta-label">Alimentos da refeição</span>
-                <p>Selecione quantos alimentos quiser para montar a refeição.</p>
-              </div>
+              <InfoBlock label="Alimentos da refeição">
+                Selecione quantos alimentos quiser para montar a refeição.
+              </InfoBlock>
             )}
           </div>
           <div className="setup-card__footer">
@@ -370,32 +369,30 @@ export function DietSetupPage({
               const mealTotals = calculateMealTotals(meal);
 
               return (
-                <div key={meal.id} className="setup-selection-card">
-                  <div className="setup-selection-card__header">
-                    <div>
-                      <span className="meta-label">{meal.foods.length} alimento(s)</span>
-                      <p>{meal.name}</p>
-                    </div>
-                    <div className="inline-actions">
+                <SelectionSummaryCard
+                  key={meal.id}
+                  label={`${meal.foods.length} alimento(s)`}
+                  title={meal.name}
+                  actions={(
+                    <>
                       <Button kind="ghost" size="sm" onClick={() => handleEditMeal(meal)}>
                         Editar
                       </Button>
                       <Button kind="ghost" size="sm" renderIcon={TrashCan} iconDescription="Remover refeição" onClick={() => handleRemoveMeal(meal.id)}>
                         Remover
                       </Button>
-                    </div>
-                  </div>
-                  <div className="setup-selection-card__meta">
-                    <span>{mealTotals.calories.toFixed(1)} kcal</span>
-                    <span>{mealTotals.protein.toFixed(1)}g proteína</span>
-                  </div>
-                </div>
+                    </>
+                  )}
+                  meta={[
+                    `${formatFixedDecimal(mealTotals.calories)} kcal`,
+                    `${formatFixedDecimal(mealTotals.protein)}g proteína`
+                  ]}
+                />
               );
             }) : (
-              <div className="info-block">
-                <span className="meta-label">Refeições</span>
-                <p>Nenhuma refeição cadastrada ainda.</p>
-              </div>
+              <InfoBlock label="Refeições">
+                Nenhuma refeição cadastrada ainda.
+              </InfoBlock>
             )}
           </div>
         </Tile>
@@ -421,10 +418,13 @@ export function DietSetupPage({
           </div>
           <div className="diet-day-build-summary">
             <span className="meta-label">Total do dia selecionado</span>
-            <div className="diet-totals-card__grid">
-              <StatPill label="Calorias" value={`${selectedDayTotals.calories.toFixed(1)} kcal`} />
-              <StatPill label="Proteína" value={`${selectedDayTotals.protein.toFixed(1)} g`} />
-            </div>
+            <StatsGrid
+              className="diet-totals-card__grid"
+              items={[
+                { label: 'Calorias', value: `${formatFixedDecimal(selectedDayTotals.calories)} kcal` },
+                { label: 'Proteína', value: `${formatFixedDecimal(selectedDayTotals.protein)} g` }
+              ]}
+            />
           </div>
           <div className="stack">
             {draftDiet.meals.length > 0 ? draftDiet.meals.map((meal) => {
@@ -440,10 +440,9 @@ export function DietSetupPage({
                 </button>
               );
             }) : (
-              <div className="info-block">
-                <span className="meta-label">Refeições disponíveis</span>
-                <p>Cadastre pelo menos uma refeição antes de montar o dia.</p>
-              </div>
+              <InfoBlock label="Refeições disponíveis">
+                Cadastre pelo menos uma refeição antes de montar o dia.
+              </InfoBlock>
             )}
           </div>
           <div className="inline-actions">
@@ -473,24 +472,20 @@ export function DietSetupPage({
               const mealTotals = calculateMealTotals(meal);
 
               return (
-                <div key={meal.id} className="setup-selection-card">
-                  <div className="setup-selection-card__header">
-                    <div>
-                      <span className="meta-label">{meal.foods.length} alimento(s)</span>
-                      <p>{meal.name}</p>
-                    </div>
-                  </div>
-                  <div className="setup-selection-card__meta">
-                    <span>{mealTotals.calories.toFixed(1)} kcal</span>
-                    <span>{mealTotals.protein.toFixed(1)}g proteína</span>
-                  </div>
-                </div>
+                <SelectionSummaryCard
+                  key={meal.id}
+                  label={`${meal.foods.length} alimento(s)`}
+                  title={meal.name}
+                  meta={[
+                    `${formatFixedDecimal(mealTotals.calories)} kcal`,
+                    `${formatFixedDecimal(mealTotals.protein)}g proteína`
+                  ]}
+                />
               );
             }) : (
-              <div className="info-block">
-                <span className="meta-label">Refeições do dia</span>
-                <p>Nenhuma refeição selecionada para este dia ainda.</p>
-              </div>
+              <InfoBlock label="Refeições do dia">
+                Nenhuma refeição selecionada para este dia ainda.
+              </InfoBlock>
             )}
           </div>
         </Tile>

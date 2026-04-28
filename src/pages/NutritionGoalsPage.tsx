@@ -5,10 +5,11 @@ import type { Session } from '@supabase/supabase-js';
 import { Portuguese } from 'flatpickr/dist/l10n/pt.js';
 import { CardHeader } from '../components/CardHeader';
 import { ContextualTutorialCard, type TutorialStepContent } from '../components/ContextualTutorialCard';
-import { StatPill } from '../components/StatPill';
+import { InfoBlock } from '../components/InfoBlock';
+import { StatsGrid } from '../components/StatsGrid';
 import { ActivityLevel, DietType, GoalType, NutritionTargets, UserProfile, WeightLog } from '../data/types';
 import { PageContainer } from '../components/PageContainer';
-import { calculateAgeFromBirthDate } from '../lib/date';
+import { calculateAgeFromBirthDate, getSingleDatePickerValue } from '../lib/date';
 import { getSafeNumber } from '../lib/number';
 
 interface Props {
@@ -79,9 +80,7 @@ export function NutritionGoalsPage({
             description="Você está logado como:"
           />
           <div className="auth-status">
-            <div className="info-block">
-              <p>{session.user.email ?? 'Nenhum usuário conectado'}</p>
-            </div>
+            <InfoBlock>{session.user.email ?? 'Nenhum usuário conectado'}</InfoBlock>
             <div className="row-actions">
               <Button kind="tertiary" onClick={onReplayTutorial}>
                 Ver tutorial
@@ -109,7 +108,7 @@ export function NutritionGoalsPage({
               locale={{ ...Portuguese, locale: 'pt' }}
               maxDate={new Date()}
               onChange={(_, dateString) => {
-                const birthDate = Array.isArray(dateString) ? dateString[0] ?? '' : dateString ?? '';
+                const birthDate = getSingleDatePickerValue(dateString);
                 onUpdateProfile({ ...profile, birthDate, age: calculateAgeFromBirthDate(birthDate) });
               }}
               value={profile.birthDate}
@@ -148,13 +147,16 @@ export function NutritionGoalsPage({
             title="Metas diárias"
             description="Alvos de ingestão e hidratação"
           />
-          <div className="goals-grid goals-grid--compact">
-            <StatPill label="Calorias" value={`${targets.caloriesDaily} kcal`} />
-            <StatPill label="Proteína" value={`${targets.proteinDaily} g`} />
-            <StatPill label="Carboidrato" value={`${targets.carbsDaily} g`} />
-            <StatPill label="Gordura" value={`${targets.fatDaily} g`} />
-            <StatPill label="Água" value={`${targets.waterDailyMl} ml`} />
-          </div>
+          <StatsGrid
+            className="goals-grid goals-grid--compact"
+            items={[
+              { label: 'Calorias', value: `${targets.caloriesDaily} kcal` },
+              { label: 'Proteína', value: `${targets.proteinDaily} g` },
+              { label: 'Carboidrato', value: `${targets.carbsDaily} g` },
+              { label: 'Gordura', value: `${targets.fatDaily} g` },
+              { label: 'Água', value: `${targets.waterDailyMl} ml` }
+            ]}
+          />
         </Tile>
 
         <Tile className="card metric-card goals-card">

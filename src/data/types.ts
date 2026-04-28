@@ -7,7 +7,7 @@ export type ExerciseMediaType = 'image' | 'video' | 'gif' | 'none';
 
 export interface WorkoutExercise {
   id: string;
-  source: 'manual' | 'local';
+  source: 'local';
   sourceId?: string;
   name: string;
   ptName?: string;

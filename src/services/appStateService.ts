@@ -20,6 +20,17 @@ interface RemoteAppStateRow {
   weight_history: AppState['weightHistory'];
 }
 
+// Formato remoto atual:
+// - profile: UserProfile normalizado
+// - workouts: { version: 1, updatedAt: 'YYYY-MM-DD', workouts: Workout[] }
+// - water: WaterData normalizado
+// - weekly_diet: WeeklyDiet normalizado
+// - weight_history: WeightLog[]
+//
+// A normalização continua aceitando formatos legados para leitura, mas todo save remoto
+// passa por sanitize + serialização do formato atual para reduzir novas ambiguidades.
+// A distinção entre envelope atual, array antigo, legado com exerciseLibrary e payload
+// desconhecido fica centralizada em legacyState.ts.
 function mapRemoteRow(row: RemoteAppStateRow): AppState {
   const workoutState = normalizeWorkoutProgressState(row.workouts as AppState['workouts']);
 
