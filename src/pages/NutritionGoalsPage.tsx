@@ -1,12 +1,15 @@
-import { ChartLine, CheckmarkFilled, ChevronLeft, Login, Logout, TrashCan, UserAvatar } from '@carbon/icons-react';
+import { ChartLine, CheckmarkFilled, ChevronLeft, Logout, TrashCan, UserAvatar } from '@carbon/icons-react';
 import { Button, DatePicker, DatePickerInput, NumberInput, Select, SelectItem, Tile } from '@carbon/react';
 import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { Portuguese } from 'flatpickr/dist/l10n/pt.js';
+import { CardHeader } from '../components/CardHeader';
 import { ContextualTutorialCard, type TutorialStepContent } from '../components/ContextualTutorialCard';
+import { StatPill } from '../components/StatPill';
 import { ActivityLevel, DietType, GoalType, NutritionTargets, UserProfile, WeightLog } from '../data/types';
 import { PageContainer } from '../components/PageContainer';
 import { calculateAgeFromBirthDate } from '../lib/date';
+import { getSafeNumber } from '../lib/number';
 
 interface Props {
   profile: UserProfile;
@@ -23,8 +26,7 @@ interface Props {
   onUpdateProfile: (profile: UserProfile) => void;
   onAddWeight: (weight: number) => void;
   onRemoveWeight: (index: number) => void;
-  session: Session | null;
-  onOpenLogin: () => void;
+  session: Session;
   onSignOut: () => Promise<void>;
 }
 
@@ -48,7 +50,6 @@ export function NutritionGoalsPage({
   onAddWeight,
   onRemoveWeight,
   session,
-  onOpenLogin,
   onSignOut
 }: Props) {
   const [newWeight, setNewWeight] = useState(profile.currentWeight);
@@ -72,53 +73,35 @@ export function NutritionGoalsPage({
           />
         ) : null}
         <Tile className="card metric-card goals-card">
-          <div className="card-head">
-            <div className="card-head__group">
-              <div className="icon-badge icon-badge--primary card-head__badge">
-                <UserAvatar size={20} />
-              </div>
-              <div className="card-head__title">
-                <h3>Status da conta</h3>
-                <p>{session ? 'Você está logado como:' : 'Você ainda não fez login'}</p>
-              </div>
-            </div>
-          </div>
+          <CardHeader
+            icon={<UserAvatar size={20} />}
+            title="Status da conta"
+            description="Você está logado como:"
+          />
           <div className="auth-status">
             <div className="info-block">
-              <p>{session?.user.email ?? 'Nenhum usuário conectado'}</p>
+              <p>{session.user.email ?? 'Nenhum usuário conectado'}</p>
             </div>
             <div className="row-actions">
               <Button kind="tertiary" onClick={onReplayTutorial}>
                 Ver tutorial
               </Button>
-              {session ? (
-                <Button kind="ghost" renderIcon={Logout} onClick={() => void onSignOut()}>
-                  Sair
-                </Button>
-              ) : (
-                <Button renderIcon={Login} onClick={onOpenLogin}>
-                  Fazer login
-                </Button>
-              )}
+              <Button kind="ghost" renderIcon={Logout} onClick={() => void onSignOut()}>
+                Sair
+              </Button>
             </div>
           </div>
         </Tile>
 
         <Tile className="card metric-card goals-card">
-          <div className="card-head">
-            <div className="card-head__group">
-              <div className="icon-badge icon-badge--primary card-head__badge">
-                <UserAvatar size={20} />
-              </div>
-              <div className="card-head__title">
-                <h3>Dados do usuário</h3>
-                <p>Informações-base para as metas</p>
-              </div>
-            </div>
-          </div>
+          <CardHeader
+            icon={<UserAvatar size={20} />}
+            title="Dados do usuário"
+            description="Informações-base para as metas"
+          />
           <div className="goals-form-grid">
-            <NumberInput id="profile-weight" label="Peso (kg)" min={1} value={profile.currentWeight} onChange={(event) => onUpdateProfile({ ...profile, currentWeight: Number((event.target as HTMLInputElement).value) })} />
-            <NumberInput id="profile-height" label="Altura (cm)" min={1} value={profile.heightCm} onChange={(event) => onUpdateProfile({ ...profile, heightCm: Number((event.target as HTMLInputElement).value) })} />
+            <NumberInput id="profile-weight" label="Peso (kg)" min={1} value={profile.currentWeight} onChange={(_, state) => onUpdateProfile({ ...profile, currentWeight: getSafeNumber(state.value, profile.currentWeight) })} />
+            <NumberInput id="profile-height" label="Altura (cm)" min={1} value={profile.heightCm} onChange={(_, state) => onUpdateProfile({ ...profile, heightCm: getSafeNumber(state.value, profile.heightCm) })} />
             <DatePicker
               className="goals-form-grid__date-picker"
               datePickerType="single"
@@ -160,55 +143,28 @@ export function NutritionGoalsPage({
         </Tile>
 
         <Tile className="card metric-card goals-card">
-          <div className="card-head">
-            <div className="card-head__group">
-              <div className="icon-badge icon-badge--primary card-head__badge">
-                <CheckmarkFilled size={20} />
-              </div>
-              <div className="card-head__title">
-                <h3>Metas diárias</h3>
-                <p>Alvos de ingestão e hidratação</p>
-              </div>
-            </div>
-          </div>
+          <CardHeader
+            icon={<CheckmarkFilled size={20} />}
+            title="Metas diárias"
+            description="Alvos de ingestão e hidratação"
+          />
           <div className="goals-grid goals-grid--compact">
-            <div className="stat-pill">
-              <span>Calorias</span>
-              <strong>{targets.caloriesDaily} kcal</strong>
-            </div>
-            <div className="stat-pill">
-              <span>Proteína</span>
-              <strong>{targets.proteinDaily} g</strong>
-            </div>
-            <div className="stat-pill">
-              <span>Carboidrato</span>
-              <strong>{targets.carbsDaily} g</strong>
-            </div>
-            <div className="stat-pill">
-              <span>Gordura</span>
-              <strong>{targets.fatDaily} g</strong>
-            </div>
-            <div className="stat-pill">
-              <span>Água</span>
-              <strong>{targets.waterDailyMl} ml</strong>
-            </div>
+            <StatPill label="Calorias" value={`${targets.caloriesDaily} kcal`} />
+            <StatPill label="Proteína" value={`${targets.proteinDaily} g`} />
+            <StatPill label="Carboidrato" value={`${targets.carbsDaily} g`} />
+            <StatPill label="Gordura" value={`${targets.fatDaily} g`} />
+            <StatPill label="Água" value={`${targets.waterDailyMl} ml`} />
           </div>
         </Tile>
 
         <Tile className="card metric-card goals-card">
-          <div className="card-head">
-            <div className="card-head__group">
-              <div className="icon-badge icon-badge--primary card-head__badge">
-                <ChartLine size={20} />
-              </div>
-              <div className="card-head__title">
-                <h3>Acompanhamento de peso</h3>
-                <p>Registro e histórico recente</p>
-              </div>
-            </div>
-          </div>
+          <CardHeader
+            icon={<ChartLine size={20} />}
+            title="Acompanhamento de peso"
+            description="Registro e histórico recente"
+          />
           <div className="goals-weight-form">
-            <NumberInput id="new-weight" label="Registrar peso" min={1} value={newWeight} onChange={(event) => setNewWeight(Number((event.target as HTMLInputElement).value))} />
+            <NumberInput id="new-weight" label="Registrar peso" min={1} value={newWeight} onChange={(_, state) => setNewWeight(getSafeNumber(state.value, profile.currentWeight))} />
             <div className="setup-card__footer">
               <Button size="sm" onClick={() => onAddWeight(newWeight)}>Salvar peso</Button>
             </div>

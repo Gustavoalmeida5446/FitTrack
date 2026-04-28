@@ -2,10 +2,12 @@ import type { Session } from '@supabase/supabase-js';
 import {
   AppState,
   defaultAppState,
+  hasSuspiciousWorkoutData,
   normalizeProfile,
   normalizeWaterData,
   normalizeWeeklyDiet,
   normalizeWorkoutProgressState,
+  sanitizeAppStateForSave,
   serializeWorkoutProgressState
 } from '../lib/appState';
 import { supabase } from '../lib/supabaseClient';
@@ -31,44 +33,23 @@ function mapRemoteRow(row: RemoteAppStateRow): AppState {
   };
 }
 
-function isLegacyMockState(state: AppState): boolean {
-  const looksLikeMockWorkout = state.workouts.some((workout) => ['Push A', 'Pull B'].includes(workout.name));
-  const looksLikeMockDiet = state.weeklyDiet.meals.some((meal) => ['Café da manhã', 'Almoço', 'Jantar'].includes(meal.name));
-  const looksLikeMockProfile = state.profile.currentWeight === 78 && state.profile.heightCm === 175;
+async function createRemoteAppState(session: Session, state: AppState) {
+  const sanitizedState = sanitizeAppStateForSave(state);
 
-  return looksLikeMockWorkout || looksLikeMockDiet || looksLikeMockProfile;
-}
-
-async function replaceRemoteAppState(session: Session, state: AppState) {
-  const { error } = await supabase
-    .from('user_app_states')
-    .upsert({
-      user_id: session.user.id,
-      profile: state.profile,
-      workouts: serializeWorkoutProgressState(state.workouts, state.workoutsUpdatedAt),
-      water: state.water,
-      weekly_diet: state.weeklyDiet,
-      weight_history: state.weightHistory
-    });
-
-  if (error) {
-    console.error('Erro ao substituir estado remoto', error);
+  if (hasSuspiciousWorkoutData(sanitizedState.workouts)) {
+    console.error('Estado remoto bloqueado: treinos com aparência de dados corrompidos.');
     return null;
   }
 
-  return state;
-}
-
-async function createRemoteAppState(session: Session, state: AppState) {
   const { error } = await supabase
     .from('user_app_states')
     .insert({
       user_id: session.user.id,
-      profile: state.profile,
-      workouts: serializeWorkoutProgressState(state.workouts, state.workoutsUpdatedAt),
-      water: state.water,
-      weekly_diet: state.weeklyDiet,
-      weight_history: state.weightHistory
+      profile: sanitizedState.profile,
+      workouts: serializeWorkoutProgressState(sanitizedState.workouts, sanitizedState.workoutsUpdatedAt),
+      water: sanitizedState.water,
+      weekly_diet: sanitizedState.weeklyDiet,
+      weight_history: sanitizedState.weightHistory
     });
 
   if (error) {
@@ -76,7 +57,7 @@ async function createRemoteAppState(session: Session, state: AppState) {
     return null;
   }
 
-  return state;
+  return sanitizedState;
 }
 
 export async function loadRemoteAppState(session: Session): Promise<AppState | null> {
@@ -100,26 +81,26 @@ export async function loadRemoteAppState(session: Session): Promise<AppState | n
 
   const mappedState = mapRemoteRow(data as RemoteAppStateRow);
 
-  if (isLegacyMockState(mappedState)) {
-    return replaceRemoteAppState(session, {
-      ...defaultAppState,
-      water: normalizeWaterData(defaultAppState.water)
-    });
-  }
-
   return mappedState;
 }
 
 export async function saveRemoteAppState(session: Session, state: AppState) {
+  const sanitizedState = sanitizeAppStateForSave(state);
+
+  if (hasSuspiciousWorkoutData(sanitizedState.workouts)) {
+    console.error('Save remoto bloqueado: treinos com aparência de dados corrompidos.');
+    return false;
+  }
+
   const { error } = await supabase
     .from('user_app_states')
     .upsert({
       user_id: session.user.id,
-      profile: state.profile,
-      workouts: serializeWorkoutProgressState(state.workouts, state.workoutsUpdatedAt),
-      water: state.water,
-      weekly_diet: state.weeklyDiet,
-      weight_history: state.weightHistory
+      profile: sanitizedState.profile,
+      workouts: serializeWorkoutProgressState(sanitizedState.workouts, sanitizedState.workoutsUpdatedAt),
+      water: sanitizedState.water,
+      weekly_diet: sanitizedState.weeklyDiet,
+      weight_history: sanitizedState.weightHistory
     });
 
   if (error) {

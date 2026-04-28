@@ -1,0 +1,229 @@
+# TODO
+
+Backlog técnico consolidado a partir da revisão do projeto.
+
+Status:
+- `[ ]` pendente
+- `[-]` parcial
+- `[x]` concluído
+
+## Prioridade 1
+
+### [x] 1. Remover a heurística de "mock state"
+- Objetivo: impedir perda de dados reais por coincidência com valores usados no estado antigo de demonstração.
+- Risco atual: alto.
+- Arquivos:
+- [src/services/appStateService.ts](/home/gustavo/projects/FitTrack/src/services/appStateService.ts)
+- [src/lib/appState.ts](/home/gustavo/projects/FitTrack/src/lib/appState.ts)
+- Tarefas:
+- remover `isLegacyMockState`
+- parar de sobrescrever estado remoto automaticamente
+- se necessário, criar uma migração explícita e temporária
+
+### [x] 2. Blindar a persistência remota contra corrupção silenciosa
+- Objetivo: garantir que falhas de save ou estados degradados não sejam enviados sem controle.
+- Risco atual: alto.
+- Arquivos:
+- [src/App.tsx](/home/gustavo/projects/FitTrack/src/App.tsx)
+- [src/services/appStateService.ts](/home/gustavo/projects/FitTrack/src/services/appStateService.ts)
+- [src/lib/appState.ts](/home/gustavo/projects/FitTrack/src/lib/appState.ts)
+- [src/hooks/useRemoteAppState.ts](/home/gustavo/projects/FitTrack/src/hooks/useRemoteAppState.ts)
+- [src/styles/app.css](/home/gustavo/projects/FitTrack/src/styles/app.css)
+- Tarefas:
+- [x] adicionar retry ou fila simples de reenvio
+- [x] exibir estado de erro de sincronização
+- [x] validar payload antes de salvar
+
+### [x] 3. Corrigir consistência entre `weightHistory` e `profile.currentWeight`
+- Objetivo: manter o peso atual coerente com o histórico.
+- Risco atual: médio/alto.
+- Arquivos:
+- [src/App.tsx](/home/gustavo/projects/FitTrack/src/App.tsx)
+- [src/pages/NutritionGoalsPage.tsx](/home/gustavo/projects/FitTrack/src/pages/NutritionGoalsPage.tsx)
+- Tarefas:
+- [x] ao remover um peso, recalcular `currentWeight`
+- [x] definir regra única: último peso válido do histórico representa o peso atual
+
+## Prioridade 2
+
+### [x] 4. Refatorar `App.tsx`
+- Objetivo: reduzir acoplamento e risco de regressão.
+- Risco atual: médio.
+- Arquivos:
+- [src/App.tsx](/home/gustavo/projects/FitTrack/src/App.tsx)
+- [src/hooks/useAuthSession.ts](/home/gustavo/projects/FitTrack/src/hooks/useAuthSession.ts)
+- [src/hooks/useRemoteAppState.ts](/home/gustavo/projects/FitTrack/src/hooks/useRemoteAppState.ts)
+- [src/hooks/useTutorial.ts](/home/gustavo/projects/FitTrack/src/hooks/useTutorial.ts)
+- [src/hooks/useDailyWorkoutReset.ts](/home/gustavo/projects/FitTrack/src/hooks/useDailyWorkoutReset.ts)
+- [src/hooks/useLocalNavigation.ts](/home/gustavo/projects/FitTrack/src/hooks/useLocalNavigation.ts)
+- Tarefas:
+- [x] extrair `useAuthSession`
+- [x] extrair `useRemoteAppState`
+- [x] extrair `useTutorial`
+- [x] extrair `useDailyWorkoutReset`
+- [x] extrair navegação local
+
+### [x] 5. Separar compatibilidade legada da lógica principal de estado
+- Objetivo: simplificar leitura e manutenção de persistência.
+- Risco atual: médio.
+- Arquivos:
+- [src/lib/appState.ts](/home/gustavo/projects/FitTrack/src/lib/appState.ts)
+- [src/services/appStateService.ts](/home/gustavo/projects/FitTrack/src/services/appStateService.ts)
+- Tarefas:
+- [x] mover tipos `Legacy*` para módulo próprio
+- [x] deixar o formato atual de persistência com caminho principal único
+- [x] isolar parsing/migração de formatos antigos
+
+### [x] 6. Padronizar todos os `NumberInput`
+- Objetivo: evitar bugs de formulário e `NaN`.
+- Risco atual: médio.
+- Arquivos:
+- [src/pages/NutritionGoalsPage.tsx](/home/gustavo/projects/FitTrack/src/pages/NutritionGoalsPage.tsx)
+- [src/pages/WorkoutSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/WorkoutSetupPage.tsx)
+- [src/pages/WorkoutPage.tsx](/home/gustavo/projects/FitTrack/src/pages/WorkoutPage.tsx)
+- [src/pages/DietSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/DietSetupPage.tsx)
+- Tarefas:
+- [x] escolher um padrão único de leitura
+- [x] preferir sempre `state.value` do Carbon
+- [x] centralizar sanitização num helper
+
+### 7. Decidir se exercício manual existe ou não
+- Objetivo: alinhar modelo de dados com a UI real.
+- Risco atual: médio.
+- Arquivos:
+- [src/data/types.ts](/home/gustavo/projects/FitTrack/src/data/types.ts)
+- [src/pages/WorkoutSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/WorkoutSetupPage.tsx)
+- [src/lib/appState.ts](/home/gustavo/projects/FitTrack/src/lib/appState.ts)
+- Tarefas:
+- ou habilitar fluxo completo de exercício manual
+- ou remover `source: 'manual'` e simplificar o código
+
+## Prioridade 3
+
+### [x] 8. Extrair operações de domínio repetidas
+- Objetivo: deixar o código mais didático e previsível.
+- Risco atual: médio.
+- Arquivos:
+- [src/App.tsx](/home/gustavo/projects/FitTrack/src/App.tsx)
+- [src/lib/nutrition.ts](/home/gustavo/projects/FitTrack/src/lib/nutrition.ts)
+- [src/lib/date.ts](/home/gustavo/projects/FitTrack/src/lib/date.ts)
+- [src/lib/appUpdates.ts](/home/gustavo/projects/FitTrack/src/lib/appUpdates.ts)
+- Tarefas:
+- [x] helper para toggle de exercício concluído
+- [x] helper para toggle de refeição concluída
+- [x] helper para atualizar água
+- [x] helper para atualizar peso
+- [x] helper para totais de refeição/dia
+
+### [x] 9. Melhorar busca de alimentos
+- Objetivo: reduzir custo por tecla e melhorar UX.
+- Risco atual: médio.
+- Arquivos:
+- [src/pages/DietSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/DietSetupPage.tsx)
+- [src/services/foods.ts](/home/gustavo/projects/FitTrack/src/services/foods.ts)
+- Tarefas:
+- [x] adicionar debounce
+- [x] evitar sort completo da base a cada tecla
+- [x] avaliar índice simples em memória
+
+### [x] 10. Melhorar busca de exercícios
+- Objetivo: manter consistência com a busca de alimentos e simplificar o fluxo.
+- Risco atual: baixo/médio.
+- Arquivos:
+- [src/pages/WorkoutSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/WorkoutSetupPage.tsx)
+- [src/services/exercises.ts](/home/gustavo/projects/FitTrack/src/services/exercises.ts)
+- [src/hooks/useDebouncedValue.ts](/home/gustavo/projects/FitTrack/src/hooks/useDebouncedValue.ts)
+- Tarefas:
+- [x] revisar score de busca
+- [x] avaliar debounce compartilhado
+- [x] centralizar normalização de texto
+- [x] criar índice simples em memória para reduzir trabalho repetido
+
+### [x] 11. Limpar caminhos mortos de autenticação
+- Objetivo: remover ramos que hoje não acontecem no app.
+- Risco atual: baixo.
+- Arquivos:
+- [src/App.tsx](/home/gustavo/projects/FitTrack/src/App.tsx)
+- [src/pages/NutritionGoalsPage.tsx](/home/gustavo/projects/FitTrack/src/pages/NutritionGoalsPage.tsx)
+- [src/pages/LoginPage.tsx](/home/gustavo/projects/FitTrack/src/pages/LoginPage.tsx)
+- [src/hooks/useTutorial.ts](/home/gustavo/projects/FitTrack/src/hooks/useTutorial.ts)
+- Tarefas:
+- [x] remover ou suportar de verdade o caso "perfil sem sessão"
+- [x] revisar fluxo de login/signup/onboarding
+
+## Prioridade 4
+
+### [-] 12. Consolidar utilitários pequenos
+- Objetivo: reduzir duplicação e facilitar onboarding no código.
+- Risco atual: baixo.
+- Arquivos:
+- [src/pages/WorkoutSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/WorkoutSetupPage.tsx)
+- [src/pages/WorkoutPage.tsx](/home/gustavo/projects/FitTrack/src/pages/WorkoutPage.tsx)
+- [src/pages/DietSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/DietSetupPage.tsx)
+- [src/services/exercises.ts](/home/gustavo/projects/FitTrack/src/services/exercises.ts)
+- [src/services/foods.ts](/home/gustavo/projects/FitTrack/src/services/foods.ts)
+- [src/lib/food.ts](/home/gustavo/projects/FitTrack/src/lib/food.ts)
+- [src/lib/search.ts](/home/gustavo/projects/FitTrack/src/lib/search.ts)
+- [src/lib/number.ts](/home/gustavo/projects/FitTrack/src/lib/number.ts)
+- [src/pages/HomePage.tsx](/home/gustavo/projects/FitTrack/src/pages/HomePage.tsx)
+- Tarefas:
+- [x] unificar `getSafeNumber`
+- [x] unificar normalização de busca
+- [x] unificar parse e arredondamento de alimento
+- [x] avançar na unificação de parsing numérico simples
+- [ ] unificar parse de datas e números
+
+### [-] 13. Extrair componentes de UI repetidos
+- Objetivo: simplificar páginas longas.
+- Risco atual: baixo.
+- Arquivos:
+- [src/pages/HomePage.tsx](/home/gustavo/projects/FitTrack/src/pages/HomePage.tsx)
+- [src/pages/WorkoutPage.tsx](/home/gustavo/projects/FitTrack/src/pages/WorkoutPage.tsx)
+- [src/pages/DietDayPage.tsx](/home/gustavo/projects/FitTrack/src/pages/DietDayPage.tsx)
+- [src/pages/DietSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/DietSetupPage.tsx)
+- [src/pages/NutritionGoalsPage.tsx](/home/gustavo/projects/FitTrack/src/pages/NutritionGoalsPage.tsx)
+- [src/pages/LoginPage.tsx](/home/gustavo/projects/FitTrack/src/pages/LoginPage.tsx)
+- [src/components/CardHeader.tsx](/home/gustavo/projects/FitTrack/src/components/CardHeader.tsx)
+- [src/components/StatPill.tsx](/home/gustavo/projects/FitTrack/src/components/StatPill.tsx)
+- [src/styles/app.css](/home/gustavo/projects/FitTrack/src/styles/app.css)
+- Tarefas:
+- [x] extrair bloco `stat-pill`
+- [x] extrair cabeçalho de card
+- [ ] extrair cards de resumo
+- extrair blocos de métricas
+- extrair listas reutilizáveis
+
+### 14. Revisar schema e modelo persistido
+- Objetivo: alinhar melhor o shape salvo com o shape usado na UI.
+- Risco atual: baixo/médio.
+- Arquivos:
+- [supabase/schema.sql](/home/gustavo/projects/FitTrack/supabase/schema.sql)
+- [src/services/appStateService.ts](/home/gustavo/projects/FitTrack/src/services/appStateService.ts)
+- [src/lib/appState.ts](/home/gustavo/projects/FitTrack/src/lib/appState.ts)
+- Tarefas:
+- avaliar versionamento de payload
+- documentar formatos persistidos
+- preparar migrações futuras com menos heurística
+
+### 15. Adicionar testes mínimos
+- Objetivo: reduzir regressões em persistência e cálculos.
+- Risco atual: estrutural.
+- Arquivos candidatos:
+- [src/lib/appState.ts](/home/gustavo/projects/FitTrack/src/lib/appState.ts)
+- [src/lib/date.ts](/home/gustavo/projects/FitTrack/src/lib/date.ts)
+- [src/lib/nutrition.ts](/home/gustavo/projects/FitTrack/src/lib/nutrition.ts)
+- [src/services/appStateService.ts](/home/gustavo/projects/FitTrack/src/services/appStateService.ts)
+- Tarefas:
+- testar normalização de workouts
+- testar reset diário
+- testar cálculo de idade
+- testar cálculo de metas
+
+## Ordem sugerida de execução
+
+1. Itens 1, 2 e 3
+2. Itens 4 e 5
+3. Itens 6 e 7
+4. Itens 8, 9 e 10
+5. Itens 11, 12 e 13
+6. Itens 14 e 15

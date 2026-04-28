@@ -3,8 +3,10 @@ import { Button, NumberInput, TextInput, Tile } from '@carbon/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ContextualTutorialCard, type TutorialStepContent } from '../components/ContextualTutorialCard';
 import { MuscleGroup, Workout, WorkoutExercise } from '../data/types';
+import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { searchExercises } from '../services/exercises';
 import { PageContainer } from '../components/PageContainer';
+import { getSafeNumber } from '../lib/number';
 
 interface Props {
   onBack: () => void;
@@ -32,10 +34,6 @@ const defaultExerciseValues = {
   sets: 3,
   restSeconds: 60
 };
-
-function getSafeNumber(value: number, fallback: number) {
-  return Number.isFinite(value) ? value : fallback;
-}
 
 export function WorkoutSetupPage({
   onBack,
@@ -68,13 +66,14 @@ export function WorkoutSetupPage({
   const [reps, setReps] = useState(defaultExerciseValues.reps);
   const [sets, setSets] = useState(defaultExerciseValues.sets);
   const [restSeconds, setRestSeconds] = useState(defaultExerciseValues.restSeconds);
+  const debouncedQuery = useDebouncedValue(query, 200);
 
   const canAddExercise = useMemo(() => exerciseName.trim().length > 0 && exerciseSource === 'local' && Boolean(exerciseSourceId), [exerciseName, exerciseSource, exerciseSourceId]);
   const derivedWorkoutGroups = useMemo(() => Array.from(new Set(draftExercises.map((exercise) => exercise.muscleGroup))), [draftExercises]);
   const canSaveWorkout = useMemo(() => name.trim().length > 0 && draftExercises.length > 0, [name, draftExercises.length]);
 
   useEffect(() => {
-    const trimmedQuery = query.trim();
+    const trimmedQuery = debouncedQuery.trim();
 
     if (!trimmedQuery) {
       setOptions([]);
@@ -87,14 +86,8 @@ export function WorkoutSetupPage({
       return;
     }
 
-    const timeoutId = window.setTimeout(() => {
-      setOptions(searchExercises(trimmedQuery).slice(0, 20));
-    }, 200);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [query]);
+    setOptions(searchExercises(trimmedQuery, 20));
+  }, [debouncedQuery]);
 
   const resetExerciseForm = () => {
     setEditingExerciseId(null);
@@ -289,10 +282,10 @@ export function WorkoutSetupPage({
             </ul>
           ) : null}
           <div className="setup-card__metrics">
-            <NumberInput id="exercise-load" label="Carga (kg)" min={0} value={loadKg} onChange={(event) => setLoadKg(getSafeNumber(Number((event.target as HTMLInputElement).value), defaultExerciseValues.loadKg))} />
-            <NumberInput id="exercise-reps" label="Repetições" min={1} value={reps} onChange={(event) => setReps(getSafeNumber(Number((event.target as HTMLInputElement).value), defaultExerciseValues.reps))} />
-            <NumberInput id="exercise-sets" label="Séries" min={1} value={sets} onChange={(event) => setSets(getSafeNumber(Number((event.target as HTMLInputElement).value), defaultExerciseValues.sets))} />
-            <NumberInput id="exercise-rest" label="Descanso (s)" min={0} value={restSeconds} onChange={(event) => setRestSeconds(getSafeNumber(Number((event.target as HTMLInputElement).value), defaultExerciseValues.restSeconds))} />
+            <NumberInput id="exercise-load" label="Carga (kg)" min={0} value={loadKg} onChange={(_, state) => setLoadKg(getSafeNumber(state.value, defaultExerciseValues.loadKg))} />
+            <NumberInput id="exercise-reps" label="Repetições" min={1} value={reps} onChange={(_, state) => setReps(getSafeNumber(state.value, defaultExerciseValues.reps))} />
+            <NumberInput id="exercise-sets" label="Séries" min={1} value={sets} onChange={(_, state) => setSets(getSafeNumber(state.value, defaultExerciseValues.sets))} />
+            <NumberInput id="exercise-rest" label="Descanso (s)" min={0} value={restSeconds} onChange={(_, state) => setRestSeconds(getSafeNumber(state.value, defaultExerciseValues.restSeconds))} />
           </div>
           {previewImageUrl ? (
             <button

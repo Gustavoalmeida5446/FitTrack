@@ -1,6 +1,7 @@
 import exercisesData from '../../exercises.json';
 import exerciseNamePtData from '../data/exercise-name-pt.json';
 import type { ExerciseMediaType, MuscleGroup } from '../data/types';
+import { normalizeSearchValue } from '../lib/search';
 
 export interface ExerciseRecord {
   id: string;
@@ -70,26 +71,13 @@ const muscleGroupMap: Record<string, MuscleGroup> = {
   abdominals: 'Core'
 };
 
-function normalizeSearchValue(value: string): string {
-  return value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim();
-}
-
-function getSearchScore(name: string, query: string): number {
-  const normalizedName = normalizeSearchValue(name);
-  const normalizedQuery = normalizeSearchValue(query);
-
+function getSearchScore(normalizedName: string, normalizedQuery: string, queryTerms: string[]): number {
   if (!normalizedQuery) return -1;
   if (normalizedName === normalizedQuery) return 8;
   if (normalizedName.startsWith(normalizedQuery)) return 7;
   if (normalizedName.includes(` ${normalizedQuery}`) || normalizedName.includes(`${normalizedQuery} `)) return 6;
   if (normalizedName.includes(normalizedQuery)) return 5;
 
-  const queryTerms = normalizedQuery.split(/\s+/).filter(Boolean);
   if (queryTerms.length === 0) return -1;
 
   const matchedTerms = queryTerms.filter((term) => normalizedName.includes(term)).length;
@@ -114,6 +102,18 @@ function getExerciseSearchTexts(exercise: ExerciseRecord): string[] {
     ...(exercise.secondaryMuscles ?? []),
     ...(exerciseAliases[exercise.id] ?? [])
   ].filter(Boolean);
+}
+
+interface IndexedExerciseRecord {
+  exercise: ExerciseRecord;
+  displayName: string;
+  normalizedSearchTexts: string[];
+}
+
+interface RankedExerciseResult {
+  exercise: ExerciseRecord;
+  displayName: string;
+  score: number;
 }
 
 function inferMuscleGroup(exercise: ExerciseRecord): MuscleGroup {
@@ -151,31 +151,61 @@ function mapExerciseOption(exercise: ExerciseRecord): ExerciseOption {
   };
 }
 
+const indexedExercises: IndexedExerciseRecord[] = exercises.map((exercise) => ({
+  exercise,
+  displayName: getExerciseDisplayName(exercise),
+  normalizedSearchTexts: getExerciseSearchTexts(exercise).map((text) => normalizeSearchValue(text))
+}));
+
 export function getAllExercises(): ExerciseOption[] {
   return exercises.map(mapExerciseOption);
 }
 
-export function searchExercises(query: string): ExerciseOption[] {
-  const normalizedQuery = query.trim();
+function insertRankedExerciseResult(results: RankedExerciseResult[], nextResult: RankedExerciseResult, limit?: number) {
+  let insertIndex = results.findIndex((currentResult) => {
+    if (nextResult.score !== currentResult.score) {
+      return nextResult.score > currentResult.score;
+    }
+
+    return nextResult.displayName.localeCompare(currentResult.displayName, 'pt-BR') < 0;
+  });
+
+  if (insertIndex === -1) {
+    insertIndex = results.length;
+  }
+
+  results.splice(insertIndex, 0, nextResult);
+
+  if (limit && results.length > limit) {
+    results.length = limit;
+  }
+}
+
+export function searchExercises(query: string, limit?: number): ExerciseOption[] {
+  const normalizedQuery = normalizeSearchValue(query);
+  const queryTerms = normalizedQuery.split(/\s+/).filter(Boolean);
 
   if (!normalizedQuery) {
     return [];
   }
 
-  return exercises
-    .map((exercise) => ({
-      exercise,
-      score: Math.max(...getExerciseSearchTexts(exercise).map((text) => getSearchScore(text, normalizedQuery)))
-    }))
-    .filter((item) => item.score >= 0)
-    .sort((a, b) => {
-      if (b.score !== a.score) {
-        return b.score - a.score;
-      }
+  const rankedResults = indexedExercises.reduce<RankedExerciseResult[]>((results, item) => {
+    const score = Math.max(...item.normalizedSearchTexts.map((text) => getSearchScore(text, normalizedQuery, queryTerms)));
 
-      return getExerciseDisplayName(a.exercise).localeCompare(getExerciseDisplayName(b.exercise), 'pt-BR');
-    })
-    .map((item) => mapExerciseOption(item.exercise));
+    if (score < 0) {
+      return results;
+    }
+
+    insertRankedExerciseResult(results, {
+      exercise: item.exercise,
+      displayName: item.displayName,
+      score
+    }, limit);
+
+    return results;
+  }, []);
+
+  return rankedResults.map((item) => mapExerciseOption(item.exercise));
 }
 
 export function getExerciseById(id: string): ExerciseOption | undefined {

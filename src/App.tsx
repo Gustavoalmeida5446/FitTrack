@@ -1,7 +1,6 @@
 import { Calendar, CalendarHeatMap, Home } from '@carbon/icons-react';
 import { Button, Theme } from '@carbon/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import type { Session } from '@supabase/supabase-js';
+import { useCallback, useMemo, useState } from 'react';
 import { HomePage } from './pages/HomePage';
 import { WorkoutPage } from './pages/WorkoutPage';
 import { DietDayPage } from './pages/DietDayPage';
@@ -11,15 +10,25 @@ import { WorkoutSetupPage } from './pages/WorkoutSetupPage';
 import { LoginPage } from './pages/LoginPage';
 import { type TutorialStepContent } from './components/ContextualTutorialCard';
 import { WeeklyDiet, Workout } from './data/types';
-import { AppState, defaultAppState, normalizeWaterData, normalizeWorkoutProgressForToday } from './lib/appState';
+import { useAuthSession } from './hooks/useAuthSession';
+import { useDailyWorkoutReset } from './hooks/useDailyWorkoutReset';
+import { type AppView, useLocalNavigation } from './hooks/useLocalNavigation';
+import { useRemoteAppState } from './hooks/useRemoteAppState';
+import { useTutorial } from './hooks/useTutorial';
+import { AppState, defaultAppState, normalizeWaterData } from './lib/appState';
+import {
+  addWaterAmount,
+  createWeightHistoryEntry,
+  getCurrentWeightFromHistory,
+  toggleCompletedMealForDay,
+  toggleWorkoutExerciseDone,
+  updateWorkoutExerciseLoad
+} from './lib/appUpdates';
 import { getTodayDateString } from './lib/date';
 import { calculateNutritionTargets } from './lib/nutrition';
-import { getCurrentSession, onAuthStateChange, signInWithEmail, signOut, signUpWithEmail } from './services/authService';
-import { loadRemoteAppState, saveRemoteAppState } from './services/appStateService';
+import { signInWithEmail, signOut, signUpWithEmail } from './services/authService';
 
-type View = 'home' | 'workout' | 'diet-day' | 'workout-setup' | 'diet-setup' | 'goals';
-
-const onboardingSteps: Array<TutorialStepContent & { view: View }> = [
+const onboardingSteps: Array<TutorialStepContent & { view: AppView }> = [
   {
     section: 'Etapa 1: Perfil',
     title: 'Comece pelo perfil',
@@ -51,15 +60,19 @@ const onboardingSteps: Array<TutorialStepContent & { view: View }> = [
 ];
 
 export default function App() {
-  const [view, setView] = useState<View>('home');
-  const [selectedWorkoutId, setSelectedWorkoutId] = useState<string>('');
-  const [selectedDayId, setSelectedDayId] = useState<string>('');
-  const [session, setSession] = useState<Session | null>(null);
-  const [isAuthReady, setIsAuthReady] = useState(false);
-  const [isRemoteReady, setIsRemoteReady] = useState(false);
-  const [hasPendingRemoteSave, setHasPendingRemoteSave] = useState(false);
-  const [isTutorialOpen, setIsTutorialOpen] = useState(false);
-  const [tutorialStepIndex, setTutorialStepIndex] = useState(0);
+  const { session, setSession, isAuthReady } = useAuthSession();
+  const {
+    view,
+    selectedWorkoutId,
+    selectedDayId,
+    setView,
+    openHome,
+    openGoals,
+    openWorkoutSetup,
+    openDietSetup,
+    openWorkout,
+    openDietDay
+  } = useLocalNavigation();
 
   const [profile, setProfile] = useState(defaultAppState.profile);
   const [workouts, setWorkouts] = useState(defaultAppState.workouts);
@@ -67,7 +80,6 @@ export default function App() {
   const [water, setWater] = useState(normalizeWaterData(defaultAppState.water));
   const [weeklyDiet, setWeeklyDiet] = useState(defaultAppState.weeklyDiet);
   const [weightHistory, setWeightHistory] = useState(defaultAppState.weightHistory);
-  const sessionUserIdRef = useRef<string | null>(null);
 
   const appState = useMemo<AppState>(() => ({
     profile,
@@ -89,181 +101,89 @@ export default function App() {
     return weeklyDiet.meals.filter((meal) => selectedDay.mealIds.includes(meal.id));
   }, [selectedDay, weeklyDiet.meals]);
   const userInitial = session?.user.email?.trim().charAt(0).toUpperCase() ?? 'U';
-  const tutorialStorageKey = session ? `fittrack:onboarding:${session.user.id}` : '';
-  const activeTutorialStep = isTutorialOpen ? onboardingSteps[tutorialStepIndex] : null;
-
-  useEffect(() => {
-    sessionUserIdRef.current = session?.user.id ?? null;
-  }, [session]);
-
-  useEffect(() => {
-    void getCurrentSession().then((currentSession) => {
-      setSession(currentSession);
-      setIsRemoteReady(false);
-      setIsAuthReady(true);
-    });
-
-    const { data } = onAuthStateChange((event, nextSession) => {
-      const previousUserId = sessionUserIdRef.current;
-      const nextUserId = nextSession?.user.id ?? null;
-
-      if (event === 'SIGNED_OUT') {
-        setSession(null);
-        setIsRemoteReady(false);
-        setIsAuthReady(true);
-        return;
-      }
-
-      if (!nextSession) {
-        setIsAuthReady(true);
-        return;
-      }
-
-      // Ignore token refreshes and same-user revalidation so tab focus does not
-      // relaunch onboarding or reset the current in-app view.
-      if (previousUserId === nextUserId) {
-        setIsAuthReady(true);
-        return;
-      }
-
-      setSession(nextSession);
-      setIsRemoteReady(false);
-      setIsAuthReady(true);
-    });
-
-    return () => {
-      data.subscription.unsubscribe();
-    };
+  const handleHydrateRemoteState = useCallback((remoteState: AppState) => {
+    setProfile(remoteState.profile);
+    setWorkouts(remoteState.workouts);
+    setWorkoutsUpdatedAt(remoteState.workoutsUpdatedAt);
+    setWater(normalizeWaterData(remoteState.water));
+    setWeeklyDiet(remoteState.weeklyDiet);
+    setWeightHistory(remoteState.weightHistory);
   }, []);
+  const handleResetLocalState = useCallback(() => {
+    setProfile(defaultAppState.profile);
+    setWorkouts(defaultAppState.workouts);
+    setWorkoutsUpdatedAt(defaultAppState.workoutsUpdatedAt);
+    setWater(normalizeWaterData(defaultAppState.water));
+    setWeeklyDiet(defaultAppState.weeklyDiet);
+    setWeightHistory(defaultAppState.weightHistory);
+  }, []);
+  const {
+    isRemoteReady,
+    remoteSyncError,
+    markRemoteSavePending
+  } = useRemoteAppState({
+    session,
+    appState,
+    onHydrate: handleHydrateRemoteState,
+    onReset: handleResetLocalState
+  });
+  const remoteSyncMessage = remoteSyncError === 'load'
+    ? 'Não foi possível carregar seus dados salvos agora. O app segue aberto, mas pode estar usando dados locais.'
+    : remoteSyncError === 'save'
+      ? 'Não foi possível sincronizar suas alterações agora. Vamos tentar salvar novamente automaticamente.'
+      : '';
+  const handleResetWorkoutProgress = useCallback((nextState: { workouts: Workout[]; workoutsUpdatedAt: string }) => {
+    setWorkouts(nextState.workouts);
+    setWorkoutsUpdatedAt(nextState.workoutsUpdatedAt);
+    markRemoteSavePending();
+  }, [markRemoteSavePending]);
+  const {
+    activeStep: activeTutorialStep,
+    tutorialStepIndex,
+    tutorialStepsTotal,
+    finishTutorial,
+    startTutorial,
+    handleTutorialNext,
+    handleTutorialBack
+  } = useTutorial({
+    steps: onboardingSteps,
+    sessionUserId: session?.user.id,
+    isReady: Boolean(session) && isRemoteReady,
+    onNavigate: setView
+  });
 
-  useEffect(() => {
-    if (!session) {
-      setProfile(defaultAppState.profile);
-      setWorkouts(defaultAppState.workouts);
-      setWorkoutsUpdatedAt(defaultAppState.workoutsUpdatedAt);
-      setWater(normalizeWaterData(defaultAppState.water));
-      setWeeklyDiet(defaultAppState.weeklyDiet);
-      setWeightHistory(defaultAppState.weightHistory);
-      setHasPendingRemoteSave(false);
-      setIsRemoteReady(true);
-      return;
-    }
-
-    let isActive = true;
-    setIsRemoteReady(false);
-
-    void loadRemoteAppState(session).then((remoteState) => {
-      if (!isActive || !remoteState) return;
-
-      setProfile(remoteState.profile);
-      setWorkouts(remoteState.workouts);
-      setWorkoutsUpdatedAt(remoteState.workoutsUpdatedAt);
-      setWater(normalizeWaterData(remoteState.water));
-      setWeeklyDiet(remoteState.weeklyDiet);
-      setWeightHistory(remoteState.weightHistory);
-      setHasPendingRemoteSave(false);
-      setIsRemoteReady(true);
-    });
-
-    return () => {
-      isActive = false;
-    };
-  }, [session]);
-
-  useEffect(() => {
-    if (!session || !isRemoteReady || !hasPendingRemoteSave) {
-      return;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      void saveRemoteAppState(session, appState).then((didSave) => {
-        if (didSave) {
-          setHasPendingRemoteSave(false);
-        }
-      });
-    }, 400);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [appState, hasPendingRemoteSave, isRemoteReady, session]);
-
-  useEffect(() => {
-    if (!session || !isRemoteReady || !tutorialStorageKey) {
-      return;
-    }
-
-    const hasSeenTutorial = window.localStorage.getItem(tutorialStorageKey) === 'done';
-
-    if (!hasSeenTutorial) {
-      setTutorialStepIndex(0);
-      setIsTutorialOpen(true);
-    }
-  }, [isRemoteReady, session, tutorialStorageKey]);
-
-  useEffect(() => {
-    if (!isTutorialOpen) {
-      return;
-    }
-
-    setView(onboardingSteps[tutorialStepIndex].view);
-  }, [isTutorialOpen, tutorialStepIndex]);
-
-  useEffect(() => {
-    if (!session || !isRemoteReady) {
-      return;
-    }
-
-    const syncWorkoutProgressDate = () => {
-      const normalizedState = normalizeWorkoutProgressForToday(workouts, workoutsUpdatedAt);
-
-      if (normalizedState.workoutsUpdatedAt === workoutsUpdatedAt) {
-        return;
-      }
-
-      setWorkouts(normalizedState.workouts);
-      setWorkoutsUpdatedAt(normalizedState.workoutsUpdatedAt);
-      setHasPendingRemoteSave(true);
-    };
-
-    syncWorkoutProgressDate();
-    window.addEventListener('focus', syncWorkoutProgressDate);
-    document.addEventListener('visibilitychange', syncWorkoutProgressDate);
-
-    return () => {
-      window.removeEventListener('focus', syncWorkoutProgressDate);
-      document.removeEventListener('visibilitychange', syncWorkoutProgressDate);
-    };
-  }, [isRemoteReady, session, workouts, workoutsUpdatedAt]);
+  useDailyWorkoutReset({
+    isReady: Boolean(session) && isRemoteReady,
+    workouts,
+    workoutsUpdatedAt,
+    onReset: handleResetWorkoutProgress
+  });
 
   const updateWorkout = (workoutId: string, updater: (workout: Workout) => Workout) => {
-    setHasPendingRemoteSave(true);
+    markRemoteSavePending();
     setWorkoutsUpdatedAt(getTodayDateString());
     setWorkouts((prev) => prev.map((workout) => (workout.id === workoutId ? updater(workout) : workout)));
   };
 
   const updateDiet = (updater: (diet: WeeklyDiet) => WeeklyDiet) => {
-    setHasPendingRemoteSave(true);
+    markRemoteSavePending();
     setWeeklyDiet((prev) => updater(prev));
   };
 
   const handleUpdateProfile = (nextProfile: AppState['profile']) => {
-    setHasPendingRemoteSave(true);
+    markRemoteSavePending();
     setProfile(nextProfile);
   };
 
   const handleSaveWorkouts = (nextWorkouts: Workout[]) => {
-    setHasPendingRemoteSave(true);
+    markRemoteSavePending();
     setWorkoutsUpdatedAt(getTodayDateString());
     setWorkouts(nextWorkouts);
   };
 
   const handleAddWeight = (weight: number) => {
-    setHasPendingRemoteSave(true);
-    setWeightHistory((prev) => [{
-      date: new Date().toLocaleDateString('pt-BR'),
-      weight
-    }, ...prev].slice(0, 10));
+    markRemoteSavePending();
+    setWeightHistory((prev) => [createWeightHistoryEntry(weight), ...prev].slice(0, 10));
     setProfile((prev) => ({
       ...prev,
       currentWeight: weight
@@ -271,21 +191,28 @@ export default function App() {
   };
 
   const handleRemoveWeight = (index: number) => {
-    setHasPendingRemoteSave(true);
-    setWeightHistory((prev) => prev.filter((_, itemIndex) => itemIndex !== index));
+    markRemoteSavePending();
+    setWeightHistory((prev) => {
+      const nextHistory = prev.filter((_, itemIndex) => itemIndex !== index);
+
+      if (index === 0) {
+        setProfile((currentProfile) => ({
+          ...currentProfile,
+          currentWeight: getCurrentWeightFromHistory(nextHistory)
+        }));
+      }
+
+      return nextHistory;
+    });
   };
 
   const handleAddWater = (amount: number) => {
-    setHasPendingRemoteSave(true);
-    setWater((prev) => ({
-      ...prev,
-      consumedMl: prev.consumedMl + amount,
-      updatedAt: getTodayDateString()
-    }));
+    markRemoteSavePending();
+    setWater((prev) => addWaterAmount(prev, amount, getTodayDateString()));
   };
 
   const handleSaveDiet = (nextDiet: WeeklyDiet) => {
-    setHasPendingRemoteSave(true);
+    markRemoteSavePending();
     setWeeklyDiet(nextDiet);
   };
 
@@ -297,7 +224,7 @@ export default function App() {
     }
 
     setSession(nextSession);
-    setView('goals');
+    openGoals();
     return true;
   };
 
@@ -308,39 +235,7 @@ export default function App() {
     if (!success) return;
 
     setSession(null);
-    setView('home');
-  };
-
-  const finishTutorial = () => {
-    if (tutorialStorageKey) {
-      window.localStorage.setItem(tutorialStorageKey, 'done');
-    }
-
-    setIsTutorialOpen(false);
-    setTutorialStepIndex(0);
-  };
-
-  const startTutorial = () => {
-    setTutorialStepIndex(0);
-    setIsTutorialOpen(true);
-    setView(onboardingSteps[0].view);
-  };
-
-  const handleTutorialNext = () => {
-    if (tutorialStepIndex >= onboardingSteps.length - 1) {
-      finishTutorial();
-      return;
-    }
-
-    const nextStepIndex = tutorialStepIndex + 1;
-    setTutorialStepIndex(nextStepIndex);
-    setView(onboardingSteps[nextStepIndex].view);
-  };
-
-  const handleTutorialBack = () => {
-    const previousStepIndex = Math.max(0, tutorialStepIndex - 1);
-    setTutorialStepIndex(previousStepIndex);
-    setView(onboardingSteps[previousStepIndex].view);
+    openHome();
   };
 
   if (!isAuthReady) {
@@ -368,6 +263,11 @@ export default function App() {
   return (
     <Theme theme="g100">
       <div className="app-shell">
+        {remoteSyncMessage ? (
+          <div className="sync-status sync-status--error" role="status" aria-live="polite">
+            {remoteSyncMessage}
+          </div>
+        ) : null}
         {view === 'home' ? (
           <HomePage
             workouts={workouts}
@@ -377,18 +277,12 @@ export default function App() {
             targets={targets}
             tutorialStep={activeTutorialStep?.view === 'home' ? activeTutorialStep : null}
             tutorialStepIndex={tutorialStepIndex}
-            tutorialStepsTotal={onboardingSteps.length}
+            tutorialStepsTotal={tutorialStepsTotal}
             onTutorialBack={handleTutorialBack}
             onTutorialNext={handleTutorialNext}
             onTutorialSkip={finishTutorial}
-            onOpenWorkout={(workoutId) => {
-              setSelectedWorkoutId(workoutId);
-              setView('workout');
-            }}
-            onOpenDietDay={(dayId) => {
-              setSelectedDayId(dayId);
-              setView('diet-day');
-            }}
+            onOpenWorkout={openWorkout}
+            onOpenDietDay={openDietDay}
             onAddWater={handleAddWater}
           />
         ) : null}
@@ -396,15 +290,9 @@ export default function App() {
         {view === 'workout' && selectedWorkout ? (
           <WorkoutPage
             workout={selectedWorkout}
-            onBack={() => setView('home')}
-            onToggleExerciseDone={(exerciseId) => updateWorkout(selectedWorkout.id, (workout) => ({
-              ...workout,
-              exercises: workout.exercises.map((exercise) => exercise.id === exerciseId ? { ...exercise, done: !exercise.done } : exercise)
-            }))}
-            onUpdateLoad={(exerciseId, loadKg) => updateWorkout(selectedWorkout.id, (workout) => ({
-              ...workout,
-              exercises: workout.exercises.map((exercise) => exercise.id === exerciseId ? { ...exercise, loadKg } : exercise)
-            }))}
+            onBack={openHome}
+            onToggleExerciseDone={(exerciseId) => updateWorkout(selectedWorkout.id, (workout) => toggleWorkoutExerciseDone(workout, exerciseId))}
+            onUpdateLoad={(exerciseId, loadKg) => updateWorkout(selectedWorkout.id, (workout) => updateWorkoutExerciseLoad(workout, exerciseId, loadKg))}
           />
         ) : null}
 
@@ -413,27 +301,22 @@ export default function App() {
             day={selectedDay}
             meals={selectedDayMeals}
             targets={targets}
-            onBack={() => setView('home')}
+            onBack={openHome}
             onToggleMealDone={(mealId) => updateDiet((diet) => ({
               ...diet,
-              days: diet.days.map((day) => day.id !== selectedDay.id ? day : {
-                ...day,
-                completedMealIds: day.completedMealIds.includes(mealId)
-                  ? day.completedMealIds.filter((item) => item !== mealId)
-                  : [...day.completedMealIds, mealId]
-              })
+              days: diet.days.map((day) => day.id !== selectedDay.id ? day : toggleCompletedMealForDay(day, mealId))
             }))}
           />
         ) : null}
 
         {view === 'workout-setup' ? (
           <WorkoutSetupPage
-            onBack={() => setView('home')}
+            onBack={openHome}
             workouts={workouts}
             onSaveWorkouts={handleSaveWorkouts}
             tutorialStep={activeTutorialStep?.view === 'workout-setup' ? activeTutorialStep : null}
             tutorialStepIndex={tutorialStepIndex}
-            tutorialStepsTotal={onboardingSteps.length}
+            tutorialStepsTotal={tutorialStepsTotal}
             onTutorialBack={handleTutorialBack}
             onTutorialNext={handleTutorialNext}
             onTutorialSkip={finishTutorial}
@@ -442,12 +325,12 @@ export default function App() {
 
         {view === 'diet-setup' ? (
           <DietSetupPage
-            onBack={() => setView('home')}
+            onBack={openHome}
             diet={weeklyDiet}
             onSaveDiet={handleSaveDiet}
             tutorialStep={activeTutorialStep?.view === 'diet-setup' ? activeTutorialStep : null}
             tutorialStepIndex={tutorialStepIndex}
-            tutorialStepsTotal={onboardingSteps.length}
+            tutorialStepsTotal={tutorialStepsTotal}
             onTutorialBack={handleTutorialBack}
             onTutorialNext={handleTutorialNext}
             onTutorialSkip={finishTutorial}
@@ -461,35 +344,34 @@ export default function App() {
             weightHistory={weightHistory}
             tutorialStep={activeTutorialStep?.view === 'goals' ? activeTutorialStep : null}
             tutorialStepIndex={tutorialStepIndex}
-            tutorialStepsTotal={onboardingSteps.length}
+            tutorialStepsTotal={tutorialStepsTotal}
             onTutorialBack={handleTutorialBack}
             onTutorialNext={handleTutorialNext}
             onTutorialSkip={finishTutorial}
             onReplayTutorial={startTutorial}
-            onBack={() => setView('home')}
+            onBack={openHome}
             onUpdateProfile={handleUpdateProfile}
             onAddWeight={handleAddWeight}
             onRemoveWeight={handleRemoveWeight}
             session={session}
-            onOpenLogin={() => undefined}
             onSignOut={handleSignOut}
           />
         ) : null}
 
         <nav className="bottom-tabbar bottom-nav" aria-label="Navegação principal">
-          <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'home' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={() => setView('home')}>
+          <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'home' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={openHome}>
             <Home size={20} />
             <span>Início</span>
           </Button>
-          <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'workout-setup' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={() => setView('workout-setup')}>
+          <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'workout-setup' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={openWorkoutSetup}>
             <Calendar size={20} />
             <span>Treinos</span>
           </Button>
-          <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'diet-setup' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={() => setView('diet-setup')}>
+          <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'diet-setup' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={openDietSetup}>
             <CalendarHeatMap size={20} />
             <span>Dieta</span>
           </Button>
-          <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'goals' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={() => setView('goals')}>
+          <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'goals' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={openGoals}>
             <span className="profile-initial-badge" aria-hidden="true">{userInitial}</span>
             <span>Perfil</span>
           </Button>

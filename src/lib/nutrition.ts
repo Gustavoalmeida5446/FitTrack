@@ -1,4 +1,4 @@
-import { ActivityLevel, DietDay, DietType, GoalType, Meal, NutritionTargets, Sex, UserProfile } from '../data/types';
+import { ActivityLevel, DietDay, DietType, FoodItem, GoalType, Meal, NutritionTargets, Sex, UserProfile } from '../data/types';
 
 const activityMultipliers: Record<ActivityLevel, number> = {
   Sedentario: 1.2,
@@ -125,17 +125,59 @@ export interface DietProgressTotals {
   consumedProtein: number;
 }
 
+export interface MealTotals {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+export function calculateFoodTotals(foods: FoodItem[]): MealTotals {
+  return foods.reduce<MealTotals>((totals, food) => ({
+    calories: totals.calories + food.calories,
+    protein: totals.protein + food.protein,
+    carbs: totals.carbs + food.carbs,
+    fat: totals.fat + food.fat
+  }), {
+    calories: 0,
+    protein: 0,
+    carbs: 0,
+    fat: 0
+  });
+}
+
+export function calculateMealTotals(meal: Meal): MealTotals {
+  return calculateFoodTotals(meal.foods);
+}
+
+export function calculateMealsTotals(meals: Meal[]): MealTotals {
+  return meals.reduce<MealTotals>((totals, meal) => {
+    const mealTotals = calculateMealTotals(meal);
+
+    return {
+      calories: totals.calories + mealTotals.calories,
+      protein: totals.protein + mealTotals.protein,
+      carbs: totals.carbs + mealTotals.carbs,
+      fat: totals.fat + mealTotals.fat
+    };
+  }, {
+    calories: 0,
+    protein: 0,
+    carbs: 0,
+    fat: 0
+  });
+}
+
 export function calculateDietProgress(meals: Meal[], completedMealIds: string[]): DietProgressTotals {
   return meals.reduce<DietProgressTotals>((totals, meal) => {
-    const mealCalories = meal.foods.reduce((sum, food) => sum + food.calories, 0);
-    const mealProtein = meal.foods.reduce((sum, food) => sum + food.protein, 0);
+    const mealTotals = calculateMealTotals(meal);
     const isCompleted = completedMealIds.includes(meal.id);
 
     return {
-      plannedCalories: totals.plannedCalories + mealCalories,
-      plannedProtein: totals.plannedProtein + mealProtein,
-      consumedCalories: totals.consumedCalories + (isCompleted ? mealCalories : 0),
-      consumedProtein: totals.consumedProtein + (isCompleted ? mealProtein : 0)
+      plannedCalories: totals.plannedCalories + mealTotals.calories,
+      plannedProtein: totals.plannedProtein + mealTotals.protein,
+      consumedCalories: totals.consumedCalories + (isCompleted ? mealTotals.calories : 0),
+      consumedProtein: totals.consumedProtein + (isCompleted ? mealTotals.protein : 0)
     };
   }, {
     plannedCalories: 0,

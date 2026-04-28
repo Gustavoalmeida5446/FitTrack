@@ -6,6 +6,10 @@ export function getTodayDateString(date = new Date()): string {
   return formatter.format(date);
 }
 
+export function formatDatePtBr(date = new Date()): string {
+  return date.toLocaleDateString('pt-BR');
+}
+
 function parseBirthDateParts(birthDate: string): { year: number; month: number; day: number } | null {
   const parts = birthDate.split('-').map(Number);
 

@@ -1,8 +1,10 @@
 import { CalendarHeatMap, ChevronLeft, CheckmarkFilled } from '@carbon/icons-react';
 import { Button, Checkbox, Tile } from '@carbon/react';
+import { CardHeader } from '../components/CardHeader';
 import { PageContainer } from '../components/PageContainer';
+import { StatPill } from '../components/StatPill';
 import { DietDay, Meal, NutritionTargets } from '../data/types';
-import { calculateDietProgress } from '../lib/nutrition';
+import { calculateDietProgress, calculateMealTotals } from '../lib/nutrition';
 
 interface Props {
   day: DietDay;
@@ -36,55 +38,34 @@ export function DietDayPage({ day, meals, targets, onBack, onToggleMealDone }: P
       </Tile>
 
       <Tile className="card metric-card diet-targets-card">
-        <div className="card-head">
-          <div className="card-head__group">
-            <div className="icon-badge icon-badge--purple card-head__badge">
-              <CheckmarkFilled size={20} />
-            </div>
-            <div className="card-head__title">
-              <h3>Meta Diária</h3>
-              <p>O que você precisa consumir e o que já consumiu hoje</p>
-            </div>
-          </div>
-        </div>
+        <CardHeader
+          icon={<CheckmarkFilled size={20} />}
+          title="Meta Diária"
+          description="O que você precisa consumir e o que já consumiu hoje"
+          accent="purple"
+        />
         <div className="diet-totals-card__grid">
-          <div className="stat-pill">
-            <span>Meta de calorias</span>
-            <strong>{targets.caloriesDaily} kcal</strong>
-          </div>
-          <div className="stat-pill">
-            <span>Meta de proteína</span>
-            <strong>{targets.proteinDaily} g</strong>
-          </div>
-          <div className="stat-pill">
-            <span>Calorias consumidas</span>
-            <strong>{Math.round(totals.consumedCalories)} kcal</strong>
-          </div>
-          <div className="stat-pill">
-            <span>Proteína consumida</span>
-            <strong>{Math.round(totals.consumedProtein)} g</strong>
-          </div>
+          <StatPill label="Meta de calorias" value={`${targets.caloriesDaily} kcal`} />
+          <StatPill label="Meta de proteína" value={`${targets.proteinDaily} g`} />
+          <StatPill label="Calorias consumidas" value={`${Math.round(totals.consumedCalories)} kcal`} />
+          <StatPill label="Proteína consumida" value={`${Math.round(totals.consumedProtein)} g`} />
         </div>
       </Tile>
 
       <div className="stack">
         {meals.map((meal) => {
           const isDone = day.completedMealIds.includes(meal.id);
+          const mealTotals = calculateMealTotals(meal);
 
           return (
             <Tile key={meal.id} className={`card metric-card diet-meal-card ${isDone ? 'diet-meal-card--done' : ''}`}>
-              <div className="card-head">
-                <div className="card-head__group">
-                  <div className="icon-badge icon-badge--purple card-head__badge">
-                    <CalendarHeatMap size={20} />
-                  </div>
-                  <div className="card-head__title">
-                    <h3>{meal.name}</h3>
-                    <p>{meal.foods.length} itens</p>
-                  </div>
-                </div>
-                {isDone ? <CheckmarkFilled size={20} className="diet-meal-card__status" /> : null}
-              </div>
+              <CardHeader
+                icon={<CalendarHeatMap size={20} />}
+                title={meal.name}
+                description={`${meal.foods.length} itens`}
+                accent="purple"
+                trailing={isDone ? <CheckmarkFilled size={20} className="diet-meal-card__status" /> : null}
+              />
 
               <ul className="diet-food-list">
                 {meal.foods.map((food) => (
@@ -99,14 +80,8 @@ export function DietDayPage({ day, meals, targets, onBack, onToggleMealDone }: P
               </ul>
 
               <div className="diet-meal-card__meta">
-                <div className="stat-pill">
-                  <span>Calorias</span>
-                  <strong>{meal.foods.reduce((sum, food) => sum + food.calories, 0)}</strong>
-                </div>
-                <div className="stat-pill">
-                  <span>Proteína</span>
-                  <strong>{meal.foods.reduce((sum, food) => sum + food.protein, 0)}g</strong>
-                </div>
+                <StatPill label="Calorias" value={mealTotals.calories} />
+                <StatPill label="Proteína" value={`${mealTotals.protein}g`} />
               </div>
 
               <div className="diet-meal-card__footer">
@@ -119,22 +94,10 @@ export function DietDayPage({ day, meals, targets, onBack, onToggleMealDone }: P
         <Tile className="card metric-card diet-totals-card">
           <h3>Resumo do dia</h3>
           <div className="diet-totals-card__grid">
-            <div className="stat-pill">
-              <span>Meta de calorias</span>
-              <strong>{targets.caloriesDaily} kcal</strong>
-            </div>
-            <div className="stat-pill">
-              <span>Meta de proteína</span>
-              <strong>{targets.proteinDaily}g</strong>
-            </div>
-            <div className="stat-pill">
-              <span>Calorias consumidas</span>
-              <strong>{Math.round(totals.consumedCalories)} kcal</strong>
-            </div>
-            <div className="stat-pill">
-              <span>Proteína consumida</span>
-              <strong>{Math.round(totals.consumedProtein)}g</strong>
-            </div>
+            <StatPill label="Meta de calorias" value={`${targets.caloriesDaily} kcal`} />
+            <StatPill label="Meta de proteína" value={`${targets.proteinDaily}g`} />
+            <StatPill label="Calorias consumidas" value={`${Math.round(totals.consumedCalories)} kcal`} />
+            <StatPill label="Proteína consumida" value={`${Math.round(totals.consumedProtein)}g`} />
           </div>
         </Tile>
       </div>

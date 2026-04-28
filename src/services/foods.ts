@@ -1,4 +1,5 @@
 import tacoFoods from '../data/taco-foods.json';
+import { normalizeSearchValue } from '../lib/search';
 
 export type FoodMeasurementUnit = 'g' | 'ml' | 'un';
 
@@ -18,25 +19,20 @@ export interface FoodItem {
 }
 
 const foods = tacoFoods as FoodItem[];
+const indexedFoods = foods.map((food) => ({
+  food,
+  normalizedName: normalizeSearchValue(food.nome)
+}));
 
-function normalizeSearchValue(value: string): string {
-  return value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim();
+interface RankedFoodResult {
+  food: FoodItem;
+  score: number;
 }
 
-function getSearchScore(name: string, query: string): number {
-  const normalizedName = normalizeSearchValue(name);
-  const normalizedQuery = normalizeSearchValue(query);
-
+function getSearchScore(normalizedName: string, normalizedQuery: string, queryTerms: string[]): number {
   if (!normalizedQuery) return -1;
   if (normalizedName === normalizedQuery) return 4;
   if (normalizedName.startsWith(normalizedQuery)) return 3;
-
-  const queryTerms = normalizedQuery.split(/\s+/).filter(Boolean);
   if (queryTerms.length === 0) return -1;
 
   const containsAllTerms = queryTerms.every((term) => normalizedName.includes(term));
@@ -49,27 +45,50 @@ export function getAllFoods(): FoodItem[] {
   return foods;
 }
 
-export function searchFoods(query: string): FoodItem[] {
-  const normalizedQuery = query.trim();
+function insertRankedFoodResult(results: RankedFoodResult[], nextResult: RankedFoodResult, limit?: number) {
+  let insertIndex = results.findIndex((currentResult) => {
+    if (nextResult.score !== currentResult.score) {
+      return nextResult.score > currentResult.score;
+    }
+
+    return nextResult.food.nome.localeCompare(currentResult.food.nome, 'pt-BR') < 0;
+  });
+
+  if (insertIndex === -1) {
+    insertIndex = results.length;
+  }
+
+  results.splice(insertIndex, 0, nextResult);
+
+  if (limit && results.length > limit) {
+    results.length = limit;
+  }
+}
+
+export function searchFoods(query: string, limit?: number): FoodItem[] {
+  const normalizedQuery = normalizeSearchValue(query);
+  const queryTerms = normalizedQuery.split(/\s+/).filter(Boolean);
 
   if (!normalizedQuery) {
     return [];
   }
 
-  return foods
-    .map((food) => ({
-      food,
-      score: getSearchScore(food.nome, normalizedQuery)
-    }))
-    .filter((item) => item.score >= 0)
-    .sort((a, b) => {
-      if (b.score !== a.score) {
-        return b.score - a.score;
-      }
+  const rankedResults = indexedFoods.reduce<RankedFoodResult[]>((results, item) => {
+    const score = getSearchScore(item.normalizedName, normalizedQuery, queryTerms);
 
-      return a.food.nome.localeCompare(b.food.nome, 'pt-BR');
-    })
-    .map((item) => item.food);
+    if (score < 0) {
+      return results;
+    }
+
+    insertRankedFoodResult(results, {
+      food: item.food,
+      score
+    }, limit);
+
+    return results;
+  }, []);
+
+  return rankedResults.map((item) => item.food);
 }
 
 export function getFoodById(id: number): FoodItem | undefined {

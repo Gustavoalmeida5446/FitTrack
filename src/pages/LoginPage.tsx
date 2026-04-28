@@ -1,6 +1,7 @@
 import { ChevronLeft, Login, UserAvatar } from '@carbon/icons-react';
 import { Button, PasswordInput, TextInput, Tile } from '@carbon/react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { CardHeader } from '../components/CardHeader';
 import { PageContainer } from '../components/PageContainer';
 
 interface Props {
@@ -19,23 +20,44 @@ export function LoginPage({ onBack, onLogin, onSignUp }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const isSignupMode = mode === 'signup';
 
   const canSubmit = useMemo(() => {
     if (!email.trim() || !password.trim() || isSubmitting) {
       return false;
     }
 
-    if (mode === 'signup') {
+    if (isSignupMode) {
       return confirmPassword.trim() && password === confirmPassword && password.length >= 6;
     }
 
     return true;
-  }, [confirmPassword, email, isSubmitting, mode, password]);
+  }, [confirmPassword, email, isSubmitting, isSignupMode, password]);
 
   const resetMessages = () => {
     setErrorMessage('');
     setSuccessMessage('');
   };
+
+  const switchMode = (nextMode: AuthMode) => {
+    setMode(nextMode);
+    setConfirmPassword('');
+    resetMessages();
+  };
+
+  useEffect(() => {
+    if (!errorMessage && !successMessage) {
+      return;
+    }
+
+    setErrorMessage('');
+    setSuccessMessage('');
+  }, [confirmPassword, email, password]);
+
+  const title = isSignupMode ? 'Criar conta' : 'Entrar';
+  const description = isSignupMode ? 'Cadastre-se para começar a usar o app' : 'Acesse sua conta';
+  const submitLabel = isSignupMode ? 'Criar conta' : 'Entrar';
+  const submittingLabel = isSignupMode ? 'Criando conta...' : 'Entrando...';
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
@@ -43,7 +65,7 @@ export function LoginPage({ onBack, onLogin, onSignUp }: Props) {
     setIsSubmitting(true);
     resetMessages();
 
-    if (mode === 'login') {
+    if (!isSignupMode) {
       const success = await onLogin(email.trim(), password);
 
       if (!success) {
@@ -82,44 +104,32 @@ export function LoginPage({ onBack, onLogin, onSignUp }: Props) {
 
         <Tile className="card metric-card auth-card">
           <div className="auth-mode-switch" role="tablist" aria-label="Modo de autenticação">
-            <button type="button" className={`auth-mode-switch__item ${mode === 'login' ? 'auth-mode-switch__item--active' : ''}`} onClick={() => {
-              setMode('login');
-              resetMessages();
-            }}>
+            <button type="button" className={`auth-mode-switch__item ${mode === 'login' ? 'auth-mode-switch__item--active' : ''}`} onClick={() => switchMode('login')}>
               Entrar
             </button>
-            <button type="button" className={`auth-mode-switch__item ${mode === 'signup' ? 'auth-mode-switch__item--active' : ''}`} onClick={() => {
-              setMode('signup');
-              resetMessages();
-            }}>
+            <button type="button" className={`auth-mode-switch__item ${mode === 'signup' ? 'auth-mode-switch__item--active' : ''}`} onClick={() => switchMode('signup')}>
               Criar conta
             </button>
           </div>
 
-          <div className="card-head">
-            <div className="card-head__group">
-              <div className="icon-badge icon-badge--primary card-head__badge">
-                <Login size={20} />
-              </div>
-              <div className="card-head__title">
-                <h3>{mode === 'login' ? 'Entrar' : 'Criar conta'}</h3>
-                <p>{mode === 'login' ? 'Acesse sua conta' : 'Cadastre-se para começar a usar o app'}</p>
-              </div>
-            </div>
-          </div>
+          <CardHeader
+            icon={<Login size={20} />}
+            title={title}
+            description={description}
+          />
 
           <div className="auth-form">
             <TextInput id="login-email" type="email" labelText="E-mail" value={email} onChange={(event) => setEmail(event.target.value)} />
-            <PasswordInput id="login-password" labelText="Senha" value={password} onChange={(event) => setPassword(event.target.value)} helperText={mode === 'signup' ? 'Use pelo menos 6 caracteres.' : undefined} />
-            {mode === 'signup' ? (
+            <PasswordInput id="login-password" labelText="Senha" value={password} onChange={(event) => setPassword(event.target.value)} helperText={isSignupMode ? 'Use pelo menos 6 caracteres.' : undefined} />
+            {isSignupMode ? (
               <PasswordInput id="login-confirm-password" labelText="Confirmar senha" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} />
             ) : null}
-            {mode === 'signup' && confirmPassword && password !== confirmPassword ? <p className="auth-message auth-message--error">As senhas não coincidem.</p> : null}
+            {isSignupMode && confirmPassword && password !== confirmPassword ? <p className="auth-message auth-message--error">As senhas não coincidem.</p> : null}
             {errorMessage ? <p className="auth-message auth-message--error">{errorMessage}</p> : null}
             {successMessage ? <p className="auth-message auth-message--success">{successMessage}</p> : null}
             <div className="setup-card__footer">
               <Button disabled={!canSubmit} onClick={handleSubmit}>
-                {isSubmitting ? (mode === 'login' ? 'Entrando...' : 'Criando conta...') : (mode === 'login' ? 'Entrar' : 'Criar conta')}
+                {isSubmitting ? submittingLabel : submitLabel}
               </Button>
             </div>
           </div>

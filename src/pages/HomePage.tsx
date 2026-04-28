@@ -2,8 +2,10 @@ import { CalendarHeatMap, ChevronRight, TemperatureWater } from '@carbon/icons-r
 import { Button, ProgressBar, Tile } from '@carbon/react';
 import { ContextualTutorialCard, type TutorialStepContent } from '../components/ContextualTutorialCard';
 import { PageContainer } from '../components/PageContainer';
+import { StatPill } from '../components/StatPill';
 import { NutritionTargets, WaterData, WeeklyDiet, Workout } from '../data/types';
 import { getDietDayIdForDate } from '../lib/date';
+import { parseDecimalNumber } from '../lib/number';
 import { calculateDietProgress, getMealsForDietDay } from '../lib/nutrition';
 
 interface Props {
@@ -113,7 +115,7 @@ export function HomePage({
           <Button size="sm" disabled={waterGoalMl <= 0} onClick={() => onAddWater(250)}>+250 ml</Button>
           <Button size="sm" disabled={waterGoalMl <= 0} onClick={() => onAddWater(500)}>+500 ml</Button>
           <Button size="sm" kind="tertiary" onClick={() => {
-            const custom = Number(prompt('Quanto deseja adicionar em ml?'));
+            const custom = parseDecimalNumber(prompt('Quanto deseja adicionar em ml?') ?? '', 0);
             if (custom > 0) onAddWater(custom);
           }} disabled={waterGoalMl <= 0}>Personalizado</Button>
         </div>
@@ -148,22 +150,10 @@ export function HomePage({
         {hasDiet && todayDietDay ? (
           <Tile className="card metric-card diet-home-summary-card">
             <div className="diet-home-summary-card__grid">
-              <div className="stat-pill">
-                <span>Meta de proteína</span>
-                <strong>{targets.proteinDaily}g</strong>
-              </div>
-              <div className="stat-pill">
-                <span>Proteína hoje</span>
-                <strong>{Math.round(todayDietProgress.consumedProtein)}g</strong>
-              </div>
-              <div className="stat-pill">
-                <span>Meta de calorias</span>
-                <strong>{targets.caloriesDaily} kcal</strong>
-              </div>
-              <div className="stat-pill">
-                <span>Calorias hoje</span>
-                <strong>{Math.round(todayDietProgress.consumedCalories)} kcal</strong>
-              </div>
+              <StatPill label="Meta de proteína" value={`${targets.proteinDaily}g`} />
+              <StatPill label="Proteína hoje" value={`${Math.round(todayDietProgress.consumedProtein)}g`} />
+              <StatPill label="Meta de calorias" value={`${targets.caloriesDaily} kcal`} />
+              <StatPill label="Calorias hoje" value={`${Math.round(todayDietProgress.consumedCalories)} kcal`} />
             </div>
           </Tile>
         ) : null}

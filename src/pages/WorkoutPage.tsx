@@ -1,18 +1,17 @@
 import { CheckmarkFilled, ChevronLeft, Timer } from '@carbon/icons-react';
 import { Button, Checkbox, NumberInput, Tile } from '@carbon/react';
 import { useEffect, useState } from 'react';
+import { CardHeader } from '../components/CardHeader';
 import { PageContainer } from '../components/PageContainer';
+import { StatPill } from '../components/StatPill';
 import { Workout } from '../data/types';
+import { getSafeNumber } from '../lib/number';
 
 interface Props {
   workout: Workout;
   onBack: () => void;
   onToggleExerciseDone: (exerciseId: string) => void;
   onUpdateLoad: (exerciseId: string, loadKg: number) => void;
-}
-
-function getSafeNumber(value: number, fallback: number) {
-  return Number.isFinite(value) ? value : fallback;
 }
 
 export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateLoad }: Props) {
@@ -103,17 +102,11 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateLoa
 
           return (
             <Tile key={exercise.id} className={`card metric-card workout-exercise-card ${exercise.done ? 'workout-exercise-card--done' : ''}`}>
-              <div className="card-head">
-                <div className="card-head__group">
-                  <div className="icon-badge icon-badge--primary card-head__badge">
-                    <CheckmarkFilled size={20} />
-                  </div>
-                  <div className="card-head__title">
-                    <h3>{displayName}</h3>
-                    <p>{exercise.muscleGroup}</p>
-                  </div>
-                </div>
-              </div>
+              <CardHeader
+                icon={<CheckmarkFilled size={20} />}
+                title={displayName}
+                description={exercise.muscleGroup}
+              />
               {activeImageUrl ? (
                 <button
                   type="button"
@@ -129,18 +122,9 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateLoa
                 </button>
               ) : null}
               <div className="workout-exercise-card__meta">
-                <div className="stat-pill">
-                  <span>Repetições</span>
-                  <strong>{exercise.reps}</strong>
-                </div>
-                <div className="stat-pill">
-                  <span>Séries</span>
-                  <strong>{exercise.sets}</strong>
-                </div>
-                <div className="stat-pill">
-                  <span className="stat-pill__icon"><Timer size={14} /></span>
-                  <strong>{exercise.restSeconds}s</strong>
-                </div>
+                <StatPill label="Repetições" value={exercise.reps} />
+                <StatPill label="Séries" value={exercise.sets} />
+                <StatPill label={<span className="stat-pill__icon"><Timer size={14} /></span>} value={`${exercise.restSeconds}s`} />
               </div>
               <NumberInput
                 id={`load-${exercise.id}`}
