@@ -11,6 +11,7 @@ import {
   serializeWorkoutProgressState
 } from '../lib/appState';
 import { supabase } from '../lib/supabaseClient';
+import { validateAppState } from '../lib/validation';
 
 interface RemoteAppStateRow {
   profile: AppState['profile'];
@@ -33,8 +34,7 @@ interface RemoteAppStateRow {
 // desconhecido fica centralizada em legacyState.ts.
 function mapRemoteRow(row: RemoteAppStateRow): AppState {
   const workoutState = normalizeWorkoutProgressState(row.workouts as AppState['workouts']);
-
-  return {
+  const mappedState: AppState = {
     profile: normalizeProfile(row.profile),
     workouts: workoutState.workouts,
     workoutsUpdatedAt: workoutState.workoutsUpdatedAt,
@@ -42,12 +42,20 @@ function mapRemoteRow(row: RemoteAppStateRow): AppState {
     weeklyDiet: normalizeWeeklyDiet(row.weekly_diet as AppState['weeklyDiet']),
     weightHistory: Array.isArray(row.weight_history) ? row.weight_history : []
   };
+
+  return validateAppState(mappedState) ?? sanitizeAppStateForSave(mappedState);
 }
 
 async function createRemoteAppState(session: Session, state: AppState) {
   const sanitizedState = sanitizeAppStateForSave(state);
+  const validState = validateAppState(sanitizedState);
 
-  if (hasSuspiciousWorkoutData(sanitizedState.workouts)) {
+  if (!validState) {
+    console.error('Estado remoto bloqueado: payload inválido.');
+    return null;
+  }
+
+  if (hasSuspiciousWorkoutData(validState.workouts)) {
     console.error('Estado remoto bloqueado: treinos com aparência de dados corrompidos.');
     return null;
   }
@@ -56,11 +64,11 @@ async function createRemoteAppState(session: Session, state: AppState) {
     .from('user_app_states')
     .insert({
       user_id: session.user.id,
-      profile: sanitizedState.profile,
-      workouts: serializeWorkoutProgressState(sanitizedState.workouts, sanitizedState.workoutsUpdatedAt),
-      water: sanitizedState.water,
-      weekly_diet: sanitizedState.weeklyDiet,
-      weight_history: sanitizedState.weightHistory
+      profile: validState.profile,
+      workouts: serializeWorkoutProgressState(validState.workouts, validState.workoutsUpdatedAt),
+      water: validState.water,
+      weekly_diet: validState.weeklyDiet,
+      weight_history: validState.weightHistory
     });
 
   if (error) {
@@ -68,7 +76,7 @@ async function createRemoteAppState(session: Session, state: AppState) {
     return null;
   }
 
-  return sanitizedState;
+  return validState;
 }
 
 export async function loadRemoteAppState(session: Session): Promise<AppState | null> {
@@ -97,8 +105,14 @@ export async function loadRemoteAppState(session: Session): Promise<AppState | n
 
 export async function saveRemoteAppState(session: Session, state: AppState) {
   const sanitizedState = sanitizeAppStateForSave(state);
+  const validState = validateAppState(sanitizedState);
 
-  if (hasSuspiciousWorkoutData(sanitizedState.workouts)) {
+  if (!validState) {
+    console.error('Save remoto bloqueado: payload inválido.');
+    return false;
+  }
+
+  if (hasSuspiciousWorkoutData(validState.workouts)) {
     console.error('Save remoto bloqueado: treinos com aparência de dados corrompidos.');
     return false;
   }
@@ -107,11 +121,11 @@ export async function saveRemoteAppState(session: Session, state: AppState) {
     .from('user_app_states')
     .upsert({
       user_id: session.user.id,
-      profile: sanitizedState.profile,
-      workouts: serializeWorkoutProgressState(sanitizedState.workouts, sanitizedState.workoutsUpdatedAt),
-      water: sanitizedState.water,
-      weekly_diet: sanitizedState.weeklyDiet,
-      weight_history: sanitizedState.weightHistory
+      profile: validState.profile,
+      workouts: serializeWorkoutProgressState(validState.workouts, validState.workoutsUpdatedAt),
+      water: validState.water,
+      weekly_diet: validState.weeklyDiet,
+      weight_history: validState.weightHistory
     });
 
   if (error) {

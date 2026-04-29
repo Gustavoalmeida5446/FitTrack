@@ -9,6 +9,7 @@ import { MuscleGroup, Workout, WorkoutExercise } from '../data/types';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { searchExercises } from '../services/exercises';
 import { PageContainer } from '../components/PageContainer';
+import { isValidWorkout, isValidWorkoutExercise } from '../lib/validation';
 
 interface Props {
   onBack: () => void;
@@ -71,6 +72,18 @@ export function WorkoutSetupPage({
   const canAddExercise = useMemo(() => exerciseName.trim().length > 0 && Boolean(exerciseSourceId), [exerciseName, exerciseSourceId]);
   const derivedWorkoutGroups = useMemo(() => Array.from(new Set(draftExercises.map((exercise) => exercise.muscleGroup))), [draftExercises]);
   const canSaveWorkout = useMemo(() => name.trim().length > 0 && draftExercises.length > 0, [name, draftExercises.length]);
+  const exerciseFormMessage = !exerciseName.trim()
+    ? 'Busque e selecione um exercício para adicionar.'
+    : !exerciseSourceId
+      ? 'Escolha um exercício da lista para evitar salvar dados incompletos.'
+      : reps <= 0 || sets <= 0
+        ? 'Repetições e séries precisam ser maiores que zero.'
+        : '';
+  const workoutFormMessage = !name.trim()
+    ? 'Dê um nome ao treino para salvar.'
+    : draftExercises.length === 0
+      ? 'Adicione pelo menos um exercício para salvar o treino.'
+      : '';
 
   useEffect(() => {
     const trimmedQuery = debouncedQuery.trim();
@@ -148,6 +161,10 @@ export function WorkoutSetupPage({
       done: false
     };
 
+    if (!isValidWorkoutExercise(nextExercise)) {
+      return;
+    }
+
     setDraftExercises((prev) => editingExerciseId
       ? prev.map((exercise) => exercise.id === editingExerciseId ? nextExercise : exercise)
       : [...prev, nextExercise]);
@@ -193,6 +210,10 @@ export function WorkoutSetupPage({
         done: false
       }))
     };
+
+    if (!isValidWorkout(nextWorkout)) {
+      return;
+    }
 
     onSaveWorkouts(editingWorkoutId ? workouts.map((workout) => workout.id === editingWorkoutId ? nextWorkout : workout) : [...workouts, nextWorkout]);
     resetWorkoutForm();
@@ -304,6 +325,7 @@ export function WorkoutSetupPage({
             <Button disabled={!canAddExercise} onClick={handleAddExercise}>{editingExerciseId ? 'Atualizar exercício' : 'Adicionar exercício'}</Button>
             {editingExerciseId ? <Button kind="ghost" onClick={resetExerciseForm}>Cancelar edição</Button> : null}
           </div>
+          {exerciseFormMessage ? <p className="form-message form-message--error">{exerciseFormMessage}</p> : null}
          
 
           <div className="stack">
@@ -336,6 +358,7 @@ export function WorkoutSetupPage({
               <Button disabled={!canSaveWorkout} onClick={handleSaveWorkout}>{editingWorkoutId ? 'Atualizar treino' : 'Salvar treino'}</Button>
               {editingWorkoutId ? <Button kind="ghost" onClick={resetWorkoutForm}>Cancelar edição</Button> : null}
             </div>
+            {workoutFormMessage ? <p className="form-message form-message--error">{workoutFormMessage}</p> : null}
           </div>
         </Tile>
 

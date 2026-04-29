@@ -14,6 +14,7 @@ import { calculateFoodTotals, calculateMealTotals, calculateMealsTotals } from '
 import { convertFoodQuantityToGrams, getFoodDefaultQuantity, getFoodMeasurementUnit, searchFoods, type FoodItem as TacoFood } from '../services/foods';
 import { PageContainer } from '../components/PageContainer';
 import { formatFixedDecimal } from '../lib/number';
+import { isValidFoodItem, isValidMeal } from '../lib/validation';
 
 interface Props {
   onBack: () => void;
@@ -107,6 +108,20 @@ export function DietSetupPage({
   const selectedFoodUnit = useMemo(() => selectedFood ? getFoodMeasurementUnit(selectedFood) : 'g', [selectedFood]);
   const selectedFoodDefaultQuantity = useMemo(() => selectedFood ? getFoodDefaultQuantity(selectedFood) : 100, [selectedFood]);
   const canAddSelectedFood = useMemo(() => Boolean(selectedFood) && foodQuantity > 0, [selectedFood, foodQuantity]);
+  const foodSelectionMessage = selectedFood && foodQuantity <= 0
+    ? 'Informe uma quantidade maior que zero.'
+    : '';
+  const mealFormMessage = !mealName.trim()
+    ? 'Dê um nome à refeição para salvar.'
+    : selectedFoods.length === 0
+      ? 'Adicione pelo menos um alimento antes de salvar a refeição.'
+      : '';
+  const canSaveDay = draftDiet.meals.length > 0 && selectedDayMealIds.length > 0;
+  const dayFormMessage = draftDiet.meals.length === 0
+    ? 'Cadastre pelo menos uma refeição antes de salvar o dia.'
+    : selectedDayMealIds.length === 0
+      ? 'Selecione pelo menos uma refeição para este dia.'
+      : '';
 
   if (!selectedDay) {
     return (
@@ -146,7 +161,13 @@ export function DietSetupPage({
     }
 
     const quantity = Math.max(0.1, foodQuantity || selectedFoodPortionBase.amount);
-    setSelectedFoods((prev) => [...prev, scaleFood(selectedFood, quantity)]);
+    const nextFood = scaleFood(selectedFood, quantity);
+
+    if (!isValidFoodItem(nextFood)) {
+      return;
+    }
+
+    setSelectedFoods((prev) => [...prev, nextFood]);
     setSelectedFood(null);
     setFoodQuery('');
     setFoodOptions([]);
@@ -165,6 +186,10 @@ export function DietSetupPage({
       name: mealName.trim(),
       foods: selectedFoods.map((food) => ({ ...food }))
     };
+
+    if (!isValidMeal(meal)) {
+      return;
+    }
 
     const nextDiet: WeeklyDiet = {
       ...draftDiet,
@@ -314,6 +339,7 @@ export function DietSetupPage({
                   Adicionar alimento
                 </Button>
               </div>
+              {foodSelectionMessage ? <p className="form-message form-message--error">{foodSelectionMessage}</p> : null}
             </div>
           ) : null}
           <TextInput id="meal-name" labelText="Nome da refeição" value={mealName} onChange={(event) => setMealName(event.target.value)} />
@@ -350,6 +376,7 @@ export function DietSetupPage({
           </div>
           <div className="setup-card__footer">
             <Button disabled={!canSaveMeal} onClick={handleSaveMeal}>{editingMealId ? 'Atualizar refeição' : 'Salvar refeição'}</Button>
+            {mealFormMessage ? <p className="form-message form-message--error">{mealFormMessage}</p> : null}
           </div>
         </Tile>
 
@@ -450,10 +477,11 @@ export function DietSetupPage({
             <Button kind="ghost" size="sm" disabled={selectedDayMealIds.length === 0} onClick={handleClearDay}>
               Limpar dia
             </Button>
-            <Button disabled={draftDiet.meals.length === 0} onClick={handleSaveDay}>
+            <Button disabled={!canSaveDay} onClick={handleSaveDay}>
               Salvar {selectedDay.label}
             </Button>
           </div>
+          {dayFormMessage ? <p className="form-message form-message--error">{dayFormMessage}</p> : null}
         </Tile>
 
         <Tile className="card metric-card setup-card">

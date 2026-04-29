@@ -258,7 +258,7 @@ Status:
 - [x] definir um padrão simples para valor vazio, foco e blur
 - [x] aplicar o mesmo comportamento aos formulários principais
 
-### 18. Adicionar validação com `zod` nos dados principais
+### [x] 18. Adicionar validação com `zod` nos dados principais
 - Objetivo: validar os dados do app com regras explícitas, sem introduzir `react-hook-form`.
 - Risco atual: médio.
 - Arquivos candidatos:
@@ -269,13 +269,13 @@ Status:
 - [src/pages/WorkoutSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/WorkoutSetupPage.tsx)
 - [src/pages/DietSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/DietSetupPage.tsx)
 - Tarefas:
-- [ ] instalar `zod`
-- [ ] criar schemas simples para perfil, treino, refeição e itens persistidos
-- [ ] validar dados antes de salvar no estado remoto
-- [ ] validar entradas principais antes de concluir ações de salvar
-- [ ] cobrir os schemas com testes mínimos
+- [x] instalar `zod`
+- [x] criar schemas simples para perfil, treino, refeição e itens persistidos
+- [x] validar dados antes de salvar no estado remoto
+- [x] validar entradas principais antes de concluir ações de salvar
+- [x] cobrir os schemas com testes mínimos
 
-### 19. Revisar mensagens de erro e feedback de formulário
+### [x] 19. Revisar mensagens de erro e feedback de formulário
 - Objetivo: deixar claro para o usuário quando um valor é inválido ou incompleto.
 - Risco atual: baixo/médio.
 - Arquivos candidatos:
@@ -284,9 +284,9 @@ Status:
 - [src/pages/DietSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/DietSetupPage.tsx)
 - [src/styles/app.css](/home/gustavo/projects/FitTrack/src/styles/app.css)
 - Tarefas:
-- [ ] definir onde mostrar erro inline e onde bloquear save
-- [ ] adicionar mensagens curtas e fáceis de entender
-- [ ] manter o visual consistente entre campos válidos e inválidos
+- [x] definir onde mostrar erro inline e onde bloquear save
+- [x] adicionar mensagens curtas e fáceis de entender
+- [x] manter o visual consistente entre campos válidos e inválidos
 
 ## Ordem sugerida de execução
 

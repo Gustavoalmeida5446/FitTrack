@@ -22,6 +22,14 @@ import {
   normalizeLegacyWeeklyDiet,
   normalizeLegacyWorkoutList
 } from './legacyState';
+import {
+  validateAppState,
+  validateProfile,
+  validateWaterData,
+  validateWeeklyDiet,
+  validateWeightHistory,
+  validateWorkouts
+} from './validation';
 
 export interface AppState {
   profile: UserProfile;
@@ -180,17 +188,16 @@ export function normalizeWaterData(water?: WaterData): WaterData {
 
 export function sanitizeAppStateForSave(state: AppState): AppState {
   const workoutState = normalizeWorkoutProgressState(serializeWorkoutProgressState(state.workouts, state.workoutsUpdatedAt));
-
-  return {
-    profile: normalizeProfile(state.profile),
-    workouts: workoutState.workouts,
+  const sanitizedState: AppState = {
+    profile: validateProfile(normalizeProfile(state.profile), normalizeProfile()),
+    workouts: validateWorkouts(workoutState.workouts),
     workoutsUpdatedAt: workoutState.workoutsUpdatedAt,
-    water: normalizeWaterData(state.water),
-    weeklyDiet: normalizeWeeklyDiet(state.weeklyDiet),
-    weightHistory: Array.isArray(state.weightHistory)
-      ? state.weightHistory.filter((entry) => typeof entry?.date === 'string' && typeof entry?.weight === 'number')
-      : []
+    water: validateWaterData(normalizeWaterData(state.water), normalizeWaterData(defaultAppState.water)),
+    weeklyDiet: validateWeeklyDiet(normalizeWeeklyDiet(state.weeklyDiet), createEmptyWeeklyDiet()),
+    weightHistory: validateWeightHistory(state.weightHistory)
   };
+
+  return validateAppState(sanitizedState) ?? defaultAppState;
 }
 
 export function hasSuspiciousWorkoutData(workouts: Workout[]): boolean {

@@ -60,9 +60,17 @@ export function NutritionGoalsPage({
   onSignOut
 }: Props) {
   const [newWeight, setNewWeight] = useState(profile.currentWeight);
+
   useEffect(() => {
     setNewWeight(profile.currentWeight);
   }, [profile.currentWeight]);
+
+  const profileFormMessage = profile.currentWeight <= 0 || profile.heightCm <= 0 || !profile.birthDate
+    ? 'Preencha peso, altura e data de nascimento para liberar as metas.'
+    : '';
+  const newWeightMessage = newWeight <= 0
+    ? 'Informe um peso maior que zero para salvar.'
+    : '';
 
   return (
     <PageContainer title="Metas nutricionais" subtitle="Defina suas metas do dia" actions={<Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button>}>
@@ -146,6 +154,7 @@ export function NutritionGoalsPage({
               ))}
             </Select>
           </div>
+          {profileFormMessage ? <p className="form-message form-message--error">{profileFormMessage}</p> : null}
         </Tile>
 
         <Tile className="card metric-card goals-card">
@@ -175,8 +184,9 @@ export function NutritionGoalsPage({
           <div className="goals-weight-form">
             <AppNumberInput id="new-weight" label="Registrar peso" min={1} value={newWeight} onValueChange={setNewWeight} />
             <div className="setup-card__footer">
-              <Button size="sm" onClick={() => onAddWeight(newWeight)}>Salvar peso</Button>
+              <Button size="sm" disabled={newWeight <= 0} onClick={() => onAddWeight(newWeight)}>Salvar peso</Button>
             </div>
+            {newWeightMessage ? <p className="form-message form-message--error">{newWeightMessage}</p> : null}
           </div>
           <ul className="goals-weight-log">
             {weightHistory.map((item, index) => (
