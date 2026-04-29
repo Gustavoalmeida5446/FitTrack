@@ -350,7 +350,7 @@ Status:
 - [x] confirmar que cada regra importante aparece num lugar fácil de achar
 - [x] fazer uma última passada de leitura como código de estudante caprichoso
 
-### [ ] 24. Priorizar validação do login com `zod`
+### [x] 24. Priorizar validação do login com `zod`
 - Objetivo: aplicar o mesmo padrão de validação do resto do app na autenticação.
 - Prioridade: alta.
 - Risco atual: médio.
@@ -359,13 +359,13 @@ Status:
 - [src/lib/validation.ts](/home/gustavo/projects/FitTrack/src/lib/validation.ts)
 - [tests/validation.test.ts](/home/gustavo/projects/FitTrack/tests/validation.test.ts)
 - Tarefas:
-- [ ] criar schema simples para login e cadastro
-- [ ] validar e-mail com formato real e senha com regra mínima clara
-- [ ] mostrar erros só depois de interação ou tentativa de envio
-- [ ] evitar regra duplicada espalhada dentro do componente
-- [ ] cobrir os casos principais com teste
+- [x] criar schema simples para login e cadastro
+- [x] validar e-mail com formato real e senha com regra mínima clara
+- [x] mostrar erros só depois de interação ou tentativa de envio
+- [x] evitar regra duplicada espalhada dentro do componente
+- [x] cobrir os casos principais com teste
 
-### [ ] 25. Endurecer validação do histórico de peso
+### [x] 25. Endurecer validação do histórico de peso
 - Objetivo: evitar salvar ou aceitar registros com data malformada.
 - Prioridade: média.
 - Risco atual: baixo.
@@ -374,11 +374,11 @@ Status:
 - [src/lib/appUpdates.ts](/home/gustavo/projects/FitTrack/src/lib/appUpdates.ts)
 - [tests/validation.test.ts](/home/gustavo/projects/FitTrack/tests/validation.test.ts)
 - Tarefas:
-- [ ] alinhar `weightLogSchema` com o formato de data realmente usado
-- [ ] revisar se o formato salvo é o melhor para exibição e consistência
-- [ ] adicionar teste de aceitação e rejeição
+- [x] alinhar `weightLogSchema` com o formato de data realmente usado
+- [x] revisar se o formato salvo é o melhor para exibição e consistência
+- [x] adicionar teste de aceitação e rejeição
 
-### [ ] 26. Revisão final de performance e build
+### [x] 26. Revisão final de performance e build
 - Objetivo: decidir se o aviso de bundle grande precisa de ação ou só registro.
 - Prioridade: baixa.
 - Risco atual: baixo.
@@ -386,9 +386,34 @@ Status:
 - [package.json](/home/gustavo/projects/FitTrack/package.json)
 - [src/App.tsx](/home/gustavo/projects/FitTrack/src/App.tsx)
 - Tarefas:
-- [ ] medir se vale separar telas com `lazy` ou manter como está
-- [ ] evitar otimização desnecessária se não houver ganho real para a entrega
-- [ ] registrar a decisão final no projeto
+- [x] medir se vale separar telas com `lazy` ou manter como está
+- [x] evitar otimização desnecessária se não houver ganho real para a entrega
+- [x] registrar a decisão final no projeto
+
+### [x] 28. Reduzir chunk sizes do build
+- Objetivo: remover ou reduzir o aviso de chunks grandes no `vite build`.
+- Prioridade: média.
+- Risco atual: baixo/médio.
+- Arquivos candidatos:
+- [package.json](/home/gustavo/projects/FitTrack/package.json)
+- [src/App.tsx](/home/gustavo/projects/FitTrack/src/App.tsx)
+- `vite.config.*`
+- Tarefas:
+- [x] medir o que mais pesa no bundle atual
+- [x] avaliar separar telas com `lazy` e `dynamic import`
+- [x] aplicar só a menor mudança que já reduza o aviso
+- [x] validar novamente com `vite build`
+
+### [x] 29. Colocar o build dentro do fluxo de deploy
+- Objetivo: permitir deploy com um comando só.
+- Prioridade: alta.
+- Risco atual: baixo.
+- Arquivos candidatos:
+- [package.json](/home/gustavo/projects/FitTrack/package.json)
+- [scripts/deploy-gh-pages.sh](/home/gustavo/projects/FitTrack/scripts/deploy-gh-pages.sh)
+- Tarefas:
+- [x] deixar `npm run deploy` executando o build antes da publicação
+- [x] remover duplicação do build no script de deploy
 
 ### [x] 27. Resetar água na virada do dia
 - Objetivo: zerar o consumo de água quando o app voltar em um novo dia.
@@ -425,3 +450,5 @@ Status:
 16. Item 25
 17. Item 26
 18. Item 27
+19. Item 28
+20. Item 29

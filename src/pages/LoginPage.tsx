@@ -1,8 +1,9 @@
 import { ChevronLeft, Login, UserAvatar } from '@carbon/icons-react';
 import { Button, PasswordInput, TextInput, Tile } from '@carbon/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CardHeader } from '../components/CardHeader';
 import { PageContainer } from '../components/PageContainer';
+import { getLoginFormErrors, getSignupFormErrors } from '../lib/validation';
 
 interface Props {
   onBack?: () => void;
@@ -20,28 +21,36 @@ export function LoginPage({ onBack, onLogin, onSignUp }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [hasTouchedEmail, setHasTouchedEmail] = useState(false);
+  const [hasTouchedPassword, setHasTouchedPassword] = useState(false);
+  const [hasTouchedConfirmPassword, setHasTouchedConfirmPassword] = useState(false);
+  const [hasTriedSubmit, setHasTriedSubmit] = useState(false);
   const isSignupMode = mode === 'signup';
-
-  const canSubmit = useMemo(() => {
-    if (!email.trim() || !password.trim() || isSubmitting) {
-      return false;
-    }
-
-    if (isSignupMode) {
-      return confirmPassword.trim() && password === confirmPassword && password.length >= 6;
-    }
-
-    return true;
-  }, [confirmPassword, email, isSubmitting, isSignupMode, password]);
+  const fieldErrors = isSignupMode
+    ? getSignupFormErrors(email, password, confirmPassword)
+    : getLoginFormErrors(email, password);
+  const emailError = (hasTouchedEmail || hasTriedSubmit) ? fieldErrors.email : '';
+  const passwordError = (hasTouchedPassword || hasTriedSubmit) ? fieldErrors.password : '';
+  const confirmPasswordError = isSignupMode && (hasTouchedConfirmPassword || hasTriedSubmit)
+    ? fieldErrors.confirmPassword
+    : '';
 
   const resetMessages = () => {
     setErrorMessage('');
     setSuccessMessage('');
   };
 
+  const resetTouchState = () => {
+    setHasTouchedEmail(false);
+    setHasTouchedPassword(false);
+    setHasTouchedConfirmPassword(false);
+    setHasTriedSubmit(false);
+  };
+
   const switchMode = (nextMode: AuthMode) => {
     setMode(nextMode);
     setConfirmPassword('');
+    resetTouchState();
     resetMessages();
   };
 
@@ -60,7 +69,11 @@ export function LoginPage({ onBack, onLogin, onSignUp }: Props) {
   const submittingLabel = isSignupMode ? 'Criando conta...' : 'Entrando...';
 
   const handleSubmit = async () => {
-    if (!canSubmit) return;
+    setHasTriedSubmit(true);
+
+    if (fieldErrors.email || fieldErrors.password || confirmPasswordError || (isSignupMode && fieldErrors.confirmPassword)) {
+      return;
+    }
 
     setIsSubmitting(true);
     resetMessages();
@@ -85,7 +98,9 @@ export function LoginPage({ onBack, onLogin, onSignUp }: Props) {
     }
 
     setSuccessMessage(result.requiresEmailConfirmation ? 'Conta criada. Confirme seu e-mail para entrar.' : 'Conta criada com sucesso. Você já pode usar o app.');
+    setPassword('');
     setConfirmPassword('');
+    resetTouchState();
     setIsSubmitting(false);
   };
 
@@ -119,16 +134,40 @@ export function LoginPage({ onBack, onLogin, onSignUp }: Props) {
           />
 
           <div className="auth-form">
-            <TextInput id="login-email" type="email" labelText="E-mail" value={email} onChange={(event) => setEmail(event.target.value)} />
-            <PasswordInput id="login-password" labelText="Senha" value={password} onChange={(event) => setPassword(event.target.value)} helperText={isSignupMode ? 'Use pelo menos 6 caracteres.' : undefined} />
+            <TextInput
+              id="login-email"
+              type="email"
+              labelText="E-mail"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              onBlur={() => setHasTouchedEmail(true)}
+            />
+            {emailError ? <p className="auth-message auth-message--error">{emailError}</p> : null}
+            <PasswordInput
+              id="login-password"
+              labelText="Senha"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              onBlur={() => setHasTouchedPassword(true)}
+              helperText={isSignupMode ? 'Use pelo menos 6 caracteres.' : undefined}
+            />
+            {passwordError ? <p className="auth-message auth-message--error">{passwordError}</p> : null}
             {isSignupMode ? (
-              <PasswordInput id="login-confirm-password" labelText="Confirmar senha" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} />
+              <>
+                <PasswordInput
+                  id="login-confirm-password"
+                  labelText="Confirmar senha"
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  onBlur={() => setHasTouchedConfirmPassword(true)}
+                />
+                {confirmPasswordError ? <p className="auth-message auth-message--error">{confirmPasswordError}</p> : null}
+              </>
             ) : null}
-            {isSignupMode && confirmPassword && password !== confirmPassword ? <p className="auth-message auth-message--error">As senhas não coincidem.</p> : null}
             {errorMessage ? <p className="auth-message auth-message--error">{errorMessage}</p> : null}
             {successMessage ? <p className="auth-message auth-message--success">{successMessage}</p> : null}
             <div className="setup-card__footer">
-              <Button disabled={!canSubmit} onClick={handleSubmit}>
+              <Button disabled={isSubmitting} onClick={handleSubmit}>
                 {isSubmitting ? submittingLabel : submitLabel}
               </Button>
             </div>

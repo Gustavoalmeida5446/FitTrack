@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { defaultAppState, sanitizeAppStateForSave } from '../src/lib/appState';
 import {
+  getLoginFormErrors,
   isProfileReady,
   isValidDayMealSelection,
   isValidFoodItem,
@@ -10,6 +11,7 @@ import {
   isValidWorkoutExercise,
   isValidWorkoutExerciseForSave,
   isValidWorkoutForSave,
+  getSignupFormErrors,
   validateAppState
 } from '../src/lib/validation';
 
@@ -123,6 +125,44 @@ test('isValidDayMealSelection exige ids válidos e pelo menos uma refeição', (
   assert.equal(isValidDayMealSelection([], meals), false);
   assert.equal(isValidDayMealSelection(['m-2'], meals), false);
   assert.equal(isValidDayMealSelection(['m-1'], meals), true);
+});
+
+test('getLoginFormErrors valida e-mail e senha no login', () => {
+  assert.deepEqual(getLoginFormErrors('', ''), {
+    email: 'Informe seu e-mail.',
+    password: 'Informe sua senha.',
+    confirmPassword: ''
+  });
+
+  assert.deepEqual(getLoginFormErrors('usuario-invalido', '123456'), {
+    email: 'Digite um e-mail válido.',
+    password: '',
+    confirmPassword: ''
+  });
+});
+
+test('getSignupFormErrors valida senha mínima e confirmação', () => {
+  assert.deepEqual(getSignupFormErrors('teste@email.com', '123', '321'), {
+    email: '',
+    password: 'Use pelo menos 6 caracteres na senha.',
+    confirmPassword: 'As senhas não coincidem.',
+  });
+
+  assert.deepEqual(getSignupFormErrors('teste@email.com', '123456', '123456'), {
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+});
+
+test('validateAppState rejeita histórico de peso com data fora do padrão dd/mm/aaaa', () => {
+  assert.equal(validateAppState({
+    ...defaultAppState,
+    weightHistory: [
+      { date: '29/04/2026', weight: 80 },
+      { date: '2026-04-29', weight: 81 }
+    ]
+  }), null);
 });
 
 test('sanitizeAppStateForSave não apaga a dieta inteira por uma refeição inválida', () => {

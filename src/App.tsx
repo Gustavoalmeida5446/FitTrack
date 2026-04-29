@@ -1,13 +1,6 @@
 import { Calendar, CalendarHeatMap, Home } from '@carbon/icons-react';
 import { Button, Theme } from '@carbon/react';
-import { useCallback, useMemo, useState } from 'react';
-import { HomePage } from './pages/HomePage';
-import { WorkoutPage } from './pages/WorkoutPage';
-import { DietDayPage } from './pages/DietDayPage';
-import { DietSetupPage } from './pages/DietSetupPage';
-import { NutritionGoalsPage } from './pages/NutritionGoalsPage';
-import { WorkoutSetupPage } from './pages/WorkoutSetupPage';
-import { LoginPage } from './pages/LoginPage';
+import { Suspense, lazy, useCallback, useMemo, useState } from 'react';
 import { type TutorialStepContent } from './components/ContextualTutorialCard';
 import { WeeklyDiet, Workout } from './data/types';
 import { useAuthSession } from './hooks/useAuthSession';
@@ -28,6 +21,14 @@ import {
 import { getTodayDateString } from './lib/date';
 import { calculateNutritionTargets } from './lib/nutrition';
 import { signInWithEmail, signOut, signUpWithEmail } from './services/authService';
+
+const HomePage = lazy(() => import('./pages/HomePage').then((module) => ({ default: module.HomePage })));
+const WorkoutPage = lazy(() => import('./pages/WorkoutPage').then((module) => ({ default: module.WorkoutPage })));
+const DietDayPage = lazy(() => import('./pages/DietDayPage').then((module) => ({ default: module.DietDayPage })));
+const DietSetupPage = lazy(() => import('./pages/DietSetupPage').then((module) => ({ default: module.DietSetupPage })));
+const NutritionGoalsPage = lazy(() => import('./pages/NutritionGoalsPage').then((module) => ({ default: module.NutritionGoalsPage })));
+const WorkoutSetupPage = lazy(() => import('./pages/WorkoutSetupPage').then((module) => ({ default: module.WorkoutSetupPage })));
+const LoginPage = lazy(() => import('./pages/LoginPage').then((module) => ({ default: module.LoginPage })));
 
 const onboardingSteps: Array<TutorialStepContent & { view: AppView }> = [
   {
@@ -59,6 +60,14 @@ const onboardingSteps: Array<TutorialStepContent & { view: AppView }> = [
     view: 'home'
   }
 ];
+
+function AppLoadingState() {
+  return (
+    <div className="page-container">
+      <div className="loading-state">Carregando...</div>
+    </div>
+  );
+}
 
 export default function App() {
   const { session, setSession, isAuthReady } = useAuthSession();
@@ -256,9 +265,7 @@ export default function App() {
     return (
       <Theme theme="g100">
         <div className="app-shell">
-          <div className="page-container">
-            <div className="loading-state">Carregando...</div>
-          </div>
+          <AppLoadingState />
         </div>
       </Theme>
     );
@@ -268,7 +275,9 @@ export default function App() {
     return (
       <Theme theme="g100">
         <div className="app-shell">
-          <LoginPage onLogin={handleLogin} onSignUp={handleSignUp} />
+          <Suspense fallback={<AppLoadingState />}>
+            <LoginPage onLogin={handleLogin} onSignUp={handleSignUp} />
+          </Suspense>
         </div>
       </Theme>
     );
@@ -282,95 +291,97 @@ export default function App() {
             {remoteSyncMessage}
           </div>
         ) : null}
-        {view === 'home' ? (
-          <HomePage
-            workouts={workouts}
-            water={water}
-            weeklyDiet={weeklyDiet}
-            waterGoalMl={targets.waterDailyMl}
-            targets={targets}
-            tutorialStep={activeTutorialStep?.view === 'home' ? activeTutorialStep : null}
-            tutorialStepIndex={tutorialStepIndex}
-            tutorialStepsTotal={tutorialStepsTotal}
-            onTutorialBack={handleTutorialBack}
-            onTutorialNext={handleTutorialNext}
-            onTutorialSkip={finishTutorial}
-            onOpenWorkout={openWorkout}
-            onOpenDietDay={openDietDay}
-            onAddWater={handleAddWater}
-          />
-        ) : null}
+        <Suspense fallback={<AppLoadingState />}>
+          {view === 'home' ? (
+            <HomePage
+              workouts={workouts}
+              water={water}
+              weeklyDiet={weeklyDiet}
+              waterGoalMl={targets.waterDailyMl}
+              targets={targets}
+              tutorialStep={activeTutorialStep?.view === 'home' ? activeTutorialStep : null}
+              tutorialStepIndex={tutorialStepIndex}
+              tutorialStepsTotal={tutorialStepsTotal}
+              onTutorialBack={handleTutorialBack}
+              onTutorialNext={handleTutorialNext}
+              onTutorialSkip={finishTutorial}
+              onOpenWorkout={openWorkout}
+              onOpenDietDay={openDietDay}
+              onAddWater={handleAddWater}
+            />
+          ) : null}
 
-        {view === 'workout' && selectedWorkout ? (
-          <WorkoutPage
-            workout={selectedWorkout}
-            onBack={openHome}
-            onToggleExerciseDone={(exerciseId) => updateWorkout(selectedWorkout.id, (workout) => toggleWorkoutExerciseDone(workout, exerciseId))}
-            onUpdateLoad={(exerciseId, loadKg) => updateWorkout(selectedWorkout.id, (workout) => updateWorkoutExerciseLoad(workout, exerciseId, loadKg))}
-          />
-        ) : null}
+          {view === 'workout' && selectedWorkout ? (
+            <WorkoutPage
+              workout={selectedWorkout}
+              onBack={openHome}
+              onToggleExerciseDone={(exerciseId) => updateWorkout(selectedWorkout.id, (workout) => toggleWorkoutExerciseDone(workout, exerciseId))}
+              onUpdateLoad={(exerciseId, loadKg) => updateWorkout(selectedWorkout.id, (workout) => updateWorkoutExerciseLoad(workout, exerciseId, loadKg))}
+            />
+          ) : null}
 
-        {view === 'diet-day' && selectedDay ? (
-          <DietDayPage
-            day={selectedDay}
-            meals={selectedDayMeals}
-            targets={targets}
-            onBack={openHome}
-            onToggleMealDone={(mealId) => updateDiet((diet) => ({
-              ...diet,
-              days: diet.days.map((day) => day.id !== selectedDay.id ? day : toggleCompletedMealForDay(day, mealId))
-            }))}
-          />
-        ) : null}
+          {view === 'diet-day' && selectedDay ? (
+            <DietDayPage
+              day={selectedDay}
+              meals={selectedDayMeals}
+              targets={targets}
+              onBack={openHome}
+              onToggleMealDone={(mealId) => updateDiet((diet) => ({
+                ...diet,
+                days: diet.days.map((day) => day.id !== selectedDay.id ? day : toggleCompletedMealForDay(day, mealId))
+              }))}
+            />
+          ) : null}
 
-        {view === 'workout-setup' ? (
-          <WorkoutSetupPage
-            onBack={openHome}
-            workouts={workouts}
-            onSaveWorkouts={handleSaveWorkouts}
-            tutorialStep={activeTutorialStep?.view === 'workout-setup' ? activeTutorialStep : null}
-            tutorialStepIndex={tutorialStepIndex}
-            tutorialStepsTotal={tutorialStepsTotal}
-            onTutorialBack={handleTutorialBack}
-            onTutorialNext={handleTutorialNext}
-            onTutorialSkip={finishTutorial}
-          />
-        ) : null}
+          {view === 'workout-setup' ? (
+            <WorkoutSetupPage
+              onBack={openHome}
+              workouts={workouts}
+              onSaveWorkouts={handleSaveWorkouts}
+              tutorialStep={activeTutorialStep?.view === 'workout-setup' ? activeTutorialStep : null}
+              tutorialStepIndex={tutorialStepIndex}
+              tutorialStepsTotal={tutorialStepsTotal}
+              onTutorialBack={handleTutorialBack}
+              onTutorialNext={handleTutorialNext}
+              onTutorialSkip={finishTutorial}
+            />
+          ) : null}
 
-        {view === 'diet-setup' ? (
-          <DietSetupPage
-            onBack={openHome}
-            diet={weeklyDiet}
-            onSaveDiet={handleSaveDiet}
-            tutorialStep={activeTutorialStep?.view === 'diet-setup' ? activeTutorialStep : null}
-            tutorialStepIndex={tutorialStepIndex}
-            tutorialStepsTotal={tutorialStepsTotal}
-            onTutorialBack={handleTutorialBack}
-            onTutorialNext={handleTutorialNext}
-            onTutorialSkip={finishTutorial}
-          />
-        ) : null}
+          {view === 'diet-setup' ? (
+            <DietSetupPage
+              onBack={openHome}
+              diet={weeklyDiet}
+              onSaveDiet={handleSaveDiet}
+              tutorialStep={activeTutorialStep?.view === 'diet-setup' ? activeTutorialStep : null}
+              tutorialStepIndex={tutorialStepIndex}
+              tutorialStepsTotal={tutorialStepsTotal}
+              onTutorialBack={handleTutorialBack}
+              onTutorialNext={handleTutorialNext}
+              onTutorialSkip={finishTutorial}
+            />
+          ) : null}
 
-        {view === 'goals' ? (
-          <NutritionGoalsPage
-            profile={profile}
-            targets={targets}
-            weightHistory={weightHistory}
-            tutorialStep={activeTutorialStep?.view === 'goals' ? activeTutorialStep : null}
-            tutorialStepIndex={tutorialStepIndex}
-            tutorialStepsTotal={tutorialStepsTotal}
-            onTutorialBack={handleTutorialBack}
-            onTutorialNext={handleTutorialNext}
-            onTutorialSkip={finishTutorial}
-            onReplayTutorial={startTutorial}
-            onBack={openHome}
-            onUpdateProfile={handleUpdateProfile}
-            onAddWeight={handleAddWeight}
-            onRemoveWeight={handleRemoveWeight}
-            session={session}
-            onSignOut={handleSignOut}
-          />
-        ) : null}
+          {view === 'goals' ? (
+            <NutritionGoalsPage
+              profile={profile}
+              targets={targets}
+              weightHistory={weightHistory}
+              tutorialStep={activeTutorialStep?.view === 'goals' ? activeTutorialStep : null}
+              tutorialStepIndex={tutorialStepIndex}
+              tutorialStepsTotal={tutorialStepsTotal}
+              onTutorialBack={handleTutorialBack}
+              onTutorialNext={handleTutorialNext}
+              onTutorialSkip={finishTutorial}
+              onReplayTutorial={startTutorial}
+              onBack={openHome}
+              onUpdateProfile={handleUpdateProfile}
+              onAddWeight={handleAddWeight}
+              onRemoveWeight={handleRemoveWeight}
+              session={session}
+              onSignOut={handleSignOut}
+            />
+          ) : null}
+        </Suspense>
 
         <nav className="bottom-tabbar bottom-nav" aria-label="Navegação principal">
           <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'home' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={openHome}>

@@ -10,7 +10,25 @@ const dietTypeSchema = z.enum(['Equilibrada', 'Baixo carboidrato', 'Alta em carb
 const mediaTypeSchema = z.enum(['image', 'video', 'gif', 'none']);
 const nonEmptyStringSchema = z.string().trim().min(1);
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+const ptBrDateSchema = z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/);
 const birthDateSchema = z.union([z.literal(''), dateSchema]);
+const authEmailSchema = z.string().trim().min(1, 'Informe seu e-mail.').email('Digite um e-mail válido.');
+const loginPasswordSchema = z.string().trim().min(1, 'Informe sua senha.');
+const signupPasswordSchema = z.string().trim().min(6, 'Use pelo menos 6 caracteres na senha.');
+
+export const loginFormSchema = z.object({
+  email: authEmailSchema,
+  password: loginPasswordSchema
+});
+
+export const signupFormSchema = z.object({
+  email: authEmailSchema,
+  password: signupPasswordSchema,
+  confirmPassword: z.string().trim().min(1, 'Confirme sua senha.')
+}).refine((values) => values.password === values.confirmPassword, {
+  path: ['confirmPassword'],
+  message: 'As senhas não coincidem.'
+});
 
 export const userProfileSchema = z.object({
   currentWeight: z.number().nonnegative(),
@@ -102,7 +120,7 @@ export const weeklyDietSchema = z.object({
 });
 
 export const weightLogSchema = z.object({
-  date: z.string().min(1),
+  date: ptBrDateSchema,
   weight: z.number().positive()
 });
 
@@ -212,4 +230,46 @@ export function isValidDayMealSelection(mealIds: string[], meals: Meal[]): boole
 
   const validMealIds = new Set(meals.map((meal) => meal.id));
   return mealIds.every((mealId) => validMealIds.has(mealId));
+}
+
+interface AuthFormErrors {
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
+function getFieldErrorMessages(fieldErrors: Record<string, string[] | undefined>): AuthFormErrors {
+  return {
+    email: fieldErrors.email?.[0] ?? '',
+    password: fieldErrors.password?.[0] ?? '',
+    confirmPassword: fieldErrors.confirmPassword?.[0] ?? ''
+  };
+}
+
+export function getLoginFormErrors(email: string, password: string): AuthFormErrors {
+  const parsed = loginFormSchema.safeParse({ email, password });
+
+  if (parsed.success) {
+    return {
+      email: '',
+      password: '',
+      confirmPassword: ''
+    };
+  }
+
+  return getFieldErrorMessages(parsed.error.flatten().fieldErrors);
+}
+
+export function getSignupFormErrors(email: string, password: string, confirmPassword: string): AuthFormErrors {
+  const parsed = signupFormSchema.safeParse({ email, password, confirmPassword });
+
+  if (parsed.success) {
+    return {
+      email: '',
+      password: '',
+      confirmPassword: ''
+    };
+  }
+
+  return getFieldErrorMessages(parsed.error.flatten().fieldErrors);
 }

@@ -9,6 +9,7 @@ import {
   serializeWorkoutProgressState
 } from '../src/lib/appState';
 import type { AppState } from '../src/lib/appState';
+import { createWeightHistoryEntry } from '../src/lib/appUpdates';
 import { getTodayDateString } from '../src/lib/date';
 
 function createState(overrides: Partial<AppState> = {}): AppState {
@@ -151,4 +152,11 @@ test('sanitizeAppStateForSave normaliza payload e remove weightHistory inválido
   assert.notEqual(sanitized.water.updatedAt, '2001-01-01');
   assert.equal(sanitized.weeklyDiet.days.length, 7);
   assert.deepEqual(sanitized.weightHistory, [{ date: '28/04/2026', weight: 80 }]);
+});
+
+test('createWeightHistoryEntry salva a data no padrão dd/mm/aaaa', () => {
+  const entry = createWeightHistoryEntry(80, new Date('2026-04-09T12:00:00Z'));
+
+  assert.equal(entry.date, '09/04/2026');
+  assert.equal(entry.weight, 80);
 });

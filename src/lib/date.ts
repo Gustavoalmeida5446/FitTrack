@@ -7,7 +7,14 @@ export function getTodayDateString(date = new Date()): string {
 }
 
 export function formatDatePtBr(date = new Date()): string {
-  return date.toLocaleDateString('pt-BR');
+  const formatter = new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+  });
+
+  return formatter.format(date);
 }
 
 export function getSingleDatePickerValue(value: string | string[] | undefined | null): string {

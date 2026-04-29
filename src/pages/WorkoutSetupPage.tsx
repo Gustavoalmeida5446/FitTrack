@@ -7,7 +7,7 @@ import { InfoBlock } from '../components/InfoBlock';
 import { SelectionSummaryCard } from '../components/SelectionSummaryCard';
 import { MuscleGroup, Workout, WorkoutExercise } from '../data/types';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
-import { searchExercises } from '../services/exercises';
+import { searchExercises, type ExerciseOption } from '../services/exercises';
 import { PageContainer } from '../components/PageContainer';
 import { isValidWorkoutForSave, isValidWorkoutExerciseForSave } from '../lib/validation';
 
@@ -53,7 +53,7 @@ export function WorkoutSetupPage({
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null);
   const [activePreviewImageIndex, setActivePreviewImageIndex] = useState(0);
   const [query, setQuery] = useState('');
-  const [options, setOptions] = useState<ReturnType<typeof searchExercises>>([]);
+  const [options, setOptions] = useState<ExerciseOption[]>([]);
   const [name, setName] = useState('');
   const [draftExercises, setDraftExercises] = useState<WorkoutExercise[]>([]);
   const [exerciseName, setExerciseName] = useState(defaultExerciseValues.name);
@@ -88,20 +88,31 @@ export function WorkoutSetupPage({
       : '';
 
   useEffect(() => {
+    let isActive = true;
     const trimmedQuery = debouncedQuery.trim();
 
     if (!trimmedQuery) {
       setOptions([]);
-      return;
+      return undefined;
     }
 
     if (skipNextSearchRef.current) {
       skipNextSearchRef.current = false;
       setOptions([]);
-      return;
+      return undefined;
     }
 
-    setOptions(searchExercises(trimmedQuery, 20));
+    void searchExercises(trimmedQuery, 20).then((nextOptions) => {
+      if (!isActive) {
+        return;
+      }
+
+      setOptions(nextOptions);
+    });
+
+    return () => {
+      isActive = false;
+    };
   }, [debouncedQuery]);
 
   const resetExerciseForm = () => {
@@ -131,7 +142,7 @@ export function WorkoutSetupPage({
     resetExerciseForm();
   };
 
-  const handleSelectExercise = (exercise: ReturnType<typeof searchExercises>[number]) => {
+  const handleSelectExercise = (exercise: ExerciseOption) => {
     skipNextSearchRef.current = true;
     setQuery(exercise.ptName ?? exercise.name);
     setExerciseName(exercise.name);

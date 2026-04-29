@@ -1,18 +1,14 @@
-import exercisesData from '../../exercises.json';
+import exercisesDataUrl from '../../exercises.json?url';
 import exerciseNamePtData from '../data/exercise-name-pt.json';
 import type { ExerciseMediaType, MuscleGroup } from '../data/types';
 import { normalizeSearchValue } from '../lib/search';
 
-export interface ExerciseRecord {
+interface ExerciseRecord {
   id: string;
   name: string;
-  force: string | null;
-  level: string | null;
-  mechanic: string | null;
   equipment: string | null;
   primaryMuscles: string[];
   secondaryMuscles: string[];
-  instructions: string[];
   category: string | null;
   images: string[];
 }
@@ -36,7 +32,18 @@ export interface ExerciseOption {
   secondaryMuscles: string[];
 }
 
-const exercises = exercisesData as ExerciseRecord[];
+interface IndexedExerciseRecord {
+  exercise: ExerciseRecord;
+  displayName: string;
+  normalizedSearchTexts: string[];
+}
+
+interface RankedExerciseResult {
+  exercise: ExerciseRecord;
+  displayName: string;
+  score: number;
+}
+
 const exerciseNamePt = exerciseNamePtData as Record<string, ExerciseTranslationRecord>;
 const exerciseImageBaseUrl = 'https://yuhonas.github.io/free-exercise-db/exercises/';
 const exerciseAliases: Record<string, string[]> = {
@@ -71,6 +78,8 @@ const muscleGroupMap: Record<string, MuscleGroup> = {
   abdominals: 'Core'
 };
 
+let indexedExercisesPromise: Promise<IndexedExerciseRecord[]> | null = null;
+
 function getSearchScore(normalizedName: string, normalizedQuery: string, queryTerms: string[]): number {
   if (!normalizedQuery) return -1;
   if (normalizedName === normalizedQuery) return 8;
@@ -88,8 +97,7 @@ function getSearchScore(normalizedName: string, normalizedQuery: string, queryTe
 }
 
 function getExerciseDisplayName(exercise: ExerciseRecord): string {
-  return exerciseNamePt[exercise.id]?.ptName?.trim()
-    || exercise.name;
+  return exerciseNamePt[exercise.id]?.ptName?.trim() || exercise.name;
 }
 
 function getExerciseSearchTexts(exercise: ExerciseRecord): string[] {
@@ -102,18 +110,6 @@ function getExerciseSearchTexts(exercise: ExerciseRecord): string[] {
     ...(exercise.secondaryMuscles ?? []),
     ...(exerciseAliases[exercise.id] ?? [])
   ].filter(Boolean);
-}
-
-interface IndexedExerciseRecord {
-  exercise: ExerciseRecord;
-  displayName: string;
-  normalizedSearchTexts: string[];
-}
-
-interface RankedExerciseResult {
-  exercise: ExerciseRecord;
-  displayName: string;
-  score: number;
 }
 
 function inferMuscleGroup(exercise: ExerciseRecord): MuscleGroup {
@@ -151,14 +147,18 @@ function mapExerciseOption(exercise: ExerciseRecord): ExerciseOption {
   };
 }
 
-const indexedExercises: IndexedExerciseRecord[] = exercises.map((exercise) => ({
-  exercise,
-  displayName: getExerciseDisplayName(exercise),
-  normalizedSearchTexts: getExerciseSearchTexts(exercise).map((text) => normalizeSearchValue(text))
-}));
+async function loadIndexedExercises(): Promise<IndexedExerciseRecord[]> {
+  if (!indexedExercisesPromise) {
+    indexedExercisesPromise = fetch(exercisesDataUrl)
+      .then((response) => response.json() as Promise<ExerciseRecord[]>)
+      .then((exercises) => exercises.map((exercise) => ({
+        exercise,
+        displayName: getExerciseDisplayName(exercise),
+        normalizedSearchTexts: getExerciseSearchTexts(exercise).map((text) => normalizeSearchValue(text))
+      })));
+  }
 
-export function getAllExercises(): ExerciseOption[] {
-  return exercises.map(mapExerciseOption);
+  return indexedExercisesPromise;
 }
 
 function insertRankedExerciseResult(results: RankedExerciseResult[], nextResult: RankedExerciseResult, limit?: number) {
@@ -181,7 +181,7 @@ function insertRankedExerciseResult(results: RankedExerciseResult[], nextResult:
   }
 }
 
-export function searchExercises(query: string, limit?: number): ExerciseOption[] {
+export async function searchExercises(query: string, limit?: number): Promise<ExerciseOption[]> {
   const normalizedQuery = normalizeSearchValue(query);
   const queryTerms = normalizedQuery.split(/\s+/).filter(Boolean);
 
@@ -189,6 +189,7 @@ export function searchExercises(query: string, limit?: number): ExerciseOption[]
     return [];
   }
 
+  const indexedExercises = await loadIndexedExercises();
   const rankedResults = indexedExercises.reduce<RankedExerciseResult[]>((results, item) => {
     const score = Math.max(...item.normalizedSearchTexts.map((text) => getSearchScore(text, normalizedQuery, queryTerms)));
 
@@ -206,33 +207,4 @@ export function searchExercises(query: string, limit?: number): ExerciseOption[]
   }, []);
 
   return rankedResults.map((item) => mapExerciseOption(item.exercise));
-}
-
-export function getExerciseById(id: string): ExerciseOption | undefined {
-  const exercise = exercises.find((item) => item.id === id);
-  return exercise ? mapExerciseOption(exercise) : undefined;
-}
-
-export function getExercisesByMuscle(muscle: string): ExerciseOption[] {
-  const normalizedMuscle = normalizeSearchValue(muscle);
-
-  return exercises
-    .filter((exercise) => [...exercise.primaryMuscles, ...exercise.secondaryMuscles].some((item) => normalizeSearchValue(item) === normalizedMuscle))
-    .map(mapExerciseOption);
-}
-
-export function getExercisesByEquipment(equipment: string): ExerciseOption[] {
-  const normalizedEquipment = normalizeSearchValue(equipment);
-
-  return exercises
-    .filter((exercise) => normalizeSearchValue(exercise.equipment ?? '') === normalizedEquipment)
-    .map(mapExerciseOption);
-}
-
-export function getExercisesByCategory(category: string): ExerciseOption[] {
-  const normalizedCategory = normalizeSearchValue(category);
-
-  return exercises
-    .filter((exercise) => normalizeSearchValue(exercise.category ?? '') === normalizedCategory)
-    .map(mapExerciseOption);
 }
