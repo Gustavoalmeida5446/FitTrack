@@ -7,6 +7,7 @@ import { NutritionTargets, WaterData, WeeklyDiet, Workout } from '../data/types'
 import { getDietDayIdForDate } from '../lib/date';
 import { calculateClampedPercentage, formatRoundedInteger, parseDecimalNumber } from '../lib/number';
 import { calculateDietProgress, getMealsForDietDay } from '../lib/nutrition';
+import appLogo from '../../favicon/android-chrome-192x192.png';
 
 interface Props {
   workouts: Workout[];
@@ -56,7 +57,14 @@ export function HomePage({
   const todayDietProgress = calculateDietProgress(todayMeals, todayDietDay?.completedMealIds ?? []);
 
   return (
-    <PageContainer title="FitTrack">
+    <PageContainer
+      title={(
+        <span className="app-title">
+          <img src={appLogo} alt="" className="app-title__logo" />
+          <span>FitTrack</span>
+        </span>
+      )}
+    >
       {tutorialStep ? (
         <ContextualTutorialCard
           step={tutorialStep}

@@ -7,6 +7,7 @@
     "start": "vite --host",
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "test": "/usr/bin/node ./node_modules/typescript/bin/tsc -p tsconfig.tests.json && printf '{\"type\":\"commonjs\"}\\n' > .test-dist/package.json && /usr/bin/node --test .test-dist/tests/*.test.js",
     "preview": "vite preview",
     "convert:taco": "node scripts/convert-taco.js",
     "deploy": "bash ./scripts/deploy-gh-pages.sh"

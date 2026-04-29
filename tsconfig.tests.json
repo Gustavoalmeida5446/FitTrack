@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "outDir": ".test-dist",
+    "rootDir": ".",
+    "strict": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "types": ["node"]
+  },
+  "include": [
+    "src/data/types.ts",
+    "src/lib/appState.ts",
+    "src/lib/date.ts",
+    "src/lib/legacyState.ts",
+    "src/lib/nutrition.ts",
+    "tests/**/*.ts"
+  ]
+}

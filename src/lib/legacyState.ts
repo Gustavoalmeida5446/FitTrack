@@ -187,7 +187,7 @@ export function getWorkoutProgressUpdatedAt(workouts: unknown): string {
   return '';
 }
 
-export function normalizeLegacyWorkoutList(workouts?: Workout[] | LegacyWorkoutState | LegacyWorkout[] | null): Workout[] {
+export function normalizeLegacyWorkoutList(workouts?: Workout[] | PersistedWorkoutState | LegacyWorkoutState | LegacyWorkout[] | null): Workout[] {
   const workoutStateFormat = getWorkoutStateFormat(workouts);
 
   if (workoutStateFormat === 'empty' || workoutStateFormat === 'unknown') {

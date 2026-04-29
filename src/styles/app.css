@@ -101,6 +101,20 @@ body {
   font-weight: 700;
 }
 
+.app-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.app-title__logo {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.8rem;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
 .page-header p {
   margin: 0.2rem 0 0;
   color: var(--color-text-subtle);

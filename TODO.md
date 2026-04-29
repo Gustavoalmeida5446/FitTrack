@@ -212,7 +212,7 @@ Status:
 - [x] documentar formatos persistidos
 - [x] preparar migrações futuras com menos heurística
 
-### 15. Adicionar testes mínimos
+### [x] 15. Adicionar testes mínimos
 - Objetivo: reduzir regressões em persistência e cálculos.
 - Risco atual: estrutural.
 - Arquivos candidatos:
@@ -221,10 +221,10 @@ Status:
 - [src/lib/nutrition.ts](/home/gustavo/projects/FitTrack/src/lib/nutrition.ts)
 - [src/services/appStateService.ts](/home/gustavo/projects/FitTrack/src/services/appStateService.ts)
 - Tarefas:
-- testar normalização de workouts
-- testar reset diário
-- testar cálculo de idade
-- testar cálculo de metas
+- [x] testar normalização de workouts
+- [x] testar reset diário
+- [x] testar cálculo de idade
+- [x] testar cálculo de metas
 
 ## Ordem sugerida de execução
 

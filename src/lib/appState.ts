@@ -100,11 +100,11 @@ function resetWorkoutProgress(workouts: Workout[]): Workout[] {
   }));
 }
 
-function normalizeWorkoutList(workouts?: Workout[] | LegacyWorkoutState | LegacyWorkout[] | null): Workout[] {
+function normalizeWorkoutList(workouts?: Workout[] | PersistedWorkoutState | LegacyWorkoutState | LegacyWorkout[] | null): Workout[] {
   return normalizeLegacyWorkoutList(workouts);
 }
 
-export function normalizeWorkoutState(workouts?: Workout[] | LegacyWorkoutState | LegacyWorkout[] | null): Workout[] {
+export function normalizeWorkoutState(workouts?: Workout[] | PersistedWorkoutState | LegacyWorkoutState | LegacyWorkout[] | null): Workout[] {
   return normalizeWorkoutList(workouts);
 }
 
