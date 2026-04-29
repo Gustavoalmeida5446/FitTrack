@@ -6,6 +6,7 @@
   "display": "standalone",
   "theme_color": "#0f62fe",
   "background_color": "#ffffff",
+  "description": "Acompanhe treinos, alimentacao, agua e metas nutricionais.",
   "icons": [
     {
       "src": "./favicon/android-chrome-192x192.png",
@@ -15,6 +16,11 @@
     {
       "src": "./favicon/android-chrome-512x512.png",
       "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "./favicon/apple-touch-icon.png",
+      "sizes": "180x180",
       "type": "image/png"
     }
   ]
