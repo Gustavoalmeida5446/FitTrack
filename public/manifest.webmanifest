@@ -5,7 +5,7 @@
   "scope": "./",
   "display": "standalone",
   "theme_color": "#0f62fe",
-  "background_color": "#ffffff",
+  "background_color": "#000000",
   "description": "Acompanhe treinos, alimentacao, agua e metas nutricionais.",
   "icons": [
     {
