@@ -1,4 +1,4 @@
-import { Calendar, CalendarHeatMap, Home } from '@carbon/icons-react';
+import { Calendar, CalendarHeatMap, Home, UserAvatar } from '@carbon/icons-react';
 import { Button, Theme } from '@carbon/react';
 import { Suspense, lazy, useCallback, useMemo, useState } from 'react';
 import { type TutorialStepContent } from './components/ContextualTutorialCard';
@@ -123,7 +123,6 @@ export default function App() {
 
     return weeklyDiet.meals.filter((meal) => selectedDay.mealIds.includes(meal.id));
   }, [selectedDay, weeklyDiet.meals]);
-  const userInitial = session?.user.email?.trim().charAt(0).toUpperCase() ?? 'U';
   const handleHydrateRemoteState = useCallback((remoteState: AppState) => {
     setProfile(remoteState.profile);
     setWorkouts(remoteState.workouts);
@@ -442,20 +441,28 @@ export default function App() {
 
         <nav className="bottom-tabbar bottom-nav" aria-label="Navegação principal">
           <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'home' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={openHome}>
-            <Home size={20} />
-            <span>Início</span>
+            <span className="bottom-nav__icon" aria-hidden="true">
+              <Home size={20} />
+            </span>
+            <span className="bottom-nav__label">Início</span>
           </Button>
           <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'workout-setup' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={openWorkoutSetup}>
-            <Calendar size={20} />
-            <span>Treinos</span>
+            <span className="bottom-nav__icon" aria-hidden="true">
+              <Calendar size={20} />
+            </span>
+            <span className="bottom-nav__label">Treinos</span>
           </Button>
           <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'diet-setup' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={openDietSetup}>
-            <CalendarHeatMap size={20} />
-            <span>Dieta</span>
+            <span className="bottom-nav__icon" aria-hidden="true">
+              <CalendarHeatMap size={20} />
+            </span>
+            <span className="bottom-nav__label">Dieta</span>
           </Button>
           <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'goals' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={openGoals}>
-            <span className="profile-initial-badge" aria-hidden="true">{userInitial}</span>
-            <span>Perfil</span>
+            <span className="bottom-nav__icon" aria-hidden="true">
+              <UserAvatar size={20} />
+            </span>
+            <span className="bottom-nav__label">Perfil</span>
           </Button>
         </nav>
       </div>

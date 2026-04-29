@@ -130,7 +130,7 @@ export function NutritionGoalsPage({
               datePickerType="single"
               dateFormat="d-m-Y"
               locale={{ ...Portuguese, locale: 'pt' }}
-              maxDate={new Date()}
+              maxDate={formatBirthDateForDatePicker(new Date().toISOString().slice(0, 10))}
               parseDate={parseBirthDateForDatePicker}
               onChange={(_, dateString) => {
                 const birthDate = normalizeBirthDateForStorage(getSingleDatePickerValue(dateString));
