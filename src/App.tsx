@@ -137,6 +137,9 @@ export default function App() {
     setWorkoutsUpdatedAt(nextState.workoutsUpdatedAt);
     markRemoteSavePending();
   }, [markRemoteSavePending]);
+  const handleNavigateTutorial = useCallback((nextView: AppView) => {
+    setView(nextView);
+  }, [setView]);
   const {
     activeStep: activeTutorialStep,
     tutorialStepIndex,
@@ -149,7 +152,7 @@ export default function App() {
     steps: onboardingSteps,
     sessionUserId: session?.user.id,
     isReady: Boolean(session) && isRemoteReady,
-    onNavigate: setView
+    onNavigate: handleNavigateTutorial
   });
 
   useDailyWorkoutReset({
