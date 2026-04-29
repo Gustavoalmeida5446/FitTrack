@@ -21,7 +21,13 @@ import {
 } from './lib/appUpdates';
 import { getTodayDateString } from './lib/date';
 import { calculateNutritionTargets } from './lib/nutrition';
-import { signInWithEmail, signOut, signUpWithEmail } from './services/authService';
+import {
+  requestPasswordReset,
+  signInWithEmail,
+  signOut,
+  signUpWithEmail,
+  updatePassword
+} from './services/authService';
 
 const HomePage = lazy(() => import('./pages/HomePage').then((module) => ({ default: module.HomePage })));
 const WorkoutPage = lazy(() => import('./pages/WorkoutPage').then((module) => ({ default: module.WorkoutPage })));
@@ -71,7 +77,13 @@ function AppLoadingState() {
 }
 
 export default function App() {
-  const { session, setSession, isAuthReady } = useAuthSession();
+  const {
+    session,
+    setSession,
+    isAuthReady,
+    isPasswordRecovery,
+    clearPasswordRecovery
+  } = useAuthSession();
   const {
     view,
     selectedWorkoutId,
@@ -272,6 +284,30 @@ export default function App() {
     if (!success) return;
 
     setSession(null);
+    clearPasswordRecovery();
+    openHome();
+  };
+
+  const handleRequestPasswordReset = async (email: string) => requestPasswordReset(email);
+
+  const handleUpdatePassword = async (password: string) => {
+    const success = await updatePassword(password);
+
+    if (!success) {
+      return false;
+    }
+
+    await signOut();
+    setSession(null);
+    clearPasswordRecovery();
+    openHome();
+    return true;
+  };
+
+  const handleCancelPasswordRecovery = async () => {
+    await signOut();
+    setSession(null);
+    clearPasswordRecovery();
     openHome();
   };
 
@@ -285,12 +321,19 @@ export default function App() {
     );
   }
 
-  if (!session) {
+  if (!session || isPasswordRecovery) {
     return (
       <Theme theme="g100">
         <div className="app-shell">
           <Suspense fallback={<AppLoadingState />}>
-            <LoginPage onLogin={handleLogin} onSignUp={handleSignUp} />
+            <LoginPage
+              onLogin={handleLogin}
+              onSignUp={handleSignUp}
+              onRequestPasswordReset={handleRequestPasswordReset}
+              onUpdatePassword={handleUpdatePassword}
+              isPasswordRecoveryActive={isPasswordRecovery}
+              onCancelPasswordRecovery={handleCancelPasswordRecovery}
+            />
           </Suspense>
         </div>
       </Theme>

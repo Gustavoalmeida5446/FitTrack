@@ -258,6 +258,25 @@ Status:
 - [x] definir um padrão simples para valor vazio, foco e blur
 - [x] aplicar o mesmo comportamento aos formulários principais
 
+### [ ] 18. Adicionar fluxo de "Esqueci minha senha"
+- Objetivo: permitir recuperação de senha sem sair da experiência atual de autenticação.
+- Risco atual: médio.
+- Arquivos candidatos:
+- [src/pages/LoginPage.tsx](/home/gustavo/projects/FitTrack/src/pages/LoginPage.tsx)
+- [src/services/authService.ts](/home/gustavo/projects/FitTrack/src/services/authService.ts)
+- [src/hooks/useAuthSession.ts](/home/gustavo/projects/FitTrack/src/hooks/useAuthSession.ts)
+- [src/App.tsx](/home/gustavo/projects/FitTrack/src/App.tsx)
+- [src/lib/validation.ts](/home/gustavo/projects/FitTrack/src/lib/validation.ts)
+- [src/styles/app.css](/home/gustavo/projects/FitTrack/src/styles/app.css)
+- [tests/validation.test.ts](/home/gustavo/projects/FitTrack/tests/validation.test.ts)
+- Tarefas:
+- [ ] adicionar link "Esqueci minha senha" no modo `login`
+- [ ] criar envio de e-mail com `resetPasswordForEmail`
+- [ ] tratar retorno do link de recovery do Supabase no app
+- [ ] permitir definir nova senha com confirmação
+- [ ] validar mensagens de erro/sucesso
+- [ ] testar fluxo completo com build e testes existentes
+
 ### [x] 18. Adicionar validação com `zod` nos dados principais
 - Objetivo: validar os dados do app com regras explícitas, sem introduzir `react-hook-form`.
 - Risco atual: médio.

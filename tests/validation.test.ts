@@ -2,7 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { defaultAppState, sanitizeAppStateForSave } from '../src/lib/appState';
 import {
+  getEmailFormErrors,
   getLoginFormErrors,
+  getPasswordResetFormErrors,
   isProfileReady,
   isValidDayMealSelection,
   isValidFoodItem,
@@ -141,6 +143,20 @@ test('getLoginFormErrors valida e-mail e senha no login', () => {
   });
 });
 
+test('getEmailFormErrors valida apenas o e-mail', () => {
+  assert.deepEqual(getEmailFormErrors(''), {
+    email: 'Informe seu e-mail.',
+    password: '',
+    confirmPassword: ''
+  });
+
+  assert.deepEqual(getEmailFormErrors('teste@email.com'), {
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+});
+
 test('getSignupFormErrors valida senha mínima e confirmação', () => {
   assert.deepEqual(getSignupFormErrors('teste@email.com', '123', '321'), {
     email: '',
@@ -149,6 +165,20 @@ test('getSignupFormErrors valida senha mínima e confirmação', () => {
   });
 
   assert.deepEqual(getSignupFormErrors('teste@email.com', '123456', '123456'), {
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+});
+
+test('getPasswordResetFormErrors valida senha e confirmação', () => {
+  assert.deepEqual(getPasswordResetFormErrors('123', '321'), {
+    email: '',
+    password: 'Use pelo menos 6 caracteres na senha.',
+    confirmPassword: 'As senhas não coincidem.'
+  });
+
+  assert.deepEqual(getPasswordResetFormErrors('123456', '123456'), {
     email: '',
     password: '',
     confirmPassword: ''

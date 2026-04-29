@@ -1,16 +1,24 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
-import { getCurrentSession, onAuthStateChange } from '../services/authService';
+import {
+  clearAuthRedirectUrl,
+  getCurrentSession,
+  isPasswordRecoveryRedirect,
+  onAuthStateChange
+} from '../services/authService';
 
 interface UseAuthSessionResult {
   session: Session | null;
   setSession: (session: Session | null) => void;
   isAuthReady: boolean;
+  isPasswordRecovery: boolean;
+  clearPasswordRecovery: () => void;
 }
 
 export function useAuthSession(): UseAuthSessionResult {
   const [session, setSession] = useState<Session | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
   const sessionUserIdRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -19,6 +27,13 @@ export function useAuthSession(): UseAuthSessionResult {
 
   useEffect(() => {
     void getCurrentSession().then((currentSession) => {
+      const hasRecoveryRedirect = isPasswordRecoveryRedirect();
+      setIsPasswordRecovery(Boolean(currentSession) && hasRecoveryRedirect);
+
+      if (hasRecoveryRedirect) {
+        clearAuthRedirectUrl();
+      }
+
       setSession(currentSession);
       setIsAuthReady(true);
     });
@@ -29,6 +44,15 @@ export function useAuthSession(): UseAuthSessionResult {
 
       if (event === 'SIGNED_OUT') {
         setSession(null);
+        setIsPasswordRecovery(false);
+        setIsAuthReady(true);
+        return;
+      }
+
+      if (event === 'PASSWORD_RECOVERY') {
+        setSession(nextSession);
+        setIsPasswordRecovery(true);
+        clearAuthRedirectUrl();
         setIsAuthReady(true);
         return;
       }
@@ -57,6 +81,8 @@ export function useAuthSession(): UseAuthSessionResult {
   return {
     session,
     setSession,
-    isAuthReady
+    isAuthReady,
+    isPasswordRecovery,
+    clearPasswordRecovery: () => setIsPasswordRecovery(false)
   };
 }

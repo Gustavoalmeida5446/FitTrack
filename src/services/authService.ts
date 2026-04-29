@@ -14,6 +14,25 @@ function getAppRedirectUrl() {
   return new URL(import.meta.env.BASE_URL, window.location.origin).toString();
 }
 
+export function isPasswordRecoveryRedirect() {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  const searchParams = new URLSearchParams(window.location.search);
+
+  return hashParams.get('type') === 'recovery' || searchParams.get('type') === 'recovery';
+}
+
+export function clearAuthRedirectUrl() {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.history.replaceState({}, document.title, window.location.pathname);
+}
+
 export async function getCurrentSession() {
   const { data, error } = await supabase.auth.getSession();
 
@@ -57,6 +76,32 @@ export async function signUpWithEmail(email: string, password: string): Promise<
     success: true,
     requiresEmailConfirmation: !data.session
   };
+}
+
+export async function requestPasswordReset(email: string) {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: getAppRedirectUrl()
+  });
+
+  if (error) {
+    console.error('Erro ao solicitar recuperação de senha', error);
+    return false;
+  }
+
+  return true;
+}
+
+export async function updatePassword(password: string) {
+  const { error } = await supabase.auth.updateUser({
+    password
+  });
+
+  if (error) {
+    console.error('Erro ao atualizar senha', error);
+    return false;
+  }
+
+  return true;
 }
 
 export async function signOut() {

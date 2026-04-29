@@ -21,8 +21,18 @@ export const loginFormSchema = z.object({
   password: loginPasswordSchema
 });
 
-export const signupFormSchema = z.object({
+const signupFieldsSchema = z.object({
   email: authEmailSchema,
+  password: signupPasswordSchema,
+  confirmPassword: z.string().trim().min(1, 'Confirme sua senha.')
+});
+
+export const signupFormSchema = signupFieldsSchema.refine((values) => values.password === values.confirmPassword, {
+  path: ['confirmPassword'],
+  message: 'As senhas não coincidem.'
+});
+
+const passwordResetSchema = z.object({
   password: signupPasswordSchema,
   confirmPassword: z.string().trim().min(1, 'Confirme sua senha.')
 }).refine((values) => values.password === values.confirmPassword, {
@@ -262,8 +272,39 @@ export function getLoginFormErrors(email: string, password: string): AuthFormErr
   return getFieldErrorMessages(parsed.error.flatten().fieldErrors);
 }
 
+export function getEmailFormErrors(email: string): AuthFormErrors {
+  const parsed = loginFormSchema.pick({ email: true }).safeParse({ email });
+
+  if (parsed.success) {
+    return {
+      email: '',
+      password: '',
+      confirmPassword: ''
+    };
+  }
+
+  return getFieldErrorMessages(parsed.error.flatten().fieldErrors);
+}
+
 export function getSignupFormErrors(email: string, password: string, confirmPassword: string): AuthFormErrors {
   const parsed = signupFormSchema.safeParse({ email, password, confirmPassword });
+
+  if (parsed.success) {
+    return {
+      email: '',
+      password: '',
+      confirmPassword: ''
+    };
+  }
+
+  return getFieldErrorMessages(parsed.error.flatten().fieldErrors);
+}
+
+export function getPasswordResetFormErrors(password: string, confirmPassword: string): AuthFormErrors {
+  const parsed = passwordResetSchema.safeParse({
+    password,
+    confirmPassword
+  });
 
   if (parsed.success) {
     return {
