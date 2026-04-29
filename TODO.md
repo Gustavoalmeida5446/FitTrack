@@ -415,6 +415,18 @@ Status:
 - [x] deixar `npm run deploy` executando o build antes da publicação
 - [x] remover duplicação do build no script de deploy
 
+### [x] 30. Melhorar resiliência e feedback na busca de exercícios
+- Objetivo: evitar travamento silencioso quando a base de exercícios falhar ao carregar.
+- Prioridade: média.
+- Risco atual: médio.
+- Arquivos candidatos:
+- [src/services/exercises.ts](/home/gustavo/projects/FitTrack/src/services/exercises.ts)
+- [src/pages/WorkoutSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/WorkoutSetupPage.tsx)
+- Tarefas:
+- [x] permitir nova tentativa após falha no carregamento da base
+- [x] mostrar estado simples de carregamento na busca
+- [x] mostrar mensagem clara de erro ao usuário
+
 ### [x] 27. Resetar água na virada do dia
 - Objetivo: zerar o consumo de água quando o app voltar em um novo dia.
 - Prioridade: alta.
@@ -452,3 +464,4 @@ Status:
 18. Item 27
 19. Item 28
 20. Item 29
+21. Item 30

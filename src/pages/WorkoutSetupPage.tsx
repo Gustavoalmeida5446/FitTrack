@@ -54,6 +54,8 @@ export function WorkoutSetupPage({
   const [activePreviewImageIndex, setActivePreviewImageIndex] = useState(0);
   const [query, setQuery] = useState('');
   const [options, setOptions] = useState<ExerciseOption[]>([]);
+  const [isLoadingOptions, setIsLoadingOptions] = useState(false);
+  const [searchErrorMessage, setSearchErrorMessage] = useState('');
   const [name, setName] = useState('');
   const [draftExercises, setDraftExercises] = useState<WorkoutExercise[]>([]);
   const [exerciseName, setExerciseName] = useState(defaultExerciseValues.name);
@@ -92,22 +94,38 @@ export function WorkoutSetupPage({
     const trimmedQuery = debouncedQuery.trim();
 
     if (!trimmedQuery) {
+      setIsLoadingOptions(false);
+      setSearchErrorMessage('');
       setOptions([]);
       return undefined;
     }
 
     if (skipNextSearchRef.current) {
       skipNextSearchRef.current = false;
+      setIsLoadingOptions(false);
+      setSearchErrorMessage('');
       setOptions([]);
       return undefined;
     }
+
+    setIsLoadingOptions(true);
+    setSearchErrorMessage('');
 
     void searchExercises(trimmedQuery, 20).then((nextOptions) => {
       if (!isActive) {
         return;
       }
 
+      setIsLoadingOptions(false);
       setOptions(nextOptions);
+    }).catch(() => {
+      if (!isActive) {
+        return;
+      }
+
+      setIsLoadingOptions(false);
+      setOptions([]);
+      setSearchErrorMessage('Não foi possível carregar os exercícios. Tente novamente.');
     });
 
     return () => {
@@ -131,6 +149,8 @@ export function WorkoutSetupPage({
     setSets(defaultExerciseValues.sets);
     setRestSeconds(defaultExerciseValues.restSeconds);
     setActivePreviewImageIndex(0);
+    setIsLoadingOptions(false);
+    setSearchErrorMessage('');
     setOptions([]);
   };
 
@@ -302,10 +322,13 @@ export function WorkoutSetupPage({
                 setExerciseMediaType('none');
                 setExerciseSourceId(undefined);
                 setActivePreviewImageIndex(0);
+                setSearchErrorMessage('');
               }}
               onBlur={() => window.setTimeout(() => setOptions([]), 150)}
             />
           </div>
+          {isLoadingOptions ? <p className="form-message">Carregando exercícios...</p> : null}
+          {searchErrorMessage ? <p className="form-message form-message--error">{searchErrorMessage}</p> : null}
           {options.length > 0 ? (
             <ul className="search-list">
               {options.map((option) => (

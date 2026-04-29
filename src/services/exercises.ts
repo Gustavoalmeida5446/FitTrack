@@ -150,12 +150,22 @@ function mapExerciseOption(exercise: ExerciseRecord): ExerciseOption {
 async function loadIndexedExercises(): Promise<IndexedExerciseRecord[]> {
   if (!indexedExercisesPromise) {
     indexedExercisesPromise = fetch(exercisesDataUrl)
-      .then((response) => response.json() as Promise<ExerciseRecord[]>)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Não foi possível carregar os exercícios.');
+        }
+
+        return response.json() as Promise<ExerciseRecord[]>;
+      })
       .then((exercises) => exercises.map((exercise) => ({
         exercise,
         displayName: getExerciseDisplayName(exercise),
         normalizedSearchTexts: getExerciseSearchTexts(exercise).map((text) => normalizeSearchValue(text))
-      })));
+      })))
+      .catch((error) => {
+        indexedExercisesPromise = null;
+        throw error;
+      });
   }
 
   return indexedExercisesPromise;
