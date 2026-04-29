@@ -30,10 +30,33 @@ function parseBirthDateParts(birthDate: string): { year: number; month: number; 
   return { year, month, day };
 }
 
-export function normalizeBirthDateDisplay(birthDate: string): string {
+function isValidBirthDateParts(parts: { year: number; month: number; day: number }): boolean {
+  const { year, month, day } = parts;
+  const candidate = new Date(year, month - 1, day);
+
+  return candidate.getFullYear() === year
+    && candidate.getMonth() === month - 1
+    && candidate.getDate() === day;
+}
+
+export function normalizeBirthDateForStorage(birthDate: string): string {
   const parsedDate = parseBirthDateParts(birthDate);
 
-  if (!parsedDate) {
+  if (!parsedDate || !isValidBirthDateParts(parsedDate)) {
+    return '';
+  }
+
+  const year = String(parsedDate.year).padStart(4, '0');
+  const month = String(parsedDate.month).padStart(2, '0');
+  const day = String(parsedDate.day).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
+export function formatBirthDateForDatePicker(birthDate: string): string {
+  const parsedDate = parseBirthDateParts(birthDate);
+
+  if (!parsedDate || !isValidBirthDateParts(parsedDate)) {
     return '';
   }
 
@@ -42,6 +65,22 @@ export function normalizeBirthDateDisplay(birthDate: string): string {
   const year = String(parsedDate.year).padStart(4, '0');
 
   return `${day}-${month}-${year}`;
+}
+
+export function parseBirthDateForDatePicker(birthDate: string): Date | false {
+  const normalizedBirthDate = normalizeBirthDateForStorage(birthDate);
+
+  if (!normalizedBirthDate) {
+    return false;
+  }
+
+  const [year, month, day] = normalizedBirthDate.split('-').map(Number);
+
+  return new Date(year, month - 1, day);
+}
+
+export function normalizeBirthDateDisplay(birthDate: string): string {
+  return formatBirthDateForDatePicker(birthDate);
 }
 
 export function calculateAgeFromBirthDate(birthDate: string, today = new Date()): number {

@@ -82,6 +82,11 @@ test('normalizeWorkoutProgressForToday reseta exercícios concluídos quando o d
 
 test('sanitizeAppStateForSave normaliza payload e remove weightHistory inválido', () => {
   const unsafeState = createState({
+    profile: {
+      ...defaultAppState.profile,
+      birthDate: '05-04-2000',
+      age: 26
+    },
     workouts: [
       {
         id: 'w-1',
@@ -128,6 +133,7 @@ test('sanitizeAppStateForSave normaliza payload e remove weightHistory inválido
 
   assert.equal(sanitized.workouts[0]?.exercises[0]?.done, false);
   assert.notEqual(sanitized.workoutsUpdatedAt, '2001-01-01');
+  assert.equal(sanitized.profile.birthDate, '2000-04-05');
   assert.equal(sanitized.water.consumedMl, 0);
   assert.notEqual(sanitized.water.updatedAt, '2001-01-01');
   assert.equal(sanitized.weeklyDiet.days.length, 7);

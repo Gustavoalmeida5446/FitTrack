@@ -1,6 +1,6 @@
 import type { FoodItem, Meal, MuscleGroup, UserProfile, WeeklyDiet, Workout, WorkoutExercise } from '../data/types';
 import type { ActivityLevel, DietType, GoalType } from '../data/types';
-import { calculateAgeFromBirthDate, normalizeBirthDateDisplay } from './date';
+import { calculateAgeFromBirthDate, normalizeBirthDateForStorage } from './date';
 
 type LegacyExercise = WorkoutExercise | {
   id: string;
@@ -75,12 +75,16 @@ type LegacyFoodItem = FoodItem & {
 export type LegacyProfile = Partial<UserProfile> | null | undefined;
 
 export function normalizeLegacyProfile(profile: LegacyProfile, fallback: UserProfile): UserProfile {
+  const normalizedBirthDate = typeof profile?.birthDate === 'string'
+    ? normalizeBirthDateForStorage(profile.birthDate)
+    : fallback.birthDate;
+
   return {
     currentWeight: typeof profile?.currentWeight === 'number' ? profile.currentWeight : fallback.currentWeight,
     heightCm: typeof profile?.heightCm === 'number' ? profile.heightCm : fallback.heightCm,
-    birthDate: typeof profile?.birthDate === 'string' ? normalizeBirthDateDisplay(profile.birthDate) : fallback.birthDate,
-    age: typeof profile?.birthDate === 'string' && profile.birthDate
-      ? calculateAgeFromBirthDate(profile.birthDate)
+    birthDate: normalizedBirthDate,
+    age: normalizedBirthDate
+      ? calculateAgeFromBirthDate(normalizedBirthDate)
       : typeof profile?.age === 'number' ? profile.age : fallback.age,
     sex: profile?.sex === 'Feminino' ? 'Feminino' : 'Masculino',
     activityLevel: ['Sedentario', 'Leve', 'Moderado', 'Intenso', 'Atleta'].includes(String(profile?.activityLevel))

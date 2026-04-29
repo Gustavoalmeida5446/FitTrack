@@ -9,7 +9,13 @@ import { InfoBlock } from '../components/InfoBlock';
 import { StatsGrid } from '../components/StatsGrid';
 import { ActivityLevel, DietType, GoalType, NutritionTargets, UserProfile, WeightLog } from '../data/types';
 import { PageContainer } from '../components/PageContainer';
-import { calculateAgeFromBirthDate, getSingleDatePickerValue } from '../lib/date';
+import {
+  calculateAgeFromBirthDate,
+  formatBirthDateForDatePicker,
+  getSingleDatePickerValue,
+  normalizeBirthDateForStorage,
+  parseBirthDateForDatePicker
+} from '../lib/date';
 import { getSafeNumber } from '../lib/number';
 
 interface Props {
@@ -107,11 +113,12 @@ export function NutritionGoalsPage({
               dateFormat="d-m-Y"
               locale={{ ...Portuguese, locale: 'pt' }}
               maxDate={new Date()}
+              parseDate={parseBirthDateForDatePicker}
               onChange={(_, dateString) => {
-                const birthDate = getSingleDatePickerValue(dateString);
+                const birthDate = normalizeBirthDateForStorage(getSingleDatePickerValue(dateString));
                 onUpdateProfile({ ...profile, birthDate, age: calculateAgeFromBirthDate(birthDate) });
               }}
-              value={profile.birthDate}
+              value={formatBirthDateForDatePicker(profile.birthDate)}
             >
               <DatePickerInput
                 id="profile-birth-date"
