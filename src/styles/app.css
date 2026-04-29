@@ -1318,13 +1318,20 @@ body {
 
   .bottom-tabbar,
   .bottom-nav {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.5rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.25rem;
   }
 
   .bottom-tabbar__item.cds--btn.cds--btn--ghost,
   .bottom-nav__item.cds--btn.cds--btn--ghost {
-    min-block-size: 4.25rem;
-    padding: 0.5rem;
+    min-block-size: 3.75rem;
+    padding: 0.4rem 0.2rem;
+    gap: 0.25rem;
+  }
+
+  .bottom-tabbar__item span,
+  .bottom-nav__item span {
+    font-size: 0.74rem;
+    line-height: 1.1;
   }
 }
