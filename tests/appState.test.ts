@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   defaultAppState,
   normalizeWaterData,
+  normalizeWeeklyDietProgressForToday,
   normalizeWorkoutProgressState,
   normalizeWorkoutProgressForToday,
   sanitizeAppStateForSave,
@@ -94,6 +95,46 @@ test('normalizeWaterData reseta consumo de água quando o dia mudou', () => {
   assert.notEqual(water.updatedAt, '2000-01-01');
 });
 
+test('normalizeWeeklyDietProgressForToday reseta refeições concluídas quando o dia mudou', () => {
+  const weeklyDiet = normalizeWeeklyDietProgressForToday({
+    id: 'diet-1',
+    progressUpdatedAt: '2000-01-01',
+    meals: [
+      {
+        id: 'meal-1',
+        name: 'Cafe da manha',
+        foods: [
+          {
+            id: 'food-1',
+            name: 'Aveia',
+            calories: 120,
+            protein: 5,
+            carbs: 20,
+            fat: 2,
+            fiber: 3,
+            quantity: 40,
+            unit: 'g',
+            baseQuantity: 100,
+            baseUnit: 'g'
+          }
+        ]
+      }
+    ],
+    days: [
+      {
+        id: 'd-1',
+        label: 'Segunda',
+        mealIds: ['meal-1'],
+        completedMealIds: ['meal-1']
+      },
+      ...defaultAppState.weeklyDiet.days.slice(1)
+    ]
+  });
+
+  assert.notEqual(weeklyDiet.progressUpdatedAt, '2000-01-01');
+  assert.deepEqual(weeklyDiet.days[0]?.completedMealIds, []);
+});
+
 test('sanitizeAppStateForSave normaliza payload e remove weightHistory inválido', () => {
   const unsafeState = createState({
     profile: {
@@ -133,6 +174,7 @@ test('sanitizeAppStateForSave normaliza payload e remove weightHistory inválido
     },
     weeklyDiet: {
       id: 'diet-1',
+      progressUpdatedAt: '2001-01-01',
       meals: [],
       days: []
     },
@@ -151,6 +193,7 @@ test('sanitizeAppStateForSave normaliza payload e remove weightHistory inválido
   assert.equal(sanitized.water.consumedMl, 0);
   assert.notEqual(sanitized.water.updatedAt, '2001-01-01');
   assert.equal(sanitized.weeklyDiet.days.length, 7);
+  assert.notEqual(sanitized.weeklyDiet.progressUpdatedAt, '2001-01-01');
   assert.deepEqual(sanitized.weightHistory, [{ date: '28/04/2026', weight: 80 }]);
 });
 

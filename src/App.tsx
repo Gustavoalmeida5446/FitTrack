@@ -4,12 +4,13 @@ import { Suspense, lazy, useCallback, useMemo, useState } from 'react';
 import { type TutorialStepContent } from './components/ContextualTutorialCard';
 import { WeeklyDiet, Workout } from './data/types';
 import { useAuthSession } from './hooks/useAuthSession';
+import { useDailyDietReset } from './hooks/useDailyDietReset';
 import { useDailyWaterReset } from './hooks/useDailyWaterReset';
 import { useDailyWorkoutReset } from './hooks/useDailyWorkoutReset';
 import { type AppView, useLocalNavigation } from './hooks/useLocalNavigation';
 import { useRemoteAppState } from './hooks/useRemoteAppState';
 import { useTutorial } from './hooks/useTutorial';
-import { AppState, defaultAppState, normalizeWaterData } from './lib/appState';
+import { AppState, defaultAppState, normalizeWaterData, normalizeWeeklyDiet } from './lib/appState';
 import {
   addWaterAmount,
   createWeightHistoryEntry,
@@ -151,6 +152,10 @@ export default function App() {
     setWater(nextWater);
     markRemoteSavePending();
   }, [markRemoteSavePending]);
+  const handleResetDietProgress = useCallback((nextDiet: WeeklyDiet) => {
+    setWeeklyDiet(nextDiet);
+    markRemoteSavePending();
+  }, [markRemoteSavePending]);
   const handleNavigateTutorial = useCallback((nextView: AppView) => {
     setView(nextView);
   }, [setView]);
@@ -182,6 +187,12 @@ export default function App() {
     onReset: handleResetWater
   });
 
+  useDailyDietReset({
+    isReady: Boolean(session) && isRemoteReady,
+    weeklyDiet,
+    onReset: handleResetDietProgress
+  });
+
   const updateWorkout = (workoutId: string, updater: (workout: Workout) => Workout) => {
     markRemoteSavePending();
     setWorkoutsUpdatedAt(getTodayDateString());
@@ -190,7 +201,10 @@ export default function App() {
 
   const updateDiet = (updater: (diet: WeeklyDiet) => WeeklyDiet) => {
     markRemoteSavePending();
-    setWeeklyDiet((prev) => updater(prev));
+    setWeeklyDiet((prev) => ({
+      ...updater(prev),
+      progressUpdatedAt: getTodayDateString()
+    }));
   };
 
   const handleUpdateProfile = (nextProfile: AppState['profile']) => {
@@ -236,7 +250,7 @@ export default function App() {
 
   const handleSaveDiet = (nextDiet: WeeklyDiet) => {
     markRemoteSavePending();
-    setWeeklyDiet(nextDiet);
+    setWeeklyDiet(normalizeWeeklyDiet(nextDiet));
   };
 
   const handleLogin = async (email: string, password: string) => {

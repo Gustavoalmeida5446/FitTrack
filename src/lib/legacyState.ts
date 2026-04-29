@@ -272,6 +272,7 @@ export function normalizeLegacyWeeklyDiet(diet: WeeklyDiet | LegacyWeeklyDiet | 
 
     return {
       id: diet.id ?? 'diet-empty',
+      progressUpdatedAt: typeof diet.progressUpdatedAt === 'string' ? diet.progressUpdatedAt : '',
       meals: diet.meals.map((meal) => ({
         id: meal.id,
         name: meal.name,
@@ -325,6 +326,7 @@ export function normalizeLegacyWeeklyDiet(diet: WeeklyDiet | LegacyWeeklyDiet | 
 
   return {
     id: diet.id ?? 'diet-empty',
+    progressUpdatedAt: '',
     meals,
     days: normalizedDays
   };

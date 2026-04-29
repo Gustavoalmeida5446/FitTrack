@@ -71,6 +71,7 @@ export function normalizeProfile(profile?: LegacyProfile): UserProfile {
 function createEmptyWeeklyDiet(): WeeklyDiet {
   return {
     id: 'diet-empty',
+    progressUpdatedAt: getTodayDateString(),
     meals: [],
     days: weekDayLabels.map((label, index) => ({
       id: `d-${index + 1}`,
@@ -86,6 +87,16 @@ function createEmptyWater(): WaterData {
     goalMl: 0,
     consumedMl: 0,
     updatedAt: getTodayDateString()
+  };
+}
+
+function resetWeeklyDietProgress(diet: WeeklyDiet): WeeklyDiet {
+  return {
+    ...diet,
+    days: diet.days.map((day) => ({
+      ...day,
+      completedMealIds: []
+    }))
   };
 }
 
@@ -168,7 +179,20 @@ export function normalizeWorkoutProgressForToday(workouts: Workout[], workoutsUp
 
 export function normalizeWeeklyDiet(diet?: WeeklyDiet | LegacyWeeklyDiet | null): WeeklyDiet {
   const baseDays = createEmptyWeeklyDiet().days;
-  return normalizeLegacyWeeklyDiet(diet, baseDays) ?? createEmptyWeeklyDiet();
+  return normalizeWeeklyDietProgressForToday(normalizeLegacyWeeklyDiet(diet, baseDays) ?? createEmptyWeeklyDiet());
+}
+
+export function normalizeWeeklyDietProgressForToday(diet: WeeklyDiet): WeeklyDiet {
+  const today = getTodayDateString();
+
+  if (diet.progressUpdatedAt === today) {
+    return diet;
+  }
+
+  return {
+    ...resetWeeklyDietProgress(diet),
+    progressUpdatedAt: today
+  };
 }
 
 export function normalizeWaterData(water?: WaterData): WaterData {

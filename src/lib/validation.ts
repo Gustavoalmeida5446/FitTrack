@@ -115,6 +115,7 @@ export const dietDaySchema = z.object({
 
 export const weeklyDietSchema = z.object({
   id: nonEmptyStringSchema,
+  progressUpdatedAt: dateSchema,
   meals: z.array(mealSchema),
   days: z.array(dietDaySchema).min(1)
 });
@@ -177,6 +178,7 @@ export function validateWeeklyDiet(diet: WeeklyDiet, fallback: WeeklyDiet): Week
 
   return {
     id: nonEmptyStringSchema.safeParse(diet.id).success ? String(diet.id).trim() : fallback.id,
+    progressUpdatedAt: dateSchema.safeParse(diet.progressUpdatedAt).success ? diet.progressUpdatedAt : fallback.progressUpdatedAt,
     meals: mealList,
     days: nextDays
   };

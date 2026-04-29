@@ -65,6 +65,7 @@ export interface DietDay {
 
 export interface WeeklyDiet {
   id: string;
+  progressUpdatedAt: string;
   meals: Meal[];
   days: DietDay[];
 }

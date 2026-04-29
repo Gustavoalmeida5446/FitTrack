@@ -170,6 +170,7 @@ test('sanitizeAppStateForSave não apaga a dieta inteira por uma refeição inv�
     ...defaultAppState,
     weeklyDiet: {
       id: 'diet-1',
+      progressUpdatedAt: defaultAppState.weeklyDiet.progressUpdatedAt,
       meals: [
         {
           id: 'm-1',
