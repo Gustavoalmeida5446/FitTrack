@@ -226,6 +226,21 @@ Status:
 - [x] testar cálculo de idade
 - [x] testar cálculo de metas
 
+### 16. Corrigir persistência visual da data de nascimento
+- Objetivo: fazer o campo de data de nascimento exibir novamente o valor salvo pelo usuário, no mesmo padrão visual dos outros inputs.
+- Risco atual: médio.
+- Arquivos candidatos:
+- [src/pages/NutritionGoalsPage.tsx](/home/gustavo/projects/FitTrack/src/pages/NutritionGoalsPage.tsx)
+- [src/lib/date.ts](/home/gustavo/projects/FitTrack/src/lib/date.ts)
+- [src/lib/appState.ts](/home/gustavo/projects/FitTrack/src/lib/appState.ts)
+- [src/services/appStateService.ts](/home/gustavo/projects/FitTrack/src/services/appStateService.ts)
+- [supabase/schema.sql](/home/gustavo/projects/FitTrack/supabase/schema.sql)
+- Tarefas:
+- [ ] verificar se a data de nascimento está sendo salva no banco
+- [ ] se estiver salva, fazer o valor reaparecer corretamente no seletor/input
+- [ ] se não estiver salva, corrigir a persistência
+- [ ] manter o mesmo padrão visual dos demais campos preenchidos
+
 ## Ordem sugerida de execução
 
 1. Itens 1, 2 e 3
@@ -234,3 +249,4 @@ Status:
 4. Itens 8, 9 e 10
 5. Itens 11, 12 e 13
 6. Itens 14 e 15
+7. Item 16
