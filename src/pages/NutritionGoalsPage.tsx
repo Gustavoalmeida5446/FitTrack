@@ -2,6 +2,7 @@ import { ChartLine, CheckmarkFilled, ChevronLeft, Logout, TrashCan, UserAvatar }
 import { Button, DatePicker, DatePickerInput, Select, SelectItem, Tile } from '@carbon/react';
 import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
+import { AppDigitScaledInput } from '../components/AppDigitScaledInput';
 import { AppNumberInput } from '../components/AppNumberInput';
 import { Portuguese } from 'flatpickr/dist/l10n/pt.js';
 import { CardHeader } from '../components/CardHeader';
@@ -116,7 +117,7 @@ export function NutritionGoalsPage({
             description="Informações-base para as metas"
           />
           <div className="goals-form-grid">
-            <AppNumberInput id="profile-weight" label="Peso (kg)" min={1} value={profile.currentWeight} onValueChange={(currentWeight) => {
+            <AppDigitScaledInput id="profile-weight" labelText="Peso (kg)" value={profile.currentWeight} scale={3} onValueChange={(currentWeight) => {
               setHasTouchedProfile(true);
               onUpdateProfile({ ...profile, currentWeight });
             }} />
@@ -192,7 +193,7 @@ export function NutritionGoalsPage({
             description="Registro e histórico recente"
           />
           <div className="goals-weight-form">
-            <AppNumberInput id="new-weight" label="Registrar peso" min={1} value={newWeight} onValueChange={setNewWeight} />
+            <AppDigitScaledInput id="new-weight" labelText="Registrar peso" value={newWeight} scale={3} onValueChange={setNewWeight} />
             <div className="setup-card__footer">
               <Button size="sm" onClick={() => {
                 setHasTriedSaveWeight(true);

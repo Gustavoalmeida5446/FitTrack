@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fittrack-v2';
+const CACHE_NAME = 'fittrack-v4';
 const APP_SHELL = [
   './index.html',
   './manifest.webmanifest',

@@ -7,6 +7,25 @@ Status:
 - `[-]` parcial
 - `[x]` concluído
 
+## Execução atual
+
+### [-] 16. Blindar layout mobile contra fonte grande e zoom de acessibilidade
+- Objetivo: evitar quebra de layout quando o usuário usa fonte ampliada no celular ou em larguras menores.
+- Risco atual: médio/alto.
+- Arquivos:
+- [src/styles/app.css](/home/gustavo/projects/FitTrack/src/styles/app.css)
+- [src/App.tsx](/home/gustavo/projects/FitTrack/src/App.tsx)
+- [src/components/PageContainer.tsx](/home/gustavo/projects/FitTrack/src/components/PageContainer.tsx)
+- [src/components/ContextualTutorialCard.tsx](/home/gustavo/projects/FitTrack/src/components/ContextualTutorialCard.tsx)
+- [src/pages/LoginPage.tsx](/home/gustavo/projects/FitTrack/src/pages/LoginPage.tsx)
+- [src/pages/HomePage.tsx](/home/gustavo/projects/FitTrack/src/pages/HomePage.tsx)
+- Tarefas:
+- [x] mapear pontos de maior risco com fonte grande
+- [x] corrigir navegação inferior, cards de lista e cabeçalhos com ações laterais
+- [x] revisar controles com grids fixos e toggles de autenticação
+- [ ] validar visualmente em viewport mobile com texto ampliado
+- [ ] ajustar eventuais regressões de espaçamento e altura útil
+
 ## Prioridade 1
 
 ### [x] 1. Remover a heurística de "mock state"

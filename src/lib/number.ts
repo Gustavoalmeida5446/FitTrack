@@ -31,6 +31,30 @@ export function parseDecimalNumber(value: number | string, fallback = 0): number
   return Number.isFinite(parsedValue) ? parsedValue : fallback;
 }
 
+export function formatNumberWithFixedDecimals(value: number, decimalPlaces: number): string {
+  return Number.isFinite(value) ? value.toFixed(decimalPlaces) : (0).toFixed(decimalPlaces);
+}
+
+export function formatNumberWithFixedDecimalsPtBr(value: number, decimalPlaces: number): string {
+  return formatNumberWithFixedDecimals(value, decimalPlaces).replace('.', ',');
+}
+
+export function parseDigitScaledNumberInput(value: number | string, decimalPlaces: number): number | null {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : null;
+  }
+
+  const digitsOnly = value.replace(/\D/g, '');
+
+  if (!digitsOnly) {
+    return null;
+  }
+
+  const parsedValue = Number(digitsOnly) / 10 ** decimalPlaces;
+
+  return Number.isFinite(parsedValue) ? parsedValue : null;
+}
+
 export function roundToDecimalPlaces(value: number, decimalPlaces = 1): number {
   return Number(value.toFixed(decimalPlaces));
 }

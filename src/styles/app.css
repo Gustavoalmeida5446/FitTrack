@@ -93,6 +93,7 @@ body {
 
 .page-header__actions {
   flex-shrink: 0;
+  max-width: 100%;
 }
 
 .page-header h1 {
@@ -156,6 +157,7 @@ body {
   justify-content: space-between;
   gap: var(--space-3);
   padding-top: 0;
+  align-items: flex-start;
 }
 
 .card-head__group {
@@ -239,6 +241,7 @@ body {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .list-card__content p,
@@ -247,6 +250,7 @@ body {
   margin: 0.2rem 0 0;
   color: var(--color-text-muted);
   font-size: 0.95rem;
+  overflow-wrap: anywhere;
 }
 
 .list-card__chevron {
@@ -431,6 +435,11 @@ body {
   backdrop-filter: blur(12px);
 }
 
+.bottom-tabbar__item,
+.bottom-nav__item {
+  min-width: 0;
+}
+
 .bottom-tabbar__item.cds--btn.cds--btn--ghost,
 .bottom-nav__item.cds--btn.cds--btn--ghost {
   min-height: auto;
@@ -444,6 +453,8 @@ body {
 .bottom-tabbar__item span,
 .bottom-nav__item span {
   font-size: 0.8rem;
+  overflow-wrap: anywhere;
+  text-align: center;
 }
 
 .profile-initial-badge {
@@ -504,11 +515,13 @@ body {
 .workout-meta-pill span {
   color: var(--color-text-muted);
   font-size: 0.82rem;
+  overflow-wrap: anywhere;
 }
 
 .stat-pill strong,
 .workout-meta-pill strong {
   font-size: 0.98rem;
+  overflow-wrap: anywhere;
 }
 
 .stat-pill__icon,
@@ -637,6 +650,7 @@ body {
 .setup-card__footer {
   display: flex;
   justify-content: flex-start;
+  width: 100%;
 }
 
 .info-block,
@@ -666,6 +680,7 @@ body {
   background: rgba(255, 255, 255, 0.04);
   color: var(--color-text);
   cursor: pointer;
+  overflow-wrap: anywhere;
 }
 
 .day-selector__item--active {
@@ -698,11 +713,13 @@ body {
   display: block;
   margin-top: 0.2rem;
   font-size: 0.95rem;
+  overflow-wrap: anywhere;
 }
 
 .selection-toggle-card span:last-child {
   color: var(--color-text-muted);
   font-size: 0.88rem;
+  overflow-wrap: anywhere;
 }
 
 .selection-toggle-card--active {
@@ -721,6 +738,10 @@ body {
   justify-content: space-between;
   align-items: flex-start;
   gap: var(--space-3);
+}
+
+.setup-selection-card__header > :first-child {
+  min-width: 0;
 }
 
 .setup-selection-card__meta {
@@ -804,6 +825,7 @@ body {
   color: var(--color-text-muted);
   cursor: pointer;
   font: inherit;
+  overflow-wrap: anywhere;
 }
 
 .auth-mode-switch__item--active {
@@ -887,7 +909,6 @@ body {
 .tutorial-inline-card__header .cds--btn,
 .tutorial-inline-card__footer .cds--btn {
   flex-shrink: 0;
-  white-space: nowrap;
 }
 
 .tutorial-inline-card__header h3 {
@@ -1176,5 +1197,134 @@ body {
 
   .auth-hero-card {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .app-shell {
+    padding-bottom: 9.5rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .page-header__actions {
+    inline-size: 100%;
+  }
+
+  .page-header__actions .cds--btn {
+    inline-size: 100%;
+    max-inline-size: none;
+  }
+
+  .card-head {
+    flex-direction: column;
+  }
+
+  .card-head > :last-child {
+    align-self: flex-start;
+  }
+
+  .list-card,
+  .list-card--compact {
+    grid-template-columns: 48px minmax(0, 1fr);
+    align-items: flex-start;
+  }
+
+  .list-card__badge,
+  .list-card--compact .list-card__badge {
+    width: 48px;
+    height: 48px;
+  }
+
+  .list-card__chevron {
+    display: none;
+  }
+
+  .water-card__progress {
+    grid-template-columns: 1fr;
+  }
+
+  .water-card__progress span {
+    text-align: left;
+  }
+
+  .actions-grid,
+  .water-card__actions {
+    grid-template-columns: 1fr;
+  }
+
+  .workout-exercise-card__meta,
+  .diet-meal-card__meta,
+  .diet-totals-card__grid,
+  .diet-home-summary-card__grid,
+  .goals-grid,
+  .goals-form-grid,
+  .goals-grid--compact,
+  .setup-card__metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .day-selector {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .checkbox-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .row-actions {
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .row-actions .cds--btn {
+    inline-size: 100%;
+    max-inline-size: none;
+  }
+
+  .selection-toggle-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .setup-card__footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+
+  .setup-card__footer .cds--btn {
+    inline-size: 100%;
+    max-inline-size: none;
+  }
+
+  .auth-mode-switch {
+    grid-template-columns: 1fr;
+    border-radius: 1rem;
+  }
+
+  .tutorial-inline-card__footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tutorial-inline-card__footer .cds--btn {
+    inline-size: 100%;
+    max-inline-size: none;
+  }
+
+  .bottom-tabbar,
+  .bottom-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .bottom-tabbar__item.cds--btn.cds--btn--ghost,
+  .bottom-nav__item.cds--btn.cds--btn--ghost {
+    min-block-size: 4.25rem;
+    padding: 0.5rem;
   }
 }
