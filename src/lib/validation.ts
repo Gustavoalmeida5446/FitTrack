@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { AppState } from './appState';
-import type { FoodItem, WeeklyDiet, Workout, WorkoutExercise, UserProfile, WaterData, WeightLog, Meal } from '../data/types';
+import type { DietDay, FoodItem, WeeklyDiet, Workout, WorkoutExercise, UserProfile, WaterData, WeightLog, Meal } from '../data/types';
 
 const muscleGroupSchema = z.enum(['Peito', 'Costas', 'Pernas', 'Ombros', 'Braços', 'Core']);
 const sexSchema = z.enum(['Masculino', 'Feminino']);
@@ -10,16 +10,23 @@ const dietTypeSchema = z.enum(['Equilibrada', 'Baixo carboidrato', 'Alta em carb
 const mediaTypeSchema = z.enum(['image', 'video', 'gif', 'none']);
 const nonEmptyStringSchema = z.string().trim().min(1);
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+const birthDateSchema = z.union([z.literal(''), dateSchema]);
 
 export const userProfileSchema = z.object({
   currentWeight: z.number().nonnegative(),
   heightCm: z.number().nonnegative(),
-  birthDate: z.string(),
+  birthDate: birthDateSchema,
   age: z.number().int().nonnegative(),
   sex: sexSchema,
   activityLevel: activityLevelSchema,
   goal: goalSchema,
   dietType: dietTypeSchema
+});
+
+const profileReadySchema = userProfileSchema.extend({
+  currentWeight: z.number().positive(),
+  heightCm: z.number().positive(),
+  birthDate: dateSchema
 });
 
 export const workoutExerciseSchema = z.object({
@@ -44,6 +51,14 @@ export const workoutSchema = z.object({
   name: nonEmptyStringSchema,
   muscleGroups: z.array(muscleGroupSchema),
   exercises: z.array(workoutExerciseSchema)
+});
+
+const workoutExerciseForSaveSchema = workoutExerciseSchema.extend({
+  sourceId: nonEmptyStringSchema
+});
+
+const workoutForSaveSchema = workoutSchema.extend({
+  exercises: z.array(workoutExerciseForSaveSchema).min(1)
 });
 
 export const waterDataSchema = z.object({
@@ -127,8 +142,26 @@ export function validateWaterData(water: WaterData, fallback: WaterData): WaterD
 }
 
 export function validateWeeklyDiet(diet: WeeklyDiet, fallback: WeeklyDiet): WeeklyDiet {
-  const parsed = weeklyDietSchema.safeParse(diet);
-  return parsed.success ? parsed.data as WeeklyDiet : fallback;
+  const mealList = filterValidItems(diet.meals, mealSchema) as Meal[];
+  const validMealIds = new Set(mealList.map((meal) => meal.id));
+  const nextDays = fallback.days.map((fallbackDay, index) => {
+    const rawDay = Array.isArray(diet.days) ? diet.days[index] : undefined;
+    const parsedDay = dietDaySchema.safeParse(rawDay);
+    const nextDay: DietDay = parsedDay.success ? parsedDay.data as DietDay : fallbackDay;
+    const mealIds = nextDay.mealIds.filter((mealId) => validMealIds.has(mealId));
+
+    return {
+      ...nextDay,
+      mealIds,
+      completedMealIds: nextDay.completedMealIds.filter((mealId) => mealIds.includes(mealId))
+    };
+  });
+
+  return {
+    id: nonEmptyStringSchema.safeParse(diet.id).success ? String(diet.id).trim() : fallback.id,
+    meals: mealList,
+    days: nextDays
+  };
 }
 
 export function validateWeightHistory(history: unknown): WeightLog[] {
@@ -152,10 +185,31 @@ export function isValidWorkout(workout: Workout): boolean {
   return workoutSchema.safeParse(workout).success;
 }
 
+export function isProfileReady(profile: UserProfile): boolean {
+  return profileReadySchema.safeParse(profile).success;
+}
+
+export function isValidWorkoutExerciseForSave(exercise: WorkoutExercise): boolean {
+  return workoutExerciseForSaveSchema.safeParse(exercise).success;
+}
+
+export function isValidWorkoutForSave(workout: Workout): boolean {
+  return workoutForSaveSchema.safeParse(workout).success;
+}
+
 export function isValidFoodItem(food: FoodItem): boolean {
   return foodItemSchema.safeParse(food).success;
 }
 
 export function isValidMeal(meal: Meal): boolean {
   return mealSchema.safeParse(meal).success;
+}
+
+export function isValidDayMealSelection(mealIds: string[], meals: Meal[]): boolean {
+  if (mealIds.length === 0) {
+    return false;
+  }
+
+  const validMealIds = new Set(meals.map((meal) => meal.id));
+  return mealIds.every((mealId) => validMealIds.has(mealId));
 }

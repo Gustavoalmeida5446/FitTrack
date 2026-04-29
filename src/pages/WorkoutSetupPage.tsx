@@ -9,7 +9,7 @@ import { MuscleGroup, Workout, WorkoutExercise } from '../data/types';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { searchExercises } from '../services/exercises';
 import { PageContainer } from '../components/PageContainer';
-import { isValidWorkout, isValidWorkoutExercise } from '../lib/validation';
+import { isValidWorkoutForSave, isValidWorkoutExerciseForSave } from '../lib/validation';
 
 interface Props {
   onBack: () => void;
@@ -67,21 +67,23 @@ export function WorkoutSetupPage({
   const [reps, setReps] = useState(defaultExerciseValues.reps);
   const [sets, setSets] = useState(defaultExerciseValues.sets);
   const [restSeconds, setRestSeconds] = useState(defaultExerciseValues.restSeconds);
+  const [hasTriedAddExercise, setHasTriedAddExercise] = useState(false);
+  const [hasTriedSaveWorkout, setHasTriedSaveWorkout] = useState(false);
   const debouncedQuery = useDebouncedValue(query, 200);
 
   const canAddExercise = useMemo(() => exerciseName.trim().length > 0 && Boolean(exerciseSourceId), [exerciseName, exerciseSourceId]);
   const derivedWorkoutGroups = useMemo(() => Array.from(new Set(draftExercises.map((exercise) => exercise.muscleGroup))), [draftExercises]);
   const canSaveWorkout = useMemo(() => name.trim().length > 0 && draftExercises.length > 0, [name, draftExercises.length]);
-  const exerciseFormMessage = !exerciseName.trim()
+  const exerciseFormMessage = hasTriedAddExercise && !exerciseName.trim()
     ? 'Busque e selecione um exercício para adicionar.'
-    : !exerciseSourceId
+    : hasTriedAddExercise && !exerciseSourceId
       ? 'Escolha um exercício da lista para evitar salvar dados incompletos.'
-      : reps <= 0 || sets <= 0
+      : hasTriedAddExercise && (reps <= 0 || sets <= 0)
         ? 'Repetições e séries precisam ser maiores que zero.'
         : '';
-  const workoutFormMessage = !name.trim()
+  const workoutFormMessage = hasTriedSaveWorkout && !name.trim()
     ? 'Dê um nome ao treino para salvar.'
-    : draftExercises.length === 0
+    : hasTriedSaveWorkout && draftExercises.length === 0
       ? 'Adicione pelo menos um exercício para salvar o treino.'
       : '';
 
@@ -103,6 +105,7 @@ export function WorkoutSetupPage({
   }, [debouncedQuery]);
 
   const resetExerciseForm = () => {
+    setHasTriedAddExercise(false);
     setEditingExerciseId(null);
     setQuery('');
     setExerciseName(defaultExerciseValues.name);
@@ -121,6 +124,7 @@ export function WorkoutSetupPage({
   };
 
   const resetWorkoutForm = () => {
+    setHasTriedSaveWorkout(false);
     setEditingWorkoutId(null);
     setName('');
     setDraftExercises([]);
@@ -142,6 +146,8 @@ export function WorkoutSetupPage({
   };
 
   const handleAddExercise = () => {
+    setHasTriedAddExercise(true);
+
     if (!canAddExercise) return;
 
     const nextExercise: WorkoutExercise = {
@@ -161,7 +167,7 @@ export function WorkoutSetupPage({
       done: false
     };
 
-    if (!isValidWorkoutExercise(nextExercise)) {
+    if (!isValidWorkoutExerciseForSave(nextExercise)) {
       return;
     }
 
@@ -169,6 +175,7 @@ export function WorkoutSetupPage({
       ? prev.map((exercise) => exercise.id === editingExerciseId ? nextExercise : exercise)
       : [...prev, nextExercise]);
 
+    setHasTriedAddExercise(false);
     resetExerciseForm();
   };
 
@@ -199,6 +206,8 @@ export function WorkoutSetupPage({
   };
 
   const handleSaveWorkout = () => {
+    setHasTriedSaveWorkout(true);
+
     if (!canSaveWorkout) return;
 
     const nextWorkout: Workout = {
@@ -211,11 +220,12 @@ export function WorkoutSetupPage({
       }))
     };
 
-    if (!isValidWorkout(nextWorkout)) {
+    if (!isValidWorkoutForSave(nextWorkout)) {
       return;
     }
 
     onSaveWorkouts(editingWorkoutId ? workouts.map((workout) => workout.id === editingWorkoutId ? nextWorkout : workout) : [...workouts, nextWorkout]);
+    setHasTriedSaveWorkout(false);
     resetWorkoutForm();
   };
 
@@ -322,7 +332,7 @@ export function WorkoutSetupPage({
               </button>
           ) : null}
           <div className="inline-actions">
-            <Button disabled={!canAddExercise} onClick={handleAddExercise}>{editingExerciseId ? 'Atualizar exercício' : 'Adicionar exercício'}</Button>
+            <Button onClick={handleAddExercise}>{editingExerciseId ? 'Atualizar exercício' : 'Adicionar exercício'}</Button>
             {editingExerciseId ? <Button kind="ghost" onClick={resetExerciseForm}>Cancelar edição</Button> : null}
           </div>
           {exerciseFormMessage ? <p className="form-message form-message--error">{exerciseFormMessage}</p> : null}
@@ -355,7 +365,7 @@ export function WorkoutSetupPage({
           </div>
           <div className="setup-card__footer">
             <div className="inline-actions">
-              <Button disabled={!canSaveWorkout} onClick={handleSaveWorkout}>{editingWorkoutId ? 'Atualizar treino' : 'Salvar treino'}</Button>
+              <Button onClick={handleSaveWorkout}>{editingWorkoutId ? 'Atualizar treino' : 'Salvar treino'}</Button>
               {editingWorkoutId ? <Button kind="ghost" onClick={resetWorkoutForm}>Cancelar edição</Button> : null}
             </div>
             {workoutFormMessage ? <p className="form-message form-message--error">{workoutFormMessage}</p> : null}

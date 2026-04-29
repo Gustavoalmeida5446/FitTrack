@@ -197,7 +197,7 @@ export function sanitizeAppStateForSave(state: AppState): AppState {
     weightHistory: validateWeightHistory(state.weightHistory)
   };
 
-  return validateAppState(sanitizedState) ?? defaultAppState;
+  return validateAppState(sanitizedState) ?? sanitizedState;
 }
 
 export function hasSuspiciousWorkoutData(workouts: Workout[]): boolean {

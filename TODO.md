@@ -288,6 +288,68 @@ Status:
 - [x] adicionar mensagens curtas e fáceis de entender
 - [x] manter o visual consistente entre campos válidos e inválidos
 
+### [x] 20. Parar de mostrar erros de formulário antes da interação do usuário
+- Objetivo: exibir erro só depois de tentativa de salvar, blur relevante ou interação real com o campo.
+- Risco atual: médio/alto.
+- Arquivos candidatos:
+- [src/pages/NutritionGoalsPage.tsx](/home/gustavo/projects/FitTrack/src/pages/NutritionGoalsPage.tsx)
+- [src/pages/WorkoutSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/WorkoutSetupPage.tsx)
+- [src/pages/DietSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/DietSetupPage.tsx)
+- [src/components/AppNumberInput.tsx](/home/gustavo/projects/FitTrack/src/components/AppNumberInput.tsx)
+- [src/styles/app.css](/home/gustavo/projects/FitTrack/src/styles/app.css)
+- Tarefas:
+- [x] definir uma regra simples de exibição: touched, blur ou tentativa de save
+- [x] impedir mensagens de erro na tela inicial vazia
+- [x] manter bloqueio de botão quando necessário, mas sem “gritar erro” cedo demais
+- [x] aplicar o mesmo padrão entre perfil, treino e dieta
+
+### [x] 21. Alinhar schemas do `zod` com as regras reais da UI
+- Objetivo: fazer a validação refletir o que o app realmente exige e permitir mensagens coerentes.
+- Risco atual: médio.
+- Arquivos candidatos:
+- [src/lib/validation.ts](/home/gustavo/projects/FitTrack/src/lib/validation.ts)
+- [src/pages/NutritionGoalsPage.tsx](/home/gustavo/projects/FitTrack/src/pages/NutritionGoalsPage.tsx)
+- [src/pages/WorkoutSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/WorkoutSetupPage.tsx)
+- [src/pages/DietSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/DietSetupPage.tsx)
+- [tests/validation.test.ts](/home/gustavo/projects/FitTrack/tests/validation.test.ts)
+- Tarefas:
+- [x] decidir quais campos podem começar vazios sem erro imediato
+- [x] exigir nos schemas o que a UI exige de verdade na hora de salvar
+- [x] revisar perfil: peso, altura e data de nascimento
+- [x] revisar treino: garantir consistência mínima de exercício e treino
+- [x] revisar dieta: garantir consistência mínima de refeição e alimento
+
+### [x] 22. Evitar perda silenciosa de dados ao sanitizar estado inválido
+- Objetivo: nunca zerar blocos inteiros do estado salvo só porque um item veio inválido.
+- Risco atual: alto.
+- Arquivos candidatos:
+- [src/lib/appState.ts](/home/gustavo/projects/FitTrack/src/lib/appState.ts)
+- [src/lib/validation.ts](/home/gustavo/projects/FitTrack/src/lib/validation.ts)
+- [src/services/appStateService.ts](/home/gustavo/projects/FitTrack/src/services/appStateService.ts)
+- [tests/appState.test.ts](/home/gustavo/projects/FitTrack/tests/appState.test.ts)
+- [tests/validation.test.ts](/home/gustavo/projects/FitTrack/tests/validation.test.ts)
+- Tarefas:
+- [x] revisar fallback atual que pode voltar para `defaultAppState`
+- [x] sanitizar listas item a item sempre que possível
+- [x] evitar apagar dieta inteira por causa de uma refeição inválida
+- [x] validar relações da dieta, como `completedMealIds` pertencendo a `mealIds`
+- [x] cobrir esses cenários com testes
+
+### [x] 23. Revisão final de simplicidade e excesso de abstração
+- Objetivo: garantir que a solução final continue fácil de entender e com o mínimo de camadas necessário.
+- Risco atual: médio.
+- Arquivos candidatos:
+- [src/lib/validation.ts](/home/gustavo/projects/FitTrack/src/lib/validation.ts)
+- [src/components/AppNumberInput.tsx](/home/gustavo/projects/FitTrack/src/components/AppNumberInput.tsx)
+- [src/pages/NutritionGoalsPage.tsx](/home/gustavo/projects/FitTrack/src/pages/NutritionGoalsPage.tsx)
+- [src/pages/WorkoutSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/WorkoutSetupPage.tsx)
+- [src/pages/DietSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/DietSetupPage.tsx)
+- Tarefas:
+- [x] remover validação duplicada ou mensagem duplicada
+- [x] simplificar helpers que tenham ficado sofisticados demais
+- [x] confirmar que cada regra importante aparece num lugar fácil de achar
+- [x] fazer uma última passada de leitura como código de estudante caprichoso
+
 ## Ordem sugerida de execução
 
 1. Itens 1, 2 e 3
@@ -300,3 +362,7 @@ Status:
 8. Item 17
 9. Item 18
 10. Item 19
+11. Item 20
+12. Item 21
+13. Item 22
+14. Item 23

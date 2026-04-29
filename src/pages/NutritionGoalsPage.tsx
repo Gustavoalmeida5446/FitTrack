@@ -17,6 +17,7 @@ import {
   normalizeBirthDateForStorage,
   parseBirthDateForDatePicker
 } from '../lib/date';
+import { isProfileReady } from '../lib/validation';
 
 interface Props {
   profile: UserProfile;
@@ -60,15 +61,17 @@ export function NutritionGoalsPage({
   onSignOut
 }: Props) {
   const [newWeight, setNewWeight] = useState(profile.currentWeight);
+  const [hasTouchedProfile, setHasTouchedProfile] = useState(false);
+  const [hasTriedSaveWeight, setHasTriedSaveWeight] = useState(false);
 
   useEffect(() => {
     setNewWeight(profile.currentWeight);
   }, [profile.currentWeight]);
 
-  const profileFormMessage = profile.currentWeight <= 0 || profile.heightCm <= 0 || !profile.birthDate
+  const profileFormMessage = hasTouchedProfile && !isProfileReady(profile)
     ? 'Preencha peso, altura e data de nascimento para liberar as metas.'
     : '';
-  const newWeightMessage = newWeight <= 0
+  const newWeightMessage = hasTriedSaveWeight && newWeight <= 0
     ? 'Informe um peso maior que zero para salvar.'
     : '';
 
@@ -113,8 +116,14 @@ export function NutritionGoalsPage({
             description="Informações-base para as metas"
           />
           <div className="goals-form-grid">
-            <AppNumberInput id="profile-weight" label="Peso (kg)" min={1} value={profile.currentWeight} onValueChange={(currentWeight) => onUpdateProfile({ ...profile, currentWeight })} />
-            <AppNumberInput id="profile-height" label="Altura (cm)" min={1} value={profile.heightCm} onValueChange={(heightCm) => onUpdateProfile({ ...profile, heightCm })} />
+            <AppNumberInput id="profile-weight" label="Peso (kg)" min={1} value={profile.currentWeight} onValueChange={(currentWeight) => {
+              setHasTouchedProfile(true);
+              onUpdateProfile({ ...profile, currentWeight });
+            }} />
+            <AppNumberInput id="profile-height" label="Altura (cm)" min={1} value={profile.heightCm} onValueChange={(heightCm) => {
+              setHasTouchedProfile(true);
+              onUpdateProfile({ ...profile, heightCm });
+            }} />
             <DatePicker
               className="goals-form-grid__date-picker"
               datePickerType="single"
@@ -124,6 +133,7 @@ export function NutritionGoalsPage({
               parseDate={parseBirthDateForDatePicker}
               onChange={(_, dateString) => {
                 const birthDate = normalizeBirthDateForStorage(getSingleDatePickerValue(dateString));
+                setHasTouchedProfile(true);
                 onUpdateProfile({ ...profile, birthDate, age: calculateAgeFromBirthDate(birthDate) });
               }}
               value={formatBirthDateForDatePicker(profile.birthDate)}
@@ -184,7 +194,15 @@ export function NutritionGoalsPage({
           <div className="goals-weight-form">
             <AppNumberInput id="new-weight" label="Registrar peso" min={1} value={newWeight} onValueChange={setNewWeight} />
             <div className="setup-card__footer">
-              <Button size="sm" disabled={newWeight <= 0} onClick={() => onAddWeight(newWeight)}>Salvar peso</Button>
+              <Button size="sm" onClick={() => {
+                setHasTriedSaveWeight(true);
+                if (newWeight <= 0) {
+                  return;
+                }
+
+                onAddWeight(newWeight);
+                setHasTriedSaveWeight(false);
+              }}>Salvar peso</Button>
             </div>
             {newWeightMessage ? <p className="form-message form-message--error">{newWeightMessage}</p> : null}
           </div>

@@ -1,11 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { defaultAppState } from '../src/lib/appState';
+import { defaultAppState, sanitizeAppStateForSave } from '../src/lib/appState';
 import {
+  isProfileReady,
+  isValidDayMealSelection,
   isValidFoodItem,
   isValidMeal,
   isValidWorkout,
   isValidWorkoutExercise,
+  isValidWorkoutExerciseForSave,
+  isValidWorkoutForSave,
   validateAppState
 } from '../src/lib/validation';
 
@@ -74,4 +78,84 @@ test('isValidMeal aceita refeição com alimento válido', () => {
 
 test('validateAppState aceita o estado padrão do app', () => {
   assert.deepEqual(validateAppState(defaultAppState), defaultAppState);
+});
+
+test('isProfileReady só aceita perfil completo para metas', () => {
+  assert.equal(isProfileReady(defaultAppState.profile), false);
+  assert.equal(isProfileReady({
+    ...defaultAppState.profile,
+    currentWeight: 80,
+    heightCm: 180,
+    birthDate: '2000-04-05',
+    age: 26
+  }), true);
+});
+
+test('isValidWorkoutExerciseForSave exige sourceId', () => {
+  assert.equal(isValidWorkoutExerciseForSave({
+    id: 'e-1',
+    source: 'local',
+    name: 'Flexão',
+    ptName: 'Flexão',
+    muscleGroup: 'Peito',
+    mediaType: 'none',
+    mediaUrl: null,
+    loadKg: 0,
+    reps: 12,
+    sets: 4,
+    restSeconds: 60,
+    done: false
+  }), false);
+});
+
+test('isValidWorkoutForSave exige pelo menos um exercício válido', () => {
+  assert.equal(isValidWorkoutForSave({
+    id: 'w-1',
+    name: 'Treino A',
+    muscleGroups: ['Peito'],
+    exercises: []
+  }), false);
+});
+
+test('isValidDayMealSelection exige ids válidos e pelo menos uma refeição', () => {
+  const meals = [{ id: 'm-1', name: 'Cafe', foods: [{ id: 'f-1', name: 'Ovo', calories: 1, protein: 1, carbs: 1, fat: 1, fiber: 1, quantity: 1, unit: 'un', baseQuantity: 1, baseUnit: 'un' }] }];
+
+  assert.equal(isValidDayMealSelection([], meals), false);
+  assert.equal(isValidDayMealSelection(['m-2'], meals), false);
+  assert.equal(isValidDayMealSelection(['m-1'], meals), true);
+});
+
+test('sanitizeAppStateForSave não apaga a dieta inteira por uma refeição inválida', () => {
+  const sanitized = sanitizeAppStateForSave({
+    ...defaultAppState,
+    weeklyDiet: {
+      id: 'diet-1',
+      meals: [
+        {
+          id: 'm-1',
+          name: 'Cafe',
+          foods: [{ id: 'f-1', name: 'Ovo', calories: 100, protein: 10, carbs: 1, fat: 7, fiber: 0, quantity: 2, unit: 'un', baseQuantity: 2, baseUnit: 'un' }]
+        },
+        {
+          id: 'm-2',
+          name: '',
+          foods: []
+        } as never
+      ],
+      days: [
+        {
+          id: 'd-1',
+          label: 'Segunda',
+          mealIds: ['m-1', 'm-2'],
+          completedMealIds: ['m-1', 'm-2']
+        },
+        ...defaultAppState.weeklyDiet.days.slice(1)
+      ]
+    }
+  });
+
+  assert.equal(sanitized.weeklyDiet.meals.length, 1);
+  assert.equal(sanitized.weeklyDiet.meals[0]?.id, 'm-1');
+  assert.deepEqual(sanitized.weeklyDiet.days[0]?.mealIds, ['m-1']);
+  assert.deepEqual(sanitized.weeklyDiet.days[0]?.completedMealIds, ['m-1']);
 });
