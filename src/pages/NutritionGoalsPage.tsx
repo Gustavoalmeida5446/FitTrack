@@ -99,8 +99,8 @@ export function NutritionGoalsPage({
           <div className="auth-status">
             <InfoBlock>{session.user.email ?? 'Nenhum usuário conectado'}</InfoBlock>
             <div className="row-actions">
-              <Button kind="tertiary" onClick={onReplayTutorial}>
-                Ver tutorial
+              <Button kind="ghost" onClick={onReplayTutorial}>
+                Rever tutorial
               </Button>
               <Button kind="ghost" renderIcon={Logout} onClick={() => void onSignOut()}>
                 Sair

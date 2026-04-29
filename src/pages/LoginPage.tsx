@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { CardHeader } from '../components/CardHeader';
 import { PageContainer } from '../components/PageContainer';
 import { getLoginFormErrors, getSignupFormErrors } from '../lib/validation';
+import appLogo from '../../favicon/android-chrome-192x192.png';
 
 interface Props {
   onBack?: () => void;
@@ -105,7 +106,16 @@ export function LoginPage({ onBack, onLogin, onSignUp }: Props) {
   };
 
   return (
-    <PageContainer title="FitTrack" subtitle="Entre ou crie sua conta para acessar seus dados" actions={onBack ? <Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button> : undefined}>
+    <PageContainer
+      title={(
+        <span className="app-title">
+          <img src={appLogo} alt="" className="app-title__logo" />
+          <span>FitTrack</span>
+        </span>
+      )}
+      subtitle="Entre ou crie sua conta para acessar seus dados"
+      actions={onBack ? <Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button> : undefined}
+    >
       <div className="stack">
         <Tile className="card metric-card auth-hero-card">
           <div className="auth-hero-card__badge">
