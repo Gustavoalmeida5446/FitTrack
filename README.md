@@ -49,3 +49,24 @@ Antes de usar a persistência remota, execute o schema em `supabase/schema.sql`.
 
 - O projeto não usa Tailwind na UI atual.
 - O script `deploy` publica em `gh-pages`.
+
+
+## PWA
+
+O app agora possui configuração básica de PWA:
+
+- Manifest (`favicon/site.webmanifest`)
+- Service Worker (`public/sw.js`)
+- Registro do Service Worker (`src/main.tsx`)
+
+### Como testar
+
+```bash
+npm run build
+npm run preview
+```
+
+Depois abra o app no navegador, recarregue uma vez e teste:
+
+- instalação do app (opção "Instalar")
+- funcionamento básico offline (com arquivos já visitados em cache)
