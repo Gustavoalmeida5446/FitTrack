@@ -1,6 +1,7 @@
 import { CalendarHeatMap, CheckmarkFilled, ChevronLeft, Search, TrashCan } from '@carbon/icons-react';
-import { Button, NumberInput, TextInput, Tile } from '@carbon/react';
+import { Button, TextInput, Tile } from '@carbon/react';
 import { useEffect, useMemo, useState } from 'react';
+import { AppNumberInput } from '../components/AppNumberInput';
 import { ContextualTutorialCard, type TutorialStepContent } from '../components/ContextualTutorialCard';
 import { InfoBlock } from '../components/InfoBlock';
 import { SelectionSummaryCard } from '../components/SelectionSummaryCard';
@@ -12,7 +13,7 @@ import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { calculateFoodTotals, calculateMealTotals, calculateMealsTotals } from '../lib/nutrition';
 import { convertFoodQuantityToGrams, getFoodDefaultQuantity, getFoodMeasurementUnit, searchFoods, type FoodItem as TacoFood } from '../services/foods';
 import { PageContainer } from '../components/PageContainer';
-import { formatFixedDecimal, parseDecimalNumber } from '../lib/number';
+import { formatFixedDecimal } from '../lib/number';
 
 interface Props {
   onBack: () => void;
@@ -291,13 +292,13 @@ export function DietSetupPage({
                 </div>
               </div>
               <div className="setup-card__fields">
-                <NumberInput
+                <AppNumberInput
                   id="food-quantity"
                   label={`Quantidade (${selectedFoodUnit})`}
                   min={0.1}
                   step={selectedFoodUnit === 'un' ? 1 : 1}
                   value={foodQuantity}
-                  onChange={(_, state) => setFoodQuantity(parseDecimalNumber(state.value, selectedFoodDefaultQuantity))}
+                  onValueChange={setFoodQuantity}
                 />
               </div>
               <div className="setup-selection-card__meta">

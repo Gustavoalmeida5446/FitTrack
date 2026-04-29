@@ -1,6 +1,7 @@
 import { CheckmarkFilled, ChevronLeft, Search, TrashCan } from '@carbon/icons-react';
-import { Button, NumberInput, TextInput, Tile } from '@carbon/react';
+import { Button, TextInput, Tile } from '@carbon/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { AppNumberInput } from '../components/AppNumberInput';
 import { ContextualTutorialCard, type TutorialStepContent } from '../components/ContextualTutorialCard';
 import { InfoBlock } from '../components/InfoBlock';
 import { SelectionSummaryCard } from '../components/SelectionSummaryCard';
@@ -8,7 +9,6 @@ import { MuscleGroup, Workout, WorkoutExercise } from '../data/types';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { searchExercises } from '../services/exercises';
 import { PageContainer } from '../components/PageContainer';
-import { getSafeNumber } from '../lib/number';
 
 interface Props {
   onBack: () => void;
@@ -278,10 +278,10 @@ export function WorkoutSetupPage({
             </ul>
           ) : null}
           <div className="setup-card__metrics">
-            <NumberInput id="exercise-load" label="Carga (kg)" min={0} value={loadKg} onChange={(_, state) => setLoadKg(getSafeNumber(state.value, defaultExerciseValues.loadKg))} />
-            <NumberInput id="exercise-reps" label="Repetições" min={1} value={reps} onChange={(_, state) => setReps(getSafeNumber(state.value, defaultExerciseValues.reps))} />
-            <NumberInput id="exercise-sets" label="Séries" min={1} value={sets} onChange={(_, state) => setSets(getSafeNumber(state.value, defaultExerciseValues.sets))} />
-            <NumberInput id="exercise-rest" label="Descanso (s)" min={0} value={restSeconds} onChange={(_, state) => setRestSeconds(getSafeNumber(state.value, defaultExerciseValues.restSeconds))} />
+            <AppNumberInput id="exercise-load" label="Carga (kg)" min={0} value={loadKg} onValueChange={setLoadKg} />
+            <AppNumberInput id="exercise-reps" label="Repetições" min={1} value={reps} onValueChange={setReps} />
+            <AppNumberInput id="exercise-sets" label="Séries" min={1} value={sets} onValueChange={setSets} />
+            <AppNumberInput id="exercise-rest" label="Descanso (s)" min={0} value={restSeconds} onValueChange={setRestSeconds} />
           </div>
           {previewImageUrl ? (
             <button

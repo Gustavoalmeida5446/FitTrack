@@ -241,6 +241,53 @@ Status:
 - [x] se não estiver salva, corrigir a persistência
 - [x] manter o mesmo padrão visual dos demais campos preenchidos
 
+## Próximas tarefas
+
+### [x] 17. Corrigir UX estranha dos `NumberInput`
+- Objetivo: fazer os campos numéricos reagirem como inputs normais enquanto o usuário digita, sem ficar presos no `0`.
+- Risco atual: médio.
+- Arquivos candidatos:
+- [src/pages/NutritionGoalsPage.tsx](/home/gustavo/projects/FitTrack/src/pages/NutritionGoalsPage.tsx)
+- [src/pages/WorkoutSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/WorkoutSetupPage.tsx)
+- [src/pages/WorkoutPage.tsx](/home/gustavo/projects/FitTrack/src/pages/WorkoutPage.tsx)
+- [src/pages/DietSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/DietSetupPage.tsx)
+- [src/lib/number.ts](/home/gustavo/projects/FitTrack/src/lib/number.ts)
+- Tarefas:
+- [x] mapear quais campos estão com comportamento ruim durante digitação
+- [x] remover o efeito visual de `0` travado nos inputs
+- [x] definir um padrão simples para valor vazio, foco e blur
+- [x] aplicar o mesmo comportamento aos formulários principais
+
+### 18. Adicionar validação com `zod` nos dados principais
+- Objetivo: validar os dados do app com regras explícitas, sem introduzir `react-hook-form`.
+- Risco atual: médio.
+- Arquivos candidatos:
+- [package.json](/home/gustavo/projects/FitTrack/package.json)
+- [src/lib/appState.ts](/home/gustavo/projects/FitTrack/src/lib/appState.ts)
+- [src/services/appStateService.ts](/home/gustavo/projects/FitTrack/src/services/appStateService.ts)
+- [src/pages/NutritionGoalsPage.tsx](/home/gustavo/projects/FitTrack/src/pages/NutritionGoalsPage.tsx)
+- [src/pages/WorkoutSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/WorkoutSetupPage.tsx)
+- [src/pages/DietSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/DietSetupPage.tsx)
+- Tarefas:
+- [ ] instalar `zod`
+- [ ] criar schemas simples para perfil, treino, refeição e itens persistidos
+- [ ] validar dados antes de salvar no estado remoto
+- [ ] validar entradas principais antes de concluir ações de salvar
+- [ ] cobrir os schemas com testes mínimos
+
+### 19. Revisar mensagens de erro e feedback de formulário
+- Objetivo: deixar claro para o usuário quando um valor é inválido ou incompleto.
+- Risco atual: baixo/médio.
+- Arquivos candidatos:
+- [src/pages/NutritionGoalsPage.tsx](/home/gustavo/projects/FitTrack/src/pages/NutritionGoalsPage.tsx)
+- [src/pages/WorkoutSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/WorkoutSetupPage.tsx)
+- [src/pages/DietSetupPage.tsx](/home/gustavo/projects/FitTrack/src/pages/DietSetupPage.tsx)
+- [src/styles/app.css](/home/gustavo/projects/FitTrack/src/styles/app.css)
+- Tarefas:
+- [ ] definir onde mostrar erro inline e onde bloquear save
+- [ ] adicionar mensagens curtas e fáceis de entender
+- [ ] manter o visual consistente entre campos válidos e inválidos
+
 ## Ordem sugerida de execução
 
 1. Itens 1, 2 e 3
@@ -250,3 +297,6 @@ Status:
 5. Itens 11, 12 e 13
 6. Itens 14 e 15
 7. Item 16
+8. Item 17
+9. Item 18
+10. Item 19

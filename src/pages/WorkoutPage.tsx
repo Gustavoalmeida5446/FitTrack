@@ -1,12 +1,12 @@
 import { CheckmarkFilled, ChevronLeft, Timer } from '@carbon/icons-react';
-import { Button, Checkbox, NumberInput, Tile } from '@carbon/react';
+import { Button, Checkbox, Tile } from '@carbon/react';
 import { useEffect, useState } from 'react';
+import { AppNumberInput } from '../components/AppNumberInput';
 import { CardHeader } from '../components/CardHeader';
 import { PageContainer } from '../components/PageContainer';
 import { StatsGrid } from '../components/StatsGrid';
 import { SummaryStatsCard } from '../components/SummaryStatsCard';
 import { Workout } from '../data/types';
-import { getSafeNumber } from '../lib/number';
 
 interface Props {
   workout: Workout;
@@ -53,7 +53,7 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateLoa
   };
 
   const handleUpdateLoad = (exerciseId: string, value: number | string, fallback: number) => {
-    const nextLoad = getSafeNumber(value, fallback);
+    const nextLoad = typeof value === 'number' ? value : fallback;
 
     setLoadValues((prev) => ({
       ...prev,
@@ -125,12 +125,12 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateLoa
                   { label: <span className="stat-pill__icon"><Timer size={14} /></span>, value: `${exercise.restSeconds}s` }
                 ]}
               />
-              <NumberInput
+              <AppNumberInput
                 id={`load-${exercise.id}`}
                 label="Carga (kg)"
                 min={0}
                 value={currentLoad}
-                onChange={(_, state) => handleUpdateLoad(exercise.id, state.value, exercise.loadKg)}
+                onValueChange={(value) => handleUpdateLoad(exercise.id, value, exercise.loadKg)}
               />
               <div className={`workout-load-status${loadWasUpdated ? ' workout-load-status--saved' : ''}`}>
                 {loadWasUpdated ? `Carga atualizada para ${currentLoad} kg` : `Carga atual: ${currentLoad} kg`}

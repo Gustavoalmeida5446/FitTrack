@@ -4,6 +4,22 @@ export function getSafeNumber(value: number | string, fallback: number): number 
   return Number.isFinite(parsedValue) ? parsedValue : fallback;
 }
 
+export function parseNumberInputValue(value: number | string): number | null {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : null;
+  }
+
+  const normalizedValue = value.trim().replace(',', '.');
+
+  if (!normalizedValue || normalizedValue === '-' || normalizedValue === '.' || normalizedValue.endsWith('.')) {
+    return null;
+  }
+
+  const parsedValue = Number(normalizedValue);
+
+  return Number.isFinite(parsedValue) ? parsedValue : null;
+}
+
 export function parseDecimalNumber(value: number | string, fallback = 0): number {
   if (typeof value === 'number') {
     return Number.isFinite(value) ? value : fallback;

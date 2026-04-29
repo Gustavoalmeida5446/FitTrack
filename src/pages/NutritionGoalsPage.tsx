@@ -1,7 +1,8 @@
 import { ChartLine, CheckmarkFilled, ChevronLeft, Logout, TrashCan, UserAvatar } from '@carbon/icons-react';
-import { Button, DatePicker, DatePickerInput, NumberInput, Select, SelectItem, Tile } from '@carbon/react';
+import { Button, DatePicker, DatePickerInput, Select, SelectItem, Tile } from '@carbon/react';
 import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
+import { AppNumberInput } from '../components/AppNumberInput';
 import { Portuguese } from 'flatpickr/dist/l10n/pt.js';
 import { CardHeader } from '../components/CardHeader';
 import { ContextualTutorialCard, type TutorialStepContent } from '../components/ContextualTutorialCard';
@@ -16,7 +17,6 @@ import {
   normalizeBirthDateForStorage,
   parseBirthDateForDatePicker
 } from '../lib/date';
-import { getSafeNumber } from '../lib/number';
 
 interface Props {
   profile: UserProfile;
@@ -105,8 +105,8 @@ export function NutritionGoalsPage({
             description="Informações-base para as metas"
           />
           <div className="goals-form-grid">
-            <NumberInput id="profile-weight" label="Peso (kg)" min={1} value={profile.currentWeight} onChange={(_, state) => onUpdateProfile({ ...profile, currentWeight: getSafeNumber(state.value, profile.currentWeight) })} />
-            <NumberInput id="profile-height" label="Altura (cm)" min={1} value={profile.heightCm} onChange={(_, state) => onUpdateProfile({ ...profile, heightCm: getSafeNumber(state.value, profile.heightCm) })} />
+            <AppNumberInput id="profile-weight" label="Peso (kg)" min={1} value={profile.currentWeight} onValueChange={(currentWeight) => onUpdateProfile({ ...profile, currentWeight })} />
+            <AppNumberInput id="profile-height" label="Altura (cm)" min={1} value={profile.heightCm} onValueChange={(heightCm) => onUpdateProfile({ ...profile, heightCm })} />
             <DatePicker
               className="goals-form-grid__date-picker"
               datePickerType="single"
@@ -173,7 +173,7 @@ export function NutritionGoalsPage({
             description="Registro e histórico recente"
           />
           <div className="goals-weight-form">
-            <NumberInput id="new-weight" label="Registrar peso" min={1} value={newWeight} onChange={(_, state) => setNewWeight(getSafeNumber(state.value, profile.currentWeight))} />
+            <AppNumberInput id="new-weight" label="Registrar peso" min={1} value={newWeight} onValueChange={setNewWeight} />
             <div className="setup-card__footer">
               <Button size="sm" onClick={() => onAddWeight(newWeight)}>Salvar peso</Button>
             </div>
