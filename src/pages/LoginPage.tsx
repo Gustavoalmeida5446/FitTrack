@@ -1,5 +1,5 @@
 import { ChevronLeft, Login, UserAvatar } from '@carbon/icons-react';
-import { Button, PasswordInput, TextInput, Tile } from '@carbon/react';
+import { Button, Checkbox, PasswordInput, TextInput, Tile } from '@carbon/react';
 import { useEffect, useState } from 'react';
 import { CardHeader } from '../components/CardHeader';
 import { PageContainer } from '../components/PageContainer';
@@ -36,6 +36,7 @@ export function LoginPage({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPasswords, setShowPasswords] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -78,6 +79,7 @@ export function LoginPage({
     }
     setPassword('');
     setConfirmPassword('');
+    setShowPasswords(false);
     resetTouchState();
     resetMessages();
   };
@@ -87,6 +89,7 @@ export function LoginPage({
       setMode('reset-password');
       setPassword('');
       setConfirmPassword('');
+      setShowPasswords(false);
       resetTouchState();
       resetMessages();
       return;
@@ -264,6 +267,9 @@ export function LoginPage({
                   onChange={(event) => setPassword(event.target.value)}
                   onBlur={() => setHasTouchedPassword(true)}
                   helperText={isSignupMode || isResetPasswordMode ? 'Use pelo menos 6 caracteres.' : undefined}
+                  type={showPasswords ? 'text' : 'password'}
+                  hidePasswordLabel="Ocultar senha"
+                  showPasswordLabel="Mostrar senha"
                 />
                 {passwordError ? <p className="auth-message auth-message--error">{passwordError}</p> : null}
                 {isSignupMode || isResetPasswordMode ? (
@@ -274,11 +280,24 @@ export function LoginPage({
                       value={confirmPassword}
                       onChange={(event) => setConfirmPassword(event.target.value)}
                       onBlur={() => setHasTouchedConfirmPassword(true)}
+                      type={showPasswords ? 'text' : 'password'}
+                      hidePasswordLabel="Ocultar senha"
+                      showPasswordLabel="Mostrar senha"
                     />
                     {confirmPasswordError ? <p className="auth-message auth-message--error">{confirmPasswordError}</p> : null}
                   </>
                 ) : null}
               </>
+            ) : null}
+            {!isForgotPasswordMode ? (
+              <div className="auth-form__actions">
+                <Checkbox
+                  id="show-passwords"
+                  labelText="Mostrar senha"
+                  checked={showPasswords}
+                  onChange={(_, { checked }) => setShowPasswords(Boolean(checked))}
+                />
+              </div>
             ) : null}
             {errorMessage ? <p className="auth-message auth-message--error">{errorMessage}</p> : null}
             {successMessage ? <p className="auth-message auth-message--success">{successMessage}</p> : null}
