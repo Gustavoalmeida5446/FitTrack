@@ -11,6 +11,7 @@ import { LoginPage } from './pages/LoginPage';
 import { type TutorialStepContent } from './components/ContextualTutorialCard';
 import { WeeklyDiet, Workout } from './data/types';
 import { useAuthSession } from './hooks/useAuthSession';
+import { useDailyWaterReset } from './hooks/useDailyWaterReset';
 import { useDailyWorkoutReset } from './hooks/useDailyWorkoutReset';
 import { type AppView, useLocalNavigation } from './hooks/useLocalNavigation';
 import { useRemoteAppState } from './hooks/useRemoteAppState';
@@ -137,6 +138,10 @@ export default function App() {
     setWorkoutsUpdatedAt(nextState.workoutsUpdatedAt);
     markRemoteSavePending();
   }, [markRemoteSavePending]);
+  const handleResetWater = useCallback((nextWater: AppState['water']) => {
+    setWater(nextWater);
+    markRemoteSavePending();
+  }, [markRemoteSavePending]);
   const handleNavigateTutorial = useCallback((nextView: AppView) => {
     setView(nextView);
   }, [setView]);
@@ -160,6 +165,12 @@ export default function App() {
     workouts,
     workoutsUpdatedAt,
     onReset: handleResetWorkoutProgress
+  });
+
+  useDailyWaterReset({
+    isReady: Boolean(session) && isRemoteReady,
+    water,
+    onReset: handleResetWater
   });
 
   const updateWorkout = (workoutId: string, updater: (workout: Workout) => Workout) => {

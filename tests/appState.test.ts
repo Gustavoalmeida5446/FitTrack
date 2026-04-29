@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   defaultAppState,
+  normalizeWaterData,
   normalizeWorkoutProgressState,
   normalizeWorkoutProgressForToday,
   sanitizeAppStateForSave,
@@ -78,6 +79,18 @@ test('normalizeWorkoutProgressForToday reseta exercícios concluídos quando o d
 
   assert.notEqual(state.workoutsUpdatedAt, '2000-01-01');
   assert.equal(state.workouts[0]?.exercises[0]?.done, false);
+});
+
+test('normalizeWaterData reseta consumo de água quando o dia mudou', () => {
+  const water = normalizeWaterData({
+    goalMl: 3000,
+    consumedMl: 1800,
+    updatedAt: '2000-01-01'
+  });
+
+  assert.equal(water.goalMl, 3000);
+  assert.equal(water.consumedMl, 0);
+  assert.notEqual(water.updatedAt, '2000-01-01');
 });
 
 test('sanitizeAppStateForSave normaliza payload e remove weightHistory inválido', () => {

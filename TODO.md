@@ -350,6 +350,61 @@ Status:
 - [x] confirmar que cada regra importante aparece num lugar fácil de achar
 - [x] fazer uma última passada de leitura como código de estudante caprichoso
 
+### [ ] 24. Priorizar validação do login com `zod`
+- Objetivo: aplicar o mesmo padrão de validação do resto do app na autenticação.
+- Prioridade: alta.
+- Risco atual: médio.
+- Arquivos candidatos:
+- [src/pages/LoginPage.tsx](/home/gustavo/projects/FitTrack/src/pages/LoginPage.tsx)
+- [src/lib/validation.ts](/home/gustavo/projects/FitTrack/src/lib/validation.ts)
+- [tests/validation.test.ts](/home/gustavo/projects/FitTrack/tests/validation.test.ts)
+- Tarefas:
+- [ ] criar schema simples para login e cadastro
+- [ ] validar e-mail com formato real e senha com regra mínima clara
+- [ ] mostrar erros só depois de interação ou tentativa de envio
+- [ ] evitar regra duplicada espalhada dentro do componente
+- [ ] cobrir os casos principais com teste
+
+### [ ] 25. Endurecer validação do histórico de peso
+- Objetivo: evitar salvar ou aceitar registros com data malformada.
+- Prioridade: média.
+- Risco atual: baixo.
+- Arquivos candidatos:
+- [src/lib/validation.ts](/home/gustavo/projects/FitTrack/src/lib/validation.ts)
+- [src/lib/appUpdates.ts](/home/gustavo/projects/FitTrack/src/lib/appUpdates.ts)
+- [tests/validation.test.ts](/home/gustavo/projects/FitTrack/tests/validation.test.ts)
+- Tarefas:
+- [ ] alinhar `weightLogSchema` com o formato de data realmente usado
+- [ ] revisar se o formato salvo é o melhor para exibição e consistência
+- [ ] adicionar teste de aceitação e rejeição
+
+### [ ] 26. Revisão final de performance e build
+- Objetivo: decidir se o aviso de bundle grande precisa de ação ou só registro.
+- Prioridade: baixa.
+- Risco atual: baixo.
+- Arquivos candidatos:
+- [package.json](/home/gustavo/projects/FitTrack/package.json)
+- [src/App.tsx](/home/gustavo/projects/FitTrack/src/App.tsx)
+- Tarefas:
+- [ ] medir se vale separar telas com `lazy` ou manter como está
+- [ ] evitar otimização desnecessária se não houver ganho real para a entrega
+- [ ] registrar a decisão final no projeto
+
+### [x] 27. Resetar água na virada do dia
+- Objetivo: zerar o consumo de água quando o app voltar em um novo dia.
+- Prioridade: alta.
+- Risco atual: médio.
+- Arquivos candidatos:
+- [src/App.tsx](/home/gustavo/projects/FitTrack/src/App.tsx)
+- [src/hooks/useDailyWaterReset.ts](/home/gustavo/projects/FitTrack/src/hooks/useDailyWaterReset.ts)
+- [src/lib/appState.ts](/home/gustavo/projects/FitTrack/src/lib/appState.ts)
+- [tests/appState.test.ts](/home/gustavo/projects/FitTrack/tests/appState.test.ts)
+- Tarefas:
+- [x] confirmar a causa do não reset
+- [x] aplicar reset diário da água com a mesma lógica simples usada em treinos
+- [x] garantir que o novo valor também seja marcado para sincronização remota
+- [x] cobrir a normalização com teste
+
 ## Ordem sugerida de execução
 
 1. Itens 1, 2 e 3
@@ -366,3 +421,7 @@ Status:
 12. Item 21
 13. Item 22
 14. Item 23
+15. Item 24
+16. Item 25
+17. Item 26
+18. Item 27
