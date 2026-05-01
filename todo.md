@@ -1,6 +1,6 @@
 # FitTrack - plano tecnico de correcao
 
-Branch atual para o proximo PR: `realtime-sync-review-fixes`
+Branch atual para o proximo PR: `feature/exercise-search-relevance`
 
 Observacao: o PR anterior do branch `technical-fix-plan` ja foi mergeado. Todo novo ajuste deve sair de um PR novo para evitar confusao com o historico anterior.
 
@@ -301,6 +301,38 @@ Critério de aceite:
 
 - Buscar "abducao de quadril" retorna o exercicio esperado.
 - Busca existente continua funcionando.
+
+## Fase 7.1 - Relevancia na busca de exercicios
+
+- [x] Criar branch `feature/exercise-search-relevance`.
+- [x] Planejar ranking tokenizado/fuzzy proprio, sem dependencia nova.
+- [x] Buscar por nome em portugues, nome original em ingles, aliases/sinonimos, grupo muscular e equipamento.
+- [x] Preparar suporte a `aliases` em `src/data/exercise-name-pt.json`.
+- [x] Adicionar aliases iniciais para triceps overhead extension, extensao triceps halter, triceps frances, agachamento halter e dumbbell squat.
+- [x] Mostrar mensagem de nenhum exercicio encontrado quando nenhum item passa no corte de relevancia.
+- [x] Adicionar testes unitarios do score de busca.
+
+Status:
+
+- Busca movida para ranking ponderado em `src/lib/exerciseSearch.ts`.
+- `src/services/exercises.ts` monta campos de busca com pesos por nome PT, nome EN, aliases, musculos, grupo muscular, equipamento e categoria.
+- A interface continua exibindo o nome em portugues quando existir.
+- Termos longos como "Seated One-Arm Dumbbell Overhead Triceps Extension" precisam casar multiplos termos relevantes antes de aparecer.
+- Exercicios sem relacao ficam abaixo do threshold e nao sao exibidos.
+
+Traducao da base:
+
+- Total de exercicios em `exercises.json`: `873`.
+- Exercicios com `ptName` em `src/data/exercise-name-pt.json`: `296`.
+- Exercicios faltando traducao: `577`.
+- Faltam `12` lotes de `50` traducoes, ou `6` lotes de `100`.
+
+Critério de aceite:
+
+- Buscar por termos em portugues e ingles retorna os exercicios relacionados primeiro.
+- Buscar "triceps overhead extension" ou "extensao triceps halter" nao mostra abdominal ou agachamento.
+- Buscar "agachamento halter" ou "dumbbell squat" retorna agachamentos com halteres.
+- Termo sem resultado relevante mostra mensagem de nenhum exercicio encontrado.
 
 ## Fase 8 - Recuperacao de senha
 

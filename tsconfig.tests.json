@@ -17,9 +17,11 @@
     "src/lib/appRouter.ts",
     "src/lib/authRedirect.ts",
     "src/lib/date.ts",
+    "src/lib/exerciseSearch.ts",
     "src/lib/legacyState.ts",
     "src/lib/nutrition.ts",
     "src/lib/relationalAppState.ts",
+    "src/lib/search.ts",
     "tests/**/*.ts"
   ]
 }

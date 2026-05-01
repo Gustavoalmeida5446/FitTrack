@@ -1,6 +1,7 @@
 import exercisesDataUrl from '../../exercises.json?url';
 import exerciseNamePtData from '../data/exercise-name-pt.json';
 import type { ExerciseMediaType, MuscleGroup } from '../data/types';
+import { getExerciseSearchScore, type ExerciseSearchField } from '../lib/exerciseSearch';
 import { normalizeSearchValue } from '../lib/search';
 
 interface ExerciseRecord {
@@ -15,6 +16,7 @@ interface ExerciseRecord {
 
 interface ExerciseTranslationRecord {
   ptName?: string;
+  aliases?: string[];
 }
 
 export interface ExerciseOption {
@@ -35,7 +37,7 @@ export interface ExerciseOption {
 interface IndexedExerciseRecord {
   exercise: ExerciseRecord;
   displayName: string;
-  normalizedSearchTexts: string[];
+  searchFields: ExerciseSearchField[];
 }
 
 interface RankedExerciseResult {
@@ -81,35 +83,14 @@ const muscleGroupMap: Record<string, MuscleGroup> = {
 
 let indexedExercisesPromise: Promise<IndexedExerciseRecord[]> | null = null;
 
-function getSearchScore(normalizedName: string, normalizedQuery: string, queryTerms: string[]): number {
-  if (!normalizedQuery) return -1;
-  if (normalizedName === normalizedQuery) return 8;
-  if (normalizedName.startsWith(normalizedQuery)) return 7;
-  if (normalizedName.includes(` ${normalizedQuery}`) || normalizedName.includes(`${normalizedQuery} `)) return 6;
-  if (normalizedName.includes(normalizedQuery)) return 5;
-
-  if (queryTerms.length === 0) return -1;
-
-  const matchedTerms = queryTerms.filter((term) => normalizedName.includes(term)).length;
-  if (matchedTerms === queryTerms.length) return 4;
-  if (matchedTerms > 0) return 1;
-
-  return -1;
-}
-
 function getExerciseDisplayName(exercise: ExerciseRecord): string {
   return exerciseNamePt[exercise.id]?.ptName?.trim() || exercise.name;
 }
 
-function getExerciseSearchTexts(exercise: ExerciseRecord): string[] {
+function getExerciseAliases(exercise: ExerciseRecord): string[] {
   return [
-    getExerciseDisplayName(exercise),
-    exercise.name,
-    exercise.equipment ?? '',
-    exercise.category ?? '',
-    ...(exercise.primaryMuscles ?? []),
-    ...(exercise.secondaryMuscles ?? []),
-    ...(exerciseAliases[exercise.id] ?? [])
+    ...(exerciseAliases[exercise.id] ?? []),
+    ...(exerciseNamePt[exercise.id]?.aliases ?? [])
   ].filter(Boolean);
 }
 
@@ -148,6 +129,20 @@ function mapExerciseOption(exercise: ExerciseRecord): ExerciseOption {
   };
 }
 
+function getExerciseSearchFields(exercise: ExerciseRecord): ExerciseSearchField[] {
+  const muscles = [...(exercise.primaryMuscles ?? []), ...(exercise.secondaryMuscles ?? [])];
+
+  return [
+    { value: getExerciseDisplayName(exercise), weight: 5 },
+    { value: exercise.name, weight: 4 },
+    ...getExerciseAliases(exercise).map((alias) => ({ value: alias, weight: 4 })),
+    ...muscles.map((muscle) => ({ value: muscle, weight: 3 })),
+    { value: inferMuscleGroup(exercise), weight: 3 },
+    { value: exercise.equipment ?? '', weight: 3 },
+    { value: exercise.category ?? '', weight: 1 }
+  ].filter((field) => field.value.trim().length > 0);
+}
+
 async function loadIndexedExercises(): Promise<IndexedExerciseRecord[]> {
   if (!indexedExercisesPromise) {
     indexedExercisesPromise = fetch(exercisesDataUrl)
@@ -161,7 +156,7 @@ async function loadIndexedExercises(): Promise<IndexedExerciseRecord[]> {
       .then((exercises) => exercises.map((exercise) => ({
         exercise,
         displayName: getExerciseDisplayName(exercise),
-        normalizedSearchTexts: getExerciseSearchTexts(exercise).map((text) => normalizeSearchValue(text))
+        searchFields: getExerciseSearchFields(exercise)
       })))
       .catch((error) => {
         indexedExercisesPromise = null;
@@ -194,7 +189,6 @@ function insertRankedExerciseResult(results: RankedExerciseResult[], nextResult:
 
 export async function searchExercises(query: string, limit?: number): Promise<ExerciseOption[]> {
   const normalizedQuery = normalizeSearchValue(query);
-  const queryTerms = normalizedQuery.split(/\s+/).filter(Boolean);
 
   if (!normalizedQuery) {
     return [];
@@ -202,7 +196,7 @@ export async function searchExercises(query: string, limit?: number): Promise<Ex
 
   const indexedExercises = await loadIndexedExercises();
   const rankedResults = indexedExercises.reduce<RankedExerciseResult[]>((results, item) => {
-    const score = Math.max(...item.normalizedSearchTexts.map((text) => getSearchScore(text, normalizedQuery, queryTerms)));
+    const score = getExerciseSearchScore(query, { fields: item.searchFields });
 
     if (score < 0) {
       return results;
