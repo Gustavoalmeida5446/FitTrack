@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fittrack-v4';
+const CACHE_NAME = 'fittrack-v5';
 const APP_SHELL = [
   './index.html',
   './manifest.webmanifest',
@@ -42,11 +42,12 @@ self.addEventListener('fetch', (event) => {
           if (response.ok) {
             const copy = response.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put('./index.html', copy));
+            return response;
           }
 
-          return response;
+          return caches.match('./index.html').then((cached) => cached ?? fetch('./index.html'));
         })
-        .catch(() => caches.match('./index.html'))
+        .catch(() => caches.match('./index.html').then((cached) => cached ?? fetch('./index.html')))
     );
     return;
   }

@@ -330,6 +330,7 @@ Critério de aceite:
 - [x] Evitar recriar o canal Realtime a cada refresh remoto.
 - [x] Validar comportamento de eventos DELETE com filtro por `user_id`.
 - [x] Garantir que o SQL de publicacao Realtime seja seguro/idempotente no ambiente alvo.
+- [x] Corrigir fallback do service worker para rotas diretas do app, como `/perfil`.
 
 Status:
 
@@ -338,7 +339,9 @@ Status:
 - Eventos de INSERT/UPDATE/DELETE disparam recarregamento remoto com debounce.
 - Enquanto ha save local pendente, eventos realtime agora ficam marcados para refresh posterior em vez de serem perdidos.
 - O canal Realtime nao depende mais de `hasPendingRemoteSave`, evitando recriacao a cada mudanca de save.
+- O canal Realtime tambem passou a depender do `userId`, evitando reconexao quando o objeto de sessao muda para o mesmo usuario.
 - SQL idempotente criado em `supabase/realtime-publication.sql` para criar/usar a publicacao `supabase_realtime`, configurar `REPLICA IDENTITY FULL` e adicionar as tabelas relacionais.
+- Service worker atualizado para devolver `index.html` quando uma rota SPA direta retorna 404, evitando erro de navegacao em `/perfil`.
 - Realtime nao substitui save: ele apenas atualiza a tela quando outra sessao/dispositivo altera dados ja persistidos.
 - Revisao pre-PR encontrou riscos no Realtime inicial e eles foram corrigidos no branch novo.
 - Branch novo criado para o proximo PR: `realtime-sync-review-fixes`.
@@ -365,6 +368,7 @@ Achados principais:
 - `src/hooks/useRemoteAppState.ts`: eventos Realtime recebidos durante save local agora disparam refresh depois que o save termina.
 - `src/hooks/useRemoteAppState.ts`: refresh Realtime nao derruba mais `isRemoteReady`, mantendo o canal estavel.
 - `supabase/realtime-publication.sql`: publicacao agora e criada se faltar e as tabelas usam `REPLICA IDENTITY FULL` para DELETE.
+- `public/sw.js`: rotas diretas do app agora usam fallback para `index.html` quando o GitHub Pages retorna 404.
 - `src/hooks/useLocalNavigation.ts`: hook antigo removido.
 - `src/pages/DietSetupPage.tsx`: `canAddSelectedFood` removido por nao ser usado.
 - Autosaves de treino/dieta funcionam, mas estao mais dificeis de entender do que o ideal para manter o codigo simples.

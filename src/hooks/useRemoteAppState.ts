@@ -39,6 +39,7 @@ export function useRemoteAppState({
   onHydrate,
   onReset
 }: UseRemoteAppStateParams): UseRemoteAppStateResult {
+  const userId = session?.user.id ?? '';
   const [isRemoteReady, setIsRemoteReady] = useState(false);
   const [hasPendingRemoteSave, setHasPendingRemoteSave] = useState(false);
   const [remoteSaveRetryTick, setRemoteSaveRetryTick] = useState(0);
@@ -50,7 +51,7 @@ export function useRemoteAppState({
   useEffect(() => {
     missedRealtimeRefreshRef.current = false;
     setIsRemoteReady(false);
-  }, [session]);
+  }, [userId]);
 
   useEffect(() => {
     hasPendingRemoteSaveRef.current = hasPendingRemoteSave;
@@ -89,15 +90,14 @@ export function useRemoteAppState({
     return () => {
       isActive = false;
     };
-  }, [onHydrate, onReset, realtimeRefreshTick, session]);
+  }, [onHydrate, onReset, realtimeRefreshTick, userId]);
 
   useEffect(() => {
-    if (!session || !isRemoteReady) {
+    if (!userId || !isRemoteReady) {
       return undefined;
     }
 
     let refreshTimeoutId: number | null = null;
-    const userId = session.user.id;
     const channel = supabase.channel(`app-state:${userId}`);
     const scheduleRefresh = () => {
       if (hasPendingRemoteSaveRef.current) {
@@ -140,16 +140,16 @@ export function useRemoteAppState({
 
       void supabase.removeChannel(channel);
     };
-  }, [isRemoteReady, session]);
+  }, [isRemoteReady, userId]);
 
   useEffect(() => {
-    if (!session || !isRemoteReady || hasPendingRemoteSave || !missedRealtimeRefreshRef.current) {
+    if (!userId || !isRemoteReady || hasPendingRemoteSave || !missedRealtimeRefreshRef.current) {
       return;
     }
 
     missedRealtimeRefreshRef.current = false;
     setRealtimeRefreshTick((currentTick) => currentTick + 1);
-  }, [hasPendingRemoteSave, isRemoteReady, session]);
+  }, [hasPendingRemoteSave, isRemoteReady, userId]);
 
   useEffect(() => {
     if (!session || !isRemoteReady || !hasPendingRemoteSave) {
