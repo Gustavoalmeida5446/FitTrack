@@ -203,9 +203,9 @@ Critério de aceite:
 
 - [x] Criar camada nova de persistencia relacional, separada de `appStateService.ts`.
 - [x] Salvar diretamente no banco toda alteracao importante do app: perfil, agua, dieta, refeicoes, alimentos, peso, treinos, exercicios e series.
-- [ ] Estado local deve servir apenas para UI temporaria, nao como fonte unica de verdade.
-- [ ] Remover dependencia de botao manual como unica forma de persistir dados.
-- [ ] Exibir estados de salvamento, sucesso e erro.
+- [x] Estado local deve servir apenas para UI temporaria, nao como fonte unica de verdade.
+- [x] Remover dependencia de botao manual como unica forma de persistir dados.
+- [x] Exibir estados de salvamento, sucesso e erro.
 - [x] Evitar salvar snapshots antigos do app inteiro quando a alteracao e pequena.
 
 Status:
@@ -220,7 +220,12 @@ Status:
 - Reset diario de progresso de treino tambem grava nas tabelas relacionais.
 - Corrigido erro `409` ao salvar series relacionais: o app agora usa o mesmo ID deterministico da migracao e faz upsert por `exercise_id,position`.
 - O fluxo antigo de save continua ativo como fallback enquanto as outras areas ainda nao migraram.
-- Falta mostrar erro relacional na UI; hoje erro relacional fica no console e o aviso visivel ainda vem do save antigo.
+- Erros de save relacional agora aparecem na UI.
+- A UI tambem mostra estado de "Salvando alterações..." e confirmacao curta de "Alterações salvas.".
+- Cadastro de treino agora faz autosave com debounce quando o treino ja esta valido: nome preenchido e pelo menos um exercicio adicionado.
+- Cadastro de dieta agora faz autosave com debounce quando a refeicao ja esta valida: nome preenchido e pelo menos um alimento adicionado.
+- Selecionar/remover refeicoes de um dia da dieta agora persiste imediatamente; o botao de salvar dia deixa de ser a unica forma de gravar.
+- Estados locais restantes sao formularios incompletos/temporarios de UI, como busca, alimento selecionado ou exercicio ainda nao adicionado.
 
 Critério de aceite:
 
@@ -254,10 +259,21 @@ Critério de aceite:
 
 ## Fase 6 - Series com peso e repeticoes independentes
 
-- [ ] Usar `workout_exercise_sets` para peso/repeticoes por serie.
-- [ ] Converter campos antigos `sets`, `loadKg` e `reps` em series iniciais.
-- [ ] Manter fallback para treinos ainda vindos do JSON legado.
-- [ ] Atualizar UI de cadastro e execucao de treino para editar cada serie.
+- [x] Usar `workout_exercise_sets` para peso/repeticoes por serie.
+- [x] Converter campos antigos `sets`, `loadKg` e `reps` em series iniciais.
+- [x] Manter fallback para treinos ainda vindos do JSON legado.
+- [x] Atualizar UI de cadastro e execucao de treino para editar cada serie.
+
+Status:
+
+- Modelo em memoria ganhou `setsDetail` em `WorkoutExercise`, preservando `sets`, `loadKg` e `reps` como resumo/fallback legado.
+- Helper `src/lib/workoutSets.ts` centraliza criacao, normalizacao e resumo das series.
+- Leitura relacional agora reconstrói `setsDetail` a partir de `app_workout_exercise_sets`.
+- Escrita relacional de treino agora grava cada serie com `loadKg`, `reps` e `done` independentes.
+- Treinos vindos do JSON legado continuam abrindo: se nao houver `setsDetail`, o app expande `sets/loadKg/reps` em series iniciais.
+- Cadastro de treino permite ajustar carga e repeticoes por serie antes de salvar.
+- Tela de execucao permite editar carga, repeticoes e status de cada serie.
+- Teste adicionado para garantir round-trip relacional com series independentes.
 
 Critério de aceite:
 
@@ -288,14 +304,14 @@ Critério de aceite:
 - [x] Revisar URL de redirect do Supabase Auth.
 - [x] Garantir que `type=recovery` seja detectado corretamente.
 - [x] Garantir que limpar hash/query nao quebre o deploy.
-- [ ] Testar solicitar reset, abrir link, trocar senha, cancelar e link expirado.
+- [x] Testar solicitar reset, abrir link, trocar senha, cancelar e link expirado.
 
 Status:
 
 - Reset de senha agora usa redirect com `type=recovery` explicito.
 - Limpeza de URL preserva o path atual, incluindo base `/FitTrack/`.
 - Helpers puros cobertos em `tests/authRedirect.test.ts`.
-- Teste manual real com Supabase ainda pendente.
+- Teste manual real com Supabase validado pelo usuario em 2026-05-01.
 
 Critério de aceite:
 

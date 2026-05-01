@@ -6,42 +6,38 @@ import { CardHeader } from '../components/CardHeader';
 import { PageContainer } from '../components/PageContainer';
 import { StatsGrid } from '../components/StatsGrid';
 import { SummaryStatsCard } from '../components/SummaryStatsCard';
-import { Workout } from '../data/types';
+import { Workout, WorkoutExerciseSet } from '../data/types';
+import { normalizeWorkoutExerciseSets } from '../lib/workoutSets';
 
 interface Props {
   workout: Workout;
   onBack: () => void;
   onToggleExerciseDone: (exerciseId: string) => void;
-  onUpdateLoad: (exerciseId: string, loadKg: number) => void;
+  onUpdateSet: (exerciseId: string, setId: string, patch: Partial<Pick<WorkoutExerciseSet, 'loadKg' | 'reps' | 'done'>>) => void;
 }
 
-export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateLoad }: Props) {
+export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateSet }: Props) {
   const completedExercises = workout.exercises.filter((exercise) => exercise.done).length;
   const [activeImageIndexes, setActiveImageIndexes] = useState<Record<string, number>>({});
-  const [loadValues, setLoadValues] = useState<Record<string, number>>({});
-  const [recentlyUpdatedLoads, setRecentlyUpdatedLoads] = useState<Record<string, boolean>>({});
+  const [recentlyUpdatedSets, setRecentlyUpdatedSets] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     setActiveImageIndexes({});
   }, [workout.id]);
 
   useEffect(() => {
-    setLoadValues(Object.fromEntries(workout.exercises.map((exercise) => [exercise.id, exercise.loadKg])));
-  }, [workout.exercises]);
+    const updatedSetIds = Object.keys(recentlyUpdatedSets).filter((setId) => recentlyUpdatedSets[setId]);
 
-  useEffect(() => {
-    const updatedExerciseIds = Object.keys(recentlyUpdatedLoads).filter((exerciseId) => recentlyUpdatedLoads[exerciseId]);
-
-    if (updatedExerciseIds.length === 0) {
+    if (updatedSetIds.length === 0) {
       return undefined;
     }
 
     const timeoutId = window.setTimeout(() => {
-      setRecentlyUpdatedLoads({});
+      setRecentlyUpdatedSets({});
     }, 1800);
 
     return () => window.clearTimeout(timeoutId);
-  }, [recentlyUpdatedLoads]);
+  }, [recentlyUpdatedSets]);
 
   const handleToggleExerciseImage = (exerciseId: string, imageCount: number) => {
     if (imageCount < 2) return;
@@ -52,22 +48,15 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateLoa
     }));
   };
 
-  const handleUpdateLoad = (exerciseId: string, value: number | string, fallback: number) => {
-    const nextLoad = typeof value === 'number' ? value : fallback;
-
-    setLoadValues((prev) => ({
+  const handleUpdateSet = (
+    exerciseId: string,
+    setId: string,
+    patch: Partial<Pick<WorkoutExerciseSet, 'loadKg' | 'reps' | 'done'>>
+  ) => {
+    onUpdateSet(exerciseId, setId, patch);
+    setRecentlyUpdatedSets((prev) => ({
       ...prev,
-      [exerciseId]: nextLoad
-    }));
-
-    if (nextLoad === fallback) {
-      return;
-    }
-
-    onUpdateLoad(exerciseId, nextLoad);
-    setRecentlyUpdatedLoads((prev) => ({
-      ...prev,
-      [exerciseId]: true
+      [setId]: true
     }));
   };
 
@@ -93,8 +82,7 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateLoa
             : exercise.mediaUrl ? [exercise.mediaUrl] : [];
           const activeImageIndex = mediaUrls.length > 1 ? activeImageIndexes[exercise.id] ?? 0 : 0;
           const activeImageUrl = mediaUrls[activeImageIndex] ?? null;
-          const currentLoad = loadValues[exercise.id] ?? exercise.loadKg;
-          const loadWasUpdated = recentlyUpdatedLoads[exercise.id] ?? false;
+          const exerciseSets = normalizeWorkoutExerciseSets(exercise);
 
           return (
             <Tile key={exercise.id} className={`card metric-card workout-exercise-card ${exercise.done ? 'workout-exercise-card--done' : ''}`}>
@@ -125,15 +113,47 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateLoa
                   { label: <span className="stat-pill__icon"><Timer size={14} /></span>, value: `${exercise.restSeconds}s` }
                 ]}
               />
-              <AppNumberInput
-                id={`load-${exercise.id}`}
-                label="Carga (kg)"
-                min={0}
-                value={currentLoad}
-                onValueChange={(value) => handleUpdateLoad(exercise.id, value, exercise.loadKg)}
-              />
-              <div className={`workout-load-status${loadWasUpdated ? ' workout-load-status--saved' : ''}`}>
-                {loadWasUpdated ? `Carga atualizada para ${currentLoad} kg` : `Carga atual: ${currentLoad} kg`}
+              <div className="workout-set-list">
+                {exerciseSets.map((set, setIndex) => {
+                  const setWasUpdated = recentlyUpdatedSets[set.id] ?? false;
+
+                  return (
+                    <div key={set.id} className={`workout-set-row ${set.done ? 'workout-set-row--done' : ''}`}>
+                      <div className="workout-set-row__info">
+                        <span className="workout-set-row__label">Série {setIndex + 1}</span>
+                        <span className={`workout-load-status${setWasUpdated ? ' workout-load-status--saved' : ''}`}>
+                          {setWasUpdated ? 'Série atualizada' : `${set.loadKg} kg x ${set.reps}`}
+                        </span>
+                      </div>
+                      <div className="workout-set-row__field">
+                        <AppNumberInput
+                          id={`load-${exercise.id}-${set.id}`}
+                          label="Carga (kg)"
+                          min={0}
+                          value={set.loadKg}
+                          onValueChange={(value) => handleUpdateSet(exercise.id, set.id, { loadKg: typeof value === 'number' ? value : set.loadKg })}
+                        />
+                      </div>
+                      <div className="workout-set-row__field">
+                        <AppNumberInput
+                          id={`reps-${exercise.id}-${set.id}`}
+                          label="Repetições"
+                          min={1}
+                          value={set.reps}
+                          onValueChange={(value) => handleUpdateSet(exercise.id, set.id, { reps: typeof value === 'number' ? value : set.reps })}
+                        />
+                      </div>
+                      <div className="workout-set-row__done">
+                        <Checkbox
+                          id={`done-${exercise.id}-${set.id}`}
+                          labelText="Feita"
+                          checked={set.done}
+                          onChange={() => handleUpdateSet(exercise.id, set.id, { done: !set.done })}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
               <div className="workout-exercise-card__footer">
                 <span className="meta-label">

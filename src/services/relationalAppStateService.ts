@@ -6,6 +6,7 @@ import {
   convertRelationalRecordsToAppState
 } from '../lib/relationalAppState';
 import { supabase } from '../lib/supabaseClient';
+import { normalizeWorkoutExerciseSets, summarizeWorkoutExerciseSets } from '../lib/workoutSets';
 
 function stableId(...parts: Array<string | number>) {
   return parts.map((part) => encodeURIComponent(String(part))).join(':');
@@ -339,6 +340,8 @@ export async function replaceRelationalWorkouts(session: Session, workouts: Work
       const mediaUrls = Array.isArray(exercise.mediaUrls)
         ? exercise.mediaUrls.filter(Boolean)
         : exercise.mediaUrl ? [exercise.mediaUrl] : [];
+      const setsDetail = normalizeWorkoutExerciseSets(exercise);
+      const setSummary = summarizeWorkoutExerciseSets(setsDetail);
 
       return {
         id: stableId(userId, 'workout', workout.id, 'exercise', exercise.id),
@@ -353,11 +356,11 @@ export async function replaceRelationalWorkouts(session: Session, workouts: Work
         media_type: exercise.mediaType,
         media_url: exercise.mediaUrl,
         media_urls: mediaUrls,
-        load_kg: exercise.loadKg,
-        reps: exercise.reps,
-        sets: exercise.sets,
+        load_kg: setSummary.loadKg,
+        reps: setSummary.reps,
+        sets: setSummary.sets,
         rest_seconds: exercise.restSeconds,
-        done: exercise.done,
+        done: setSummary.done,
         position: exerciseIndex,
         deleted_at: null,
         updated_at: new Date().toISOString()
@@ -369,17 +372,15 @@ export async function replaceRelationalWorkouts(session: Session, workouts: Work
 
     return workout.exercises.flatMap((exercise) => {
       const exerciseId = stableId(userId, 'workout', workout.id, 'exercise', exercise.id);
-      const setCount = Math.max(0, Math.floor(exercise.sets));
-
-      return Array.from({ length: setCount }, (_, setIndex) => ({
+      return normalizeWorkoutExerciseSets(exercise).map((set, setIndex) => ({
         id: stableId(userId, 'workout', workoutId, 'exercise', exerciseId, 'set', setIndex + 1),
         user_id: userId,
         workout_id: workoutId,
         exercise_id: exerciseId,
         position: setIndex,
-        load_kg: exercise.loadKg,
-        reps: exercise.reps,
-        done: exercise.done,
+        load_kg: set.loadKg,
+        reps: set.reps,
+        done: set.done,
         updated_at: new Date().toISOString()
       }));
     });

@@ -1,6 +1,6 @@
 import { Calendar, CalendarHeatMap, Home, UserAvatar } from '@carbon/icons-react';
 import { Button, Theme } from '@carbon/react';
-import { Suspense, lazy, useCallback, useMemo, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import { type TutorialStepContent } from './components/ContextualTutorialCard';
 import { WeeklyDiet, Workout } from './data/types';
 import { useAuthSession } from './hooks/useAuthSession';
@@ -18,7 +18,7 @@ import {
   getCurrentWeightFromHistory,
   toggleCompletedMealForDay,
   toggleWorkoutExerciseDone,
-  updateWorkoutExerciseLoad
+  updateWorkoutExerciseSet
 } from './lib/appUpdates';
 import { getTodayDateString } from './lib/date';
 import { calculateNutritionTargets } from './lib/nutrition';
@@ -111,6 +111,9 @@ export default function App() {
   const [water, setWater] = useState(normalizeWaterData(defaultAppState.water));
   const [weeklyDiet, setWeeklyDiet] = useState(defaultAppState.weeklyDiet);
   const [weightHistory, setWeightHistory] = useState(defaultAppState.weightHistory);
+  const [pendingRelationalSaves, setPendingRelationalSaves] = useState(0);
+  const [hasRelationalSaveError, setHasRelationalSaveError] = useState(false);
+  const [recentRelationalSaveSuccess, setRecentRelationalSaveSuccess] = useState(false);
 
   const appState = useMemo<AppState>(() => ({
     profile,
@@ -149,6 +152,7 @@ export default function App() {
   }, []);
   const {
     isRemoteReady,
+    hasPendingRemoteSave,
     remoteSyncError,
     markRemoteSavePending
   } = useRemoteAppState({
@@ -157,11 +161,53 @@ export default function App() {
     onHydrate: handleHydrateRemoteState,
     onReset: handleResetLocalState
   });
+  const trackRelationalSave = useCallback((savePromise: Promise<boolean>) => {
+    setPendingRelationalSaves((count) => count + 1);
+    setHasRelationalSaveError(false);
+    setRecentRelationalSaveSuccess(false);
+
+    void savePromise.then((didSave) => {
+      if (!didSave) {
+        setHasRelationalSaveError(true);
+        return;
+      }
+
+      setRecentRelationalSaveSuccess(true);
+    }).catch(() => {
+      setHasRelationalSaveError(true);
+    }).finally(() => {
+      setPendingRelationalSaves((count) => Math.max(0, count - 1));
+    });
+  }, []);
+  useEffect(() => {
+    if (!recentRelationalSaveSuccess) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setRecentRelationalSaveSuccess(false);
+    }, 2200);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [recentRelationalSaveSuccess]);
   const remoteSyncMessage = remoteSyncError === 'load'
     ? 'Não foi possível carregar seus dados salvos agora. O app segue aberto, mas pode estar usando dados locais.'
     : remoteSyncError === 'save'
       ? 'Não foi possível sincronizar suas alterações agora. Vamos tentar salvar novamente automaticamente.'
-      : '';
+      : hasRelationalSaveError
+        ? 'Não foi possível salvar uma alteração no banco relacional. O app ainda tentará sincronizar pelo fallback, mas confira sua conexão.'
+        : pendingRelationalSaves > 0 || hasPendingRemoteSave
+          ? 'Salvando alterações...'
+          : recentRelationalSaveSuccess
+            ? 'Alterações salvas.'
+            : '';
+  const remoteSyncStatusKind = remoteSyncError || hasRelationalSaveError
+    ? 'error'
+    : pendingRelationalSaves > 0 || hasPendingRemoteSave
+      ? 'pending'
+      : recentRelationalSaveSuccess
+        ? 'success'
+        : null;
   const shouldShowWorkoutSetup = view === 'workout-setup' || (view === 'workout' && isRemoteReady && !selectedWorkout);
   const shouldShowDietSetup = view === 'diet-setup' || (view === 'diet-day' && isRemoteReady && !selectedDay);
   const handleResetWorkoutProgress = useCallback((nextState: { workouts: Workout[]; workoutsUpdatedAt: string }) => {
@@ -169,23 +215,23 @@ export default function App() {
     setWorkoutsUpdatedAt(nextState.workoutsUpdatedAt);
     markRemoteSavePending();
     if (session) {
-      void replaceRelationalWorkouts(session, nextState.workouts);
+      trackRelationalSave(replaceRelationalWorkouts(session, nextState.workouts));
     }
-  }, [markRemoteSavePending, session]);
+  }, [markRemoteSavePending, session, trackRelationalSave]);
   const handleResetWater = useCallback((nextWater: AppState['water']) => {
     setWater(nextWater);
     markRemoteSavePending();
     if (session) {
-      void saveRelationalWater(session, nextWater);
+      trackRelationalSave(saveRelationalWater(session, nextWater));
     }
-  }, [markRemoteSavePending, session]);
+  }, [markRemoteSavePending, session, trackRelationalSave]);
   const handleResetDietProgress = useCallback((nextDiet: WeeklyDiet) => {
     setWeeklyDiet(nextDiet);
     markRemoteSavePending();
     if (session) {
-      void replaceRelationalDiet(session, nextDiet);
+      trackRelationalSave(replaceRelationalDiet(session, nextDiet));
     }
-  }, [markRemoteSavePending, session]);
+  }, [markRemoteSavePending, session, trackRelationalSave]);
   const handleNavigateTutorial = useCallback((nextView: AppView) => {
     setView(nextView);
   }, [setView]);
@@ -230,7 +276,7 @@ export default function App() {
       const nextWorkouts = prev.map((workout) => (workout.id === workoutId ? updater(workout) : workout));
 
       if (session) {
-        void replaceRelationalWorkouts(session, nextWorkouts);
+        trackRelationalSave(replaceRelationalWorkouts(session, nextWorkouts));
       }
 
       return nextWorkouts;
@@ -246,7 +292,7 @@ export default function App() {
       };
 
       if (session) {
-        void replaceRelationalDiet(session, nextDiet);
+        trackRelationalSave(replaceRelationalDiet(session, nextDiet));
       }
 
       return nextDiet;
@@ -257,7 +303,7 @@ export default function App() {
     markRemoteSavePending();
     setProfile(nextProfile);
     if (session) {
-      void saveRelationalProfile(session, nextProfile);
+      trackRelationalSave(saveRelationalProfile(session, nextProfile));
     }
   };
 
@@ -266,7 +312,7 @@ export default function App() {
     setWorkoutsUpdatedAt(getTodayDateString());
     setWorkouts(nextWorkouts);
     if (session) {
-      void replaceRelationalWorkouts(session, nextWorkouts);
+      trackRelationalSave(replaceRelationalWorkouts(session, nextWorkouts));
     }
   };
 
@@ -281,8 +327,8 @@ export default function App() {
     setWeightHistory(nextHistory);
     setProfile(nextProfile);
     if (session) {
-      void saveRelationalProfile(session, nextProfile);
-      void replaceRelationalWeightHistory(session, nextHistory);
+      trackRelationalSave(saveRelationalProfile(session, nextProfile));
+      trackRelationalSave(replaceRelationalWeightHistory(session, nextHistory));
     }
   };
 
@@ -302,9 +348,9 @@ export default function App() {
     }
     if (session) {
       if (index === 0) {
-        void saveRelationalProfile(session, nextProfile);
+        trackRelationalSave(saveRelationalProfile(session, nextProfile));
       }
-      void replaceRelationalWeightHistory(session, nextHistory);
+      trackRelationalSave(replaceRelationalWeightHistory(session, nextHistory));
     }
   };
 
@@ -314,7 +360,7 @@ export default function App() {
     markRemoteSavePending();
     setWater(nextWater);
     if (session) {
-      void saveRelationalWater(session, nextWater);
+      trackRelationalSave(saveRelationalWater(session, nextWater));
     }
   };
 
@@ -324,7 +370,7 @@ export default function App() {
     markRemoteSavePending();
     setWeeklyDiet(normalizedDiet);
     if (session) {
-      void replaceRelationalDiet(session, normalizedDiet);
+      trackRelationalSave(replaceRelationalDiet(session, normalizedDiet));
     }
   };
 
@@ -407,7 +453,7 @@ export default function App() {
     <Theme theme="g100">
       <div className="app-shell">
         {remoteSyncMessage ? (
-          <div className="sync-status sync-status--error" role="status" aria-live="polite">
+          <div className={`sync-status ${remoteSyncStatusKind ? `sync-status--${remoteSyncStatusKind}` : ''}`} role="status" aria-live="polite">
             {remoteSyncMessage}
           </div>
         ) : null}
@@ -436,7 +482,7 @@ export default function App() {
               workout={selectedWorkout}
               onBack={openHome}
               onToggleExerciseDone={(exerciseId) => updateWorkout(selectedWorkout.id, (workout) => toggleWorkoutExerciseDone(workout, exerciseId))}
-              onUpdateLoad={(exerciseId, loadKg) => updateWorkout(selectedWorkout.id, (workout) => updateWorkoutExerciseLoad(workout, exerciseId, loadKg))}
+              onUpdateSet={(exerciseId, setId, patch) => updateWorkout(selectedWorkout.id, (workout) => updateWorkoutExerciseSet(workout, exerciseId, setId, patch))}
             />
           ) : null}
 

@@ -57,6 +57,13 @@ const profileReadySchema = userProfileSchema.extend({
   birthDate: dateSchema
 });
 
+const workoutExerciseSetSchema = z.object({
+  id: nonEmptyStringSchema,
+  loadKg: z.number().nonnegative(),
+  reps: z.number().positive(),
+  done: z.boolean()
+});
+
 export const workoutExerciseSchema = z.object({
   id: nonEmptyStringSchema,
   source: z.literal('local'),
@@ -70,6 +77,7 @@ export const workoutExerciseSchema = z.object({
   loadKg: z.number().nonnegative(),
   reps: z.number().positive(),
   sets: z.number().positive(),
+  setsDetail: z.array(workoutExerciseSetSchema).min(1).optional(),
   restSeconds: z.number().nonnegative(),
   done: z.boolean()
 });

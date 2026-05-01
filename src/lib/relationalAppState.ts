@@ -7,6 +7,7 @@ import type {
   Sex
 } from '../data/types';
 import type { AppState } from './appState';
+import { normalizeWorkoutExerciseSets, summarizeWorkoutExerciseSets } from './workoutSets';
 
 export interface RelationalProfileRecord {
   id: string;
@@ -249,15 +250,16 @@ export function convertAppStateToRelationalRecords(userId: string, state: AppSta
         position: exerciseIndex
       });
 
-      workoutExerciseSets.push(...createWorkoutExerciseSetRecords(
+      workoutExerciseSets.push(...normalizeWorkoutExerciseSets(exercise).map((set, setIndex) => ({
+        id: stableId(userId, 'workout', workoutId, 'exercise', exerciseId, 'set', setIndex + 1),
         userId,
         workoutId,
         exerciseId,
-        exercise.sets,
-        exercise.loadKg,
-        exercise.reps,
-        exercise.done
-      ));
+        position: setIndex,
+        loadKg: set.loadKg,
+        reps: set.reps,
+        done: set.done
+      })));
     });
   });
 
@@ -354,22 +356,43 @@ export function convertRelationalRecordsToAppState(records: RelationalAppStateRe
       exercises: records.workoutExercises
         .filter((exercise) => exercise.workoutId === workout.id)
         .sort((a, b) => a.position - b.position)
-        .map((exercise) => ({
-          id: exercise.legacyId,
-          source: 'local' as const,
-          sourceId: exercise.sourceId,
-          name: exercise.name,
-          ptName: exercise.ptName,
-          muscleGroup: exercise.muscleGroup,
-          mediaType: exercise.mediaType,
-          mediaUrl: exercise.mediaUrl,
-          mediaUrls: exercise.mediaUrls,
-          loadKg: exercise.loadKg,
-          reps: exercise.reps,
-          sets: exercise.sets,
-          restSeconds: exercise.restSeconds,
-          done: exercise.done
-        }))
+        .map((exercise) => {
+          const setsDetail = records.workoutExerciseSets
+            .filter((set) => set.exerciseId === exercise.id)
+            .sort((a, b) => a.position - b.position)
+            .map((set, setIndex) => ({
+              id: `${exercise.legacyId}-set-${setIndex + 1}`,
+              loadKg: set.loadKg,
+              reps: set.reps,
+              done: set.done
+            }));
+          const setSummary = setsDetail.length > 0
+            ? summarizeWorkoutExerciseSets(setsDetail)
+            : {
+              loadKg: exercise.loadKg,
+              reps: exercise.reps,
+              sets: exercise.sets,
+              done: exercise.done
+            };
+
+          return {
+            id: exercise.legacyId,
+            source: 'local' as const,
+            sourceId: exercise.sourceId,
+            name: exercise.name,
+            ptName: exercise.ptName,
+            muscleGroup: exercise.muscleGroup,
+            mediaType: exercise.mediaType,
+            mediaUrl: exercise.mediaUrl,
+            mediaUrls: exercise.mediaUrls,
+            loadKg: setSummary.loadKg,
+            reps: setSummary.reps,
+            sets: setSummary.sets,
+            setsDetail: setsDetail.length > 0 ? setsDetail : undefined,
+            restSeconds: exercise.restSeconds,
+            done: setSummary.done
+          };
+        })
     }));
   const meals = [...records.dietMeals]
     .sort((a, b) => a.position - b.position)

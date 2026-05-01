@@ -45,6 +45,11 @@ function createLegacyState(): AppState {
             loadKg: 35,
             reps: 12,
             sets: 3,
+            setsDetail: [
+              { id: 'e-1-set-1', loadKg: 35, reps: 12, done: true },
+              { id: 'e-1-set-2', loadKg: 35, reps: 12, done: true },
+              { id: 'e-1-set-3', loadKg: 35, reps: 12, done: true }
+            ],
             restSeconds: 60,
             done: true
           }
@@ -139,4 +144,27 @@ test('convertRelationalRecordsToAppState reconstrói o estado usado pela UI', ()
   assert.deepEqual(restoredState.workouts, legacyState.workouts);
   assert.deepEqual(restoredState.weeklyDiet, legacyState.weeklyDiet);
   assert.equal(restoredState.workoutsUpdatedAt, '2026-05-01');
+});
+
+test('convertRelationalRecordsToAppState preserva carga e repeticoes independentes por serie', () => {
+  const legacyState = createLegacyState();
+  legacyState.workouts[0].exercises[0].setsDetail = [
+    { id: 'e-1-set-1', loadKg: 35, reps: 12, done: true },
+    { id: 'e-1-set-2', loadKg: 40, reps: 10, done: false },
+    { id: 'e-1-set-3', loadKg: 45, reps: 8, done: false }
+  ];
+
+  const records = convertAppStateToRelationalRecords('u-1', legacyState);
+  const restoredState = convertRelationalRecordsToAppState(records, '2026-05-01');
+  const restoredExercise = restoredState.workouts[0]?.exercises[0];
+
+  assert.deepEqual(restoredExercise?.setsDetail, [
+    { id: 'e-1-set-1', loadKg: 35, reps: 12, done: true },
+    { id: 'e-1-set-2', loadKg: 40, reps: 10, done: false },
+    { id: 'e-1-set-3', loadKg: 45, reps: 8, done: false }
+  ]);
+  assert.equal(restoredExercise?.loadKg, 35);
+  assert.equal(restoredExercise?.reps, 12);
+  assert.equal(restoredExercise?.sets, 3);
+  assert.equal(restoredExercise?.done, false);
 });

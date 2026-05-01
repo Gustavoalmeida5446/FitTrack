@@ -1,5 +1,6 @@
-import { DietDay, WaterData, WeightLog, Workout } from '../data/types';
+import { DietDay, WaterData, WeightLog, Workout, WorkoutExerciseSet } from '../data/types';
 import { formatDatePtBr } from './date';
+import { normalizeWorkoutExerciseSets, summarizeWorkoutExerciseSets } from './workoutSets';
 
 export function createWeightHistoryEntry(weight: number, date = new Date()): WeightLog {
   return {
@@ -23,14 +24,65 @@ export function addWaterAmount(water: WaterData, amount: number, updatedAt: stri
 export function toggleWorkoutExerciseDone(workout: Workout, exerciseId: string): Workout {
   return {
     ...workout,
-    exercises: workout.exercises.map((exercise) => exercise.id === exerciseId ? { ...exercise, done: !exercise.done } : exercise)
+    exercises: workout.exercises.map((exercise) => {
+      if (exercise.id !== exerciseId) {
+        return exercise;
+      }
+
+      const nextDone = !exercise.done;
+      const setsDetail = normalizeWorkoutExerciseSets(exercise).map((set) => ({ ...set, done: nextDone }));
+
+      return {
+        ...exercise,
+        ...summarizeWorkoutExerciseSets(setsDetail),
+        setsDetail
+      };
+    })
   };
 }
 
 export function updateWorkoutExerciseLoad(workout: Workout, exerciseId: string, loadKg: number): Workout {
   return {
     ...workout,
-    exercises: workout.exercises.map((exercise) => exercise.id === exerciseId ? { ...exercise, loadKg } : exercise)
+    exercises: workout.exercises.map((exercise) => {
+      if (exercise.id !== exerciseId) {
+        return exercise;
+      }
+
+      const setsDetail = normalizeWorkoutExerciseSets(exercise).map((set) => ({ ...set, loadKg }));
+
+      return {
+        ...exercise,
+        ...summarizeWorkoutExerciseSets(setsDetail),
+        setsDetail
+      };
+    })
+  };
+}
+
+export function updateWorkoutExerciseSet(
+  workout: Workout,
+  exerciseId: string,
+  setId: string,
+  patch: Partial<Pick<WorkoutExerciseSet, 'loadKg' | 'reps' | 'done'>>
+): Workout {
+  return {
+    ...workout,
+    exercises: workout.exercises.map((exercise) => {
+      if (exercise.id !== exerciseId) {
+        return exercise;
+      }
+
+      const setsDetail = normalizeWorkoutExerciseSets(exercise).map((set) => (
+        set.id === setId ? { ...set, ...patch } : set
+      ));
+
+      return {
+        ...exercise,
+        ...summarizeWorkoutExerciseSets(setsDetail),
+        setsDetail
+      };
+    })
   };
 }
 

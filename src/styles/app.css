@@ -53,15 +53,27 @@ body {
   margin: 0 auto var(--space-3);
   padding: 0.85rem 1rem;
   border-radius: var(--radius-md);
-  border: 1px solid #6f1d1b;
-  background: rgba(111, 29, 27, 0.22);
-  color: #ffd7d5;
   font-size: 0.92rem;
   line-height: 1.45;
 }
 
 .sync-status--error {
+  border: 1px solid #6f1d1b;
+  background: rgba(111, 29, 27, 0.22);
+  color: #ffd7d5;
   box-shadow: inset 0 0 0 1px rgba(255, 215, 213, 0.04);
+}
+
+.sync-status--pending {
+  border: 1px solid rgba(120, 169, 255, 0.45);
+  background: rgba(69, 137, 255, 0.15);
+  color: #d0e2ff;
+}
+
+.sync-status--success {
+  border: 1px solid rgba(111, 220, 140, 0.45);
+  background: rgba(36, 161, 72, 0.15);
+  color: #defbe6;
 }
 
 #root,
@@ -553,6 +565,89 @@ body {
 .workout-load-status--saved {
   color: #6fdc8c;
   font-weight: 600;
+}
+
+.workout-set-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.workout-set-list--setup {
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.workout-set-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-areas:
+    "info info"
+    "load reps"
+    "done done";
+  gap: var(--space-3);
+  padding: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.workout-set-row--done {
+  border-color: rgba(111, 220, 140, 0.45);
+  background: rgba(36, 161, 72, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(111, 220, 140, 0.08);
+}
+
+.workout-set-row__info {
+  grid-area: info;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.workout-set-row__label {
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.workout-set-row__field,
+.workout-set-row__done {
+  min-width: 0;
+}
+
+.workout-set-row__field:nth-of-type(2) {
+  grid-area: load;
+}
+
+.workout-set-row__field:nth-of-type(3) {
+  grid-area: reps;
+}
+
+.workout-set-row__field .cds--form-item,
+.workout-set-row__field .cds--number,
+.workout-set-row__field .cds--number__input-wrapper {
+  width: 100%;
+  min-width: 0;
+}
+
+.workout-set-row__done {
+  grid-area: done;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.workout-set-row__done .cds--checkbox-wrapper {
+  margin-block-end: 0;
+}
+
+.workout-set-row__info .workout-load-status {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
 }
 
 .diet-summary-card__row strong {
@@ -1145,6 +1240,15 @@ body {
   .workout-exercise-card__footer {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .workout-set-row {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "info"
+      "load"
+      "reps"
+      "done";
   }
 
   .diet-food-list__item {

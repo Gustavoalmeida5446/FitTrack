@@ -30,6 +30,7 @@ import {
   validateWeightHistory,
   validateWorkouts
 } from './validation';
+import { normalizeWorkoutExerciseSets } from './workoutSets';
 
 export interface AppState {
   profile: UserProfile;
@@ -114,6 +115,7 @@ function resetWorkoutProgress(workouts: Workout[]): Workout[] {
     ...workout,
     exercises: workout.exercises.map((exercise) => ({
       ...exercise,
+      setsDetail: normalizeWorkoutExerciseSets(exercise).map((set) => ({ ...set, done: false })),
       done: false
     }))
   }));
