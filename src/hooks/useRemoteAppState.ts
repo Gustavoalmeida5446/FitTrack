@@ -97,8 +97,9 @@ export function useRemoteAppState({
       return undefined;
     }
 
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let subscribeTimeoutId: number | null = null;
     let refreshTimeoutId: number | null = null;
-    const channel = supabase.channel(`app-state:${userId}`);
     const scheduleRefresh = () => {
       if (hasPendingRemoteSaveRef.current) {
         missedRealtimeRefreshRef.current = true;
@@ -114,31 +115,42 @@ export function useRemoteAppState({
       }, 500);
     };
 
-    relationalRealtimeTables.forEach((table) => {
-      channel.on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table,
-          filter: `user_id=eq.${userId}`
-        },
-        scheduleRefresh
-      );
-    });
+    // Avoid opening a socket for transient mounts, like React StrictMode's dev check.
+    subscribeTimeoutId = window.setTimeout(() => {
+      channel = supabase.channel(`app-state:${userId}`);
 
-    void channel.subscribe((status) => {
-      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-        console.error('Realtime de estado do app indisponível:', status);
-      }
-    });
+      relationalRealtimeTables.forEach((table) => {
+        channel?.on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table,
+            filter: `user_id=eq.${userId}`
+          },
+          scheduleRefresh
+        );
+      });
+
+      void channel.subscribe((status) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.error('Realtime de estado do app indisponível:', status);
+        }
+      });
+    }, 250);
 
     return () => {
+      if (subscribeTimeoutId) {
+        window.clearTimeout(subscribeTimeoutId);
+      }
+
       if (refreshTimeoutId) {
         window.clearTimeout(refreshTimeoutId);
       }
 
-      void supabase.removeChannel(channel);
+      if (channel) {
+        void supabase.removeChannel(channel);
+      }
     };
   }, [isRemoteReady, userId]);
 
