@@ -214,6 +214,7 @@ Status:
 - `loadRemoteAppState` agora tenta ler tabelas relacionais e cai para `user_app_states` se nao houver dados relacionais.
 - Escrita ainda continua no fluxo antigo; isso evita mudar tudo de uma vez.
 - Escrita relacional direta adicionada para perfil, agua e historico de peso.
+- Escrita relacional direta adicionada para treinos, exercicios e series.
 - O fluxo antigo de save continua ativo como fallback enquanto as outras areas ainda nao migraram.
 
 Critério de aceite:

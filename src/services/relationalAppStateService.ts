@@ -1,5 +1,6 @@
 import type { Session } from '@supabase/supabase-js';
 import type { AppState } from '../lib/appState';
+import type { Workout } from '../data/types';
 import {
   RelationalAppStateRecords,
   convertRelationalRecordsToAppState
@@ -267,6 +268,102 @@ export async function replaceRelationalWeightHistory(session: Session, weightHis
   if (error) {
     console.error('Erro ao salvar histórico de peso relacional', error);
     return false;
+  }
+
+  return true;
+}
+
+export async function replaceRelationalWorkouts(session: Session, workouts: Workout[]) {
+  const userId = session.user.id;
+  const workoutRows = workouts.map((workout, workoutIndex) => ({
+    id: stableId(userId, 'workout', workout.id),
+    user_id: userId,
+    legacy_id: workout.id,
+    name: workout.name,
+    position: workoutIndex,
+    muscle_groups: workout.muscleGroups,
+    updated_at: new Date().toISOString()
+  }));
+  const exerciseRows = workouts.flatMap((workout) => {
+    const workoutId = stableId(userId, 'workout', workout.id);
+
+    return workout.exercises.map((exercise, exerciseIndex) => {
+      const mediaUrls = Array.isArray(exercise.mediaUrls)
+        ? exercise.mediaUrls.filter(Boolean)
+        : exercise.mediaUrl ? [exercise.mediaUrl] : [];
+
+      return {
+        id: stableId(userId, 'workout', workout.id, 'exercise', exercise.id),
+        user_id: userId,
+        workout_id: workoutId,
+        legacy_id: exercise.id,
+        source: 'local',
+        source_id: exercise.sourceId,
+        name: exercise.name,
+        pt_name: exercise.ptName,
+        muscle_group: exercise.muscleGroup,
+        media_type: exercise.mediaType,
+        media_url: exercise.mediaUrl,
+        media_urls: mediaUrls,
+        load_kg: exercise.loadKg,
+        reps: exercise.reps,
+        sets: exercise.sets,
+        rest_seconds: exercise.restSeconds,
+        done: exercise.done,
+        position: exerciseIndex,
+        updated_at: new Date().toISOString()
+      };
+    });
+  });
+  const setRows = workouts.flatMap((workout) => {
+    const workoutId = stableId(userId, 'workout', workout.id);
+
+    return workout.exercises.flatMap((exercise) => {
+      const exerciseId = stableId(userId, 'workout', workout.id, 'exercise', exercise.id);
+      const setCount = Math.max(0, Math.floor(exercise.sets));
+
+      return Array.from({ length: setCount }, (_, setIndex) => ({
+        id: stableId(userId, 'workout', workout.id, 'exercise', exercise.id, 'set', setIndex + 1),
+        user_id: userId,
+        workout_id: workoutId,
+        exercise_id: exerciseId,
+        position: setIndex,
+        load_kg: exercise.loadKg,
+        reps: exercise.reps,
+        done: exercise.done,
+        updated_at: new Date().toISOString()
+      }));
+    });
+  });
+
+  const workoutDelete = await supabase.from('app_workouts').delete().eq('user_id', userId);
+  if (workoutDelete.error) {
+    console.error('Erro ao limpar treinos relacionais', workoutDelete.error);
+    return false;
+  }
+
+  if (workoutRows.length > 0) {
+    const { error } = await supabase.from('app_workouts').insert(workoutRows);
+    if (error) {
+      console.error('Erro ao salvar treinos relacionais', error);
+      return false;
+    }
+  }
+
+  if (exerciseRows.length > 0) {
+    const { error } = await supabase.from('app_workout_exercises').insert(exerciseRows);
+    if (error) {
+      console.error('Erro ao salvar exercícios relacionais', error);
+      return false;
+    }
+  }
+
+  if (setRows.length > 0) {
+    const { error } = await supabase.from('app_workout_exercise_sets').insert(setRows);
+    if (error) {
+      console.error('Erro ao salvar séries relacionais', error);
+      return false;
+    }
   }
 
   return true;

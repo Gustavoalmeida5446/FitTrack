@@ -31,6 +31,7 @@ import {
 } from './services/authService';
 import {
   replaceRelationalWeightHistory,
+  replaceRelationalWorkouts,
   saveRelationalProfile,
   saveRelationalWater
 } from './services/relationalAppStateService';
@@ -218,7 +219,15 @@ export default function App() {
   const updateWorkout = (workoutId: string, updater: (workout: Workout) => Workout) => {
     markRemoteSavePending();
     setWorkoutsUpdatedAt(getTodayDateString());
-    setWorkouts((prev) => prev.map((workout) => (workout.id === workoutId ? updater(workout) : workout)));
+    setWorkouts((prev) => {
+      const nextWorkouts = prev.map((workout) => (workout.id === workoutId ? updater(workout) : workout));
+
+      if (session) {
+        void replaceRelationalWorkouts(session, nextWorkouts);
+      }
+
+      return nextWorkouts;
+    });
   };
 
   const updateDiet = (updater: (diet: WeeklyDiet) => WeeklyDiet) => {
@@ -241,6 +250,9 @@ export default function App() {
     markRemoteSavePending();
     setWorkoutsUpdatedAt(getTodayDateString());
     setWorkouts(nextWorkouts);
+    if (session) {
+      void replaceRelationalWorkouts(session, nextWorkouts);
+    }
   };
 
   const handleAddWeight = (weight: number) => {
