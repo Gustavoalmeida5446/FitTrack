@@ -331,6 +331,7 @@ Critério de aceite:
 - [x] Validar comportamento de eventos DELETE com filtro por `user_id`.
 - [x] Garantir que o SQL de publicacao Realtime seja seguro/idempotente no ambiente alvo.
 - [x] Corrigir fallback do service worker para rotas diretas do app, como `/perfil`.
+- [x] Evitar abrir WebSocket Realtime quando o efeito desmonta rapido, como no `React.StrictMode`.
 
 Status:
 
@@ -340,6 +341,7 @@ Status:
 - Enquanto ha save local pendente, eventos realtime agora ficam marcados para refresh posterior em vez de serem perdidos.
 - O canal Realtime nao depende mais de `hasPendingRemoteSave`, evitando recriacao a cada mudanca de save.
 - O canal Realtime tambem passou a depender do `userId`, evitando reconexao quando o objeto de sessao muda para o mesmo usuario.
+- A inscricao Realtime agora espera um curto intervalo antes de abrir o WebSocket; se o efeito desmontar antes disso, a inscricao e cancelada sem iniciar conexao.
 - SQL idempotente criado em `supabase/realtime-publication.sql` para criar/usar a publicacao `supabase_realtime`, configurar `REPLICA IDENTITY FULL` e adicionar as tabelas relacionais.
 - Service worker atualizado para devolver `index.html` quando uma rota SPA direta retorna 404, evitando erro de navegacao em `/perfil`.
 - Realtime nao substitui save: ele apenas atualiza a tela quando outra sessao/dispositivo altera dados ja persistidos.
