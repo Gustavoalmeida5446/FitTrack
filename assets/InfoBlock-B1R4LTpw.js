@@ -1,0 +1,1 @@
+import{j as s}from"./index-BTpw3xU5.js";function e({label:n,children:o}){return s.jsxs("div",{className:"info-block",children:[n?s.jsx("span",{className:"meta-label",children:n}):null,s.jsx("p",{children:o})]})}export{e as I};

@@ -1,0 +1,1 @@
+import{j as s}from"./index-BTpw3xU5.js";function i({label:r,value:t,className:l="stat-pill"}){return s.jsxs("div",{className:l,children:[s.jsx("span",{children:r}),s.jsx("strong",{children:t})]})}function e({className:r="",items:t}){return s.jsx("div",{className:r.trim(),children:t.map((l,a)=>s.jsx(i,{label:l.label,value:l.value},a))})}export{e as S};
