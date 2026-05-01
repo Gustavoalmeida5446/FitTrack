@@ -6,6 +6,10 @@ import {
 } from '../lib/relationalAppState';
 import { supabase } from '../lib/supabaseClient';
 
+function stableId(...parts: Array<string | number>) {
+  return parts.map((part) => encodeURIComponent(String(part))).join(':');
+}
+
 function mapRowList<Row>(data: Row[] | null): Row[] {
   return Array.isArray(data) ? data : [];
 }
@@ -180,4 +184,90 @@ export async function loadRelationalAppState(session: Session, workoutsUpdatedAt
   };
 
   return convertRelationalRecordsToAppState(records, workoutsUpdatedAt);
+}
+
+export async function saveRelationalProfile(session: Session, profile: AppState['profile']) {
+  const userId = session.user.id;
+  const { error } = await supabase
+    .from('app_profiles')
+    .upsert({
+      id: stableId(userId, 'profile'),
+      user_id: userId,
+      current_weight: profile.currentWeight,
+      height_cm: profile.heightCm,
+      birth_date: profile.birthDate || null,
+      age: profile.age,
+      sex: profile.sex,
+      activity_level: profile.activityLevel,
+      goal: profile.goal,
+      diet_type: profile.dietType,
+      updated_at: new Date().toISOString()
+    }, {
+      onConflict: 'user_id'
+    });
+
+  if (error) {
+    console.error('Erro ao salvar perfil relacional', error);
+    return false;
+  }
+
+  return true;
+}
+
+export async function saveRelationalWater(session: Session, water: AppState['water']) {
+  const userId = session.user.id;
+  const { error } = await supabase
+    .from('app_water_days')
+    .upsert({
+      id: stableId(userId, 'water', water.updatedAt),
+      user_id: userId,
+      day: water.updatedAt,
+      goal_ml: water.goalMl,
+      consumed_ml: water.consumedMl,
+      updated_at: new Date().toISOString()
+    }, {
+      onConflict: 'user_id,day'
+    });
+
+  if (error) {
+    console.error('Erro ao salvar água relacional', error);
+    return false;
+  }
+
+  return true;
+}
+
+export async function replaceRelationalWeightHistory(session: Session, weightHistory: AppState['weightHistory']) {
+  const userId = session.user.id;
+  const deleteResult = await supabase
+    .from('app_weight_logs')
+    .delete()
+    .eq('user_id', userId);
+
+  if (deleteResult.error) {
+    console.error('Erro ao limpar histórico de peso relacional', deleteResult.error);
+    return false;
+  }
+
+  if (weightHistory.length === 0) {
+    return true;
+  }
+
+  const { error } = await supabase
+    .from('app_weight_logs')
+    .insert(weightHistory.map((item, index) => ({
+      id: stableId(userId, 'weight', item.date, index),
+      user_id: userId,
+      legacy_id: item.date,
+      position: index,
+      logged_at: item.date,
+      weight: item.weight
+    })));
+
+  if (error) {
+    console.error('Erro ao salvar histórico de peso relacional', error);
+    return false;
+  }
+
+  return true;
 }

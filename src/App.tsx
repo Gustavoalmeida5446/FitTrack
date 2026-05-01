@@ -29,6 +29,11 @@ import {
   signUpWithEmail,
   updatePassword
 } from './services/authService';
+import {
+  replaceRelationalWeightHistory,
+  saveRelationalProfile,
+  saveRelationalWater
+} from './services/relationalAppStateService';
 
 const HomePage = lazy(() => import('./pages/HomePage').then((module) => ({ default: module.HomePage })));
 const WorkoutPage = lazy(() => import('./pages/WorkoutPage').then((module) => ({ default: module.WorkoutPage })));
@@ -165,7 +170,10 @@ export default function App() {
   const handleResetWater = useCallback((nextWater: AppState['water']) => {
     setWater(nextWater);
     markRemoteSavePending();
-  }, [markRemoteSavePending]);
+    if (session) {
+      void saveRelationalWater(session, nextWater);
+    }
+  }, [markRemoteSavePending, session]);
   const handleResetDietProgress = useCallback((nextDiet: WeeklyDiet) => {
     setWeeklyDiet(nextDiet);
     markRemoteSavePending();
@@ -224,6 +232,9 @@ export default function App() {
   const handleUpdateProfile = (nextProfile: AppState['profile']) => {
     markRemoteSavePending();
     setProfile(nextProfile);
+    if (session) {
+      void saveRelationalProfile(session, nextProfile);
+    }
   };
 
   const handleSaveWorkouts = (nextWorkouts: Workout[]) => {
@@ -233,33 +244,51 @@ export default function App() {
   };
 
   const handleAddWeight = (weight: number) => {
-    markRemoteSavePending();
-    setWeightHistory((prev) => [createWeightHistoryEntry(weight), ...prev].slice(0, 10));
-    setProfile((prev) => ({
-      ...prev,
+    const nextHistory = [createWeightHistoryEntry(weight), ...weightHistory].slice(0, 10);
+    const nextProfile = {
+      ...profile,
       currentWeight: weight
-    }));
+    };
+
+    markRemoteSavePending();
+    setWeightHistory(nextHistory);
+    setProfile(nextProfile);
+    if (session) {
+      void saveRelationalProfile(session, nextProfile);
+      void replaceRelationalWeightHistory(session, nextHistory);
+    }
   };
 
   const handleRemoveWeight = (index: number) => {
-    markRemoteSavePending();
-    setWeightHistory((prev) => {
-      const nextHistory = prev.filter((_, itemIndex) => itemIndex !== index);
-
-      if (index === 0) {
-        setProfile((currentProfile) => ({
-          ...currentProfile,
-          currentWeight: getCurrentWeightFromHistory(nextHistory)
-        }));
+    const nextHistory = weightHistory.filter((_, itemIndex) => itemIndex !== index);
+    const nextProfile = index === 0
+      ? {
+        ...profile,
+        currentWeight: getCurrentWeightFromHistory(nextHistory)
       }
+      : profile;
 
-      return nextHistory;
-    });
+    markRemoteSavePending();
+    setWeightHistory(nextHistory);
+    if (index === 0) {
+      setProfile(nextProfile);
+    }
+    if (session) {
+      if (index === 0) {
+        void saveRelationalProfile(session, nextProfile);
+      }
+      void replaceRelationalWeightHistory(session, nextHistory);
+    }
   };
 
   const handleAddWater = (amount: number) => {
+    const nextWater = addWaterAmount(water, amount, getTodayDateString());
+
     markRemoteSavePending();
-    setWater((prev) => addWaterAmount(prev, amount, getTodayDateString()));
+    setWater(nextWater);
+    if (session) {
+      void saveRelationalWater(session, nextWater);
+    }
   };
 
   const handleSaveDiet = (nextDiet: WeeklyDiet) => {
