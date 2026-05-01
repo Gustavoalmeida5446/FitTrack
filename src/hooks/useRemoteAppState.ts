@@ -1,7 +1,23 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import type { AppState } from '../lib/appState';
+import { supabase } from '../lib/supabaseClient';
 import { loadRemoteAppState, saveRemoteAppState } from '../services/appStateService';
+
+const relationalRealtimeTables = [
+  'app_profiles',
+  'app_water_days',
+  'app_weight_logs',
+  'app_workouts',
+  'app_workout_exercises',
+  'app_workout_exercise_sets',
+  'app_diets',
+  'app_diet_meals',
+  'app_diet_foods',
+  'app_diet_days',
+  'app_diet_day_meals',
+  'app_diet_completed_meals'
+] as const;
 
 interface UseRemoteAppStateParams {
   session: Session | null;
@@ -23,14 +39,23 @@ export function useRemoteAppState({
   onHydrate,
   onReset
 }: UseRemoteAppStateParams): UseRemoteAppStateResult {
+  const userId = session?.user.id ?? '';
   const [isRemoteReady, setIsRemoteReady] = useState(false);
   const [hasPendingRemoteSave, setHasPendingRemoteSave] = useState(false);
   const [remoteSaveRetryTick, setRemoteSaveRetryTick] = useState(0);
+  const [realtimeRefreshTick, setRealtimeRefreshTick] = useState(0);
   const [remoteSyncError, setRemoteSyncError] = useState<'load' | 'save' | null>(null);
+  const hasPendingRemoteSaveRef = useRef(false);
+  const missedRealtimeRefreshRef = useRef(false);
 
   useEffect(() => {
+    missedRealtimeRefreshRef.current = false;
     setIsRemoteReady(false);
-  }, [session]);
+  }, [userId]);
+
+  useEffect(() => {
+    hasPendingRemoteSaveRef.current = hasPendingRemoteSave;
+  }, [hasPendingRemoteSave]);
 
   useEffect(() => {
     if (!session) {
@@ -43,7 +68,6 @@ export function useRemoteAppState({
     }
 
     let isActive = true;
-    setIsRemoteReady(false);
 
     void loadRemoteAppState(session).then((remoteState) => {
       if (!isActive) {
@@ -66,7 +90,66 @@ export function useRemoteAppState({
     return () => {
       isActive = false;
     };
-  }, [onHydrate, onReset, session]);
+  }, [onHydrate, onReset, realtimeRefreshTick, userId]);
+
+  useEffect(() => {
+    if (!userId || !isRemoteReady) {
+      return undefined;
+    }
+
+    let refreshTimeoutId: number | null = null;
+    const channel = supabase.channel(`app-state:${userId}`);
+    const scheduleRefresh = () => {
+      if (hasPendingRemoteSaveRef.current) {
+        missedRealtimeRefreshRef.current = true;
+        return;
+      }
+
+      if (refreshTimeoutId) {
+        window.clearTimeout(refreshTimeoutId);
+      }
+
+      refreshTimeoutId = window.setTimeout(() => {
+        setRealtimeRefreshTick((currentTick) => currentTick + 1);
+      }, 500);
+    };
+
+    relationalRealtimeTables.forEach((table) => {
+      channel.on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table,
+          filter: `user_id=eq.${userId}`
+        },
+        scheduleRefresh
+      );
+    });
+
+    void channel.subscribe((status) => {
+      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        console.error('Realtime de estado do app indisponível:', status);
+      }
+    });
+
+    return () => {
+      if (refreshTimeoutId) {
+        window.clearTimeout(refreshTimeoutId);
+      }
+
+      void supabase.removeChannel(channel);
+    };
+  }, [isRemoteReady, userId]);
+
+  useEffect(() => {
+    if (!userId || !isRemoteReady || hasPendingRemoteSave || !missedRealtimeRefreshRef.current) {
+      return;
+    }
+
+    missedRealtimeRefreshRef.current = false;
+    setRealtimeRefreshTick((currentTick) => currentTick + 1);
+  }, [hasPendingRemoteSave, isRemoteReady, userId]);
 
   useEffect(() => {
     if (!session || !isRemoteReady || !hasPendingRemoteSave) {

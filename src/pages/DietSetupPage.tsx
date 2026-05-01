@@ -111,7 +111,6 @@ export function DietSetupPage({
   const selectedFoodPortionBase = useMemo(() => parsePortionBase(selectedFood?.porcaoBase), [selectedFood]);
   const selectedFoodUnit = useMemo(() => selectedFood ? getFoodMeasurementUnit(selectedFood) : 'g', [selectedFood]);
   const selectedFoodDefaultQuantity = useMemo(() => selectedFood ? getFoodDefaultQuantity(selectedFood) : 100, [selectedFood]);
-  const canAddSelectedFood = useMemo(() => Boolean(selectedFood) && foodQuantity > 0, [selectedFood, foodQuantity]);
   const foodSelectionMessage = hasTriedAddFood && selectedFood && foodQuantity <= 0
     ? 'Informe uma quantidade maior que zero.'
     : '';

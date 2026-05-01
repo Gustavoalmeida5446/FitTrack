@@ -1,6 +1,8 @@
 # FitTrack - plano tecnico de correcao
 
-Branch: `technical-fix-plan`
+Branch atual para o proximo PR: `realtime-sync-review-fixes`
+
+Observacao: o PR anterior do branch `technical-fix-plan` ja foi mergeado. Todo novo ajuste deve sair de um PR novo para evitar confusao com o historico anterior.
 
 ## Direcao do plano
 
@@ -15,7 +17,7 @@ Tambem e necessario trocar a navegacao atual baseada em `useState` por router, p
 ## Diagnostico resumido
 
 - O app e React + Vite + TypeScript.
-- A navegacao atual fica em `src/hooks/useLocalNavigation.ts` e usa `useState`.
+- A navegacao atual usa `src/hooks/useAppRouter.ts` com rotas reais.
 - `src/App.tsx` controla as telas renderizadas e chama `openGoals()` apos login.
 - O onboarding tambem pode navegar para Perfil, porque a primeira etapa e `goals`.
 - O estado remoto atual e salvo em `user_app_states` via `src/services/appStateService.ts`.
@@ -31,7 +33,7 @@ Tambem e necessario trocar a navegacao atual baseada em `useState` por router, p
 ## Arquivos relevantes
 
 - `src/App.tsx`
-- `src/hooks/useLocalNavigation.ts`
+- `src/hooks/useAppRouter.ts`
 - `src/hooks/useRemoteAppState.ts`
 - `src/services/appStateService.ts`
 - `src/lib/appState.ts`
@@ -250,6 +252,7 @@ Status:
 - Tabs e telas de detalhe agora navegam com `history.pushState`.
 - `popstate` atualiza a tela ao usar voltar/avancar do navegador.
 - Testes de parse/build de rotas adicionados em `tests/appRouter.test.ts`.
+- Hook antigo `src/hooks/useLocalNavigation.ts` removido depois da troca completa para `useAppRouter`.
 
 Critério de aceite:
 
@@ -321,13 +324,60 @@ Critério de aceite:
 
 ## Fase 9 - Realtime depois
 
-- [ ] Avaliar Supabase Realtime apenas depois da persistencia direta estar correta.
-- [ ] Usar Realtime para sincronizacao/atualizacao de tela, nao para compensar falta de save.
+- [x] Avaliar Supabase Realtime apenas depois da persistencia direta estar correta.
+- [x] Usar Realtime para sincronizacao/atualizacao de tela, nao para compensar falta de save.
+- [x] Revisar o fluxo para nao perder eventos recebidos enquanto existe save local pendente.
+- [x] Evitar recriar o canal Realtime a cada refresh remoto.
+- [x] Validar comportamento de eventos DELETE com filtro por `user_id`.
+- [x] Garantir que o SQL de publicacao Realtime seja seguro/idempotente no ambiente alvo.
+- [x] Corrigir fallback do service worker para rotas diretas do app, como `/perfil`.
+
+Status:
+
+- Realtime foi adicionado depois da persistencia relacional direta e do autosave.
+- `useRemoteAppState` assina as tabelas relacionais `app_*` do usuario logado.
+- Eventos de INSERT/UPDATE/DELETE disparam recarregamento remoto com debounce.
+- Enquanto ha save local pendente, eventos realtime agora ficam marcados para refresh posterior em vez de serem perdidos.
+- O canal Realtime nao depende mais de `hasPendingRemoteSave`, evitando recriacao a cada mudanca de save.
+- O canal Realtime tambem passou a depender do `userId`, evitando reconexao quando o objeto de sessao muda para o mesmo usuario.
+- SQL idempotente criado em `supabase/realtime-publication.sql` para criar/usar a publicacao `supabase_realtime`, configurar `REPLICA IDENTITY FULL` e adicionar as tabelas relacionais.
+- Service worker atualizado para devolver `index.html` quando uma rota SPA direta retorna 404, evitando erro de navegacao em `/perfil`.
+- Realtime nao substitui save: ele apenas atualiza a tela quando outra sessao/dispositivo altera dados ja persistidos.
+- Revisao pre-PR encontrou riscos no Realtime inicial e eles foram corrigidos no branch novo.
+- Branch novo criado para o proximo PR: `realtime-sync-review-fixes`.
 
 Critério de aceite:
 
 - Persistencia funciona sem depender de Realtime.
-- Realtime entra apenas como melhoria futura.
+- Realtime entra apenas como melhoria incremental, sem substituir save.
+- Alteracoes feitas em outro dispositivo/aba aparecem sem recarregar a pagina.
+- Eventos recebidos durante save local nao ficam perdidos.
+- Canal Realtime permanece estavel durante refreshes.
+
+## Revisao antes do proximo PR
+
+- [x] Criar branch novo depois do merge do PR anterior.
+- [x] Comparar o branch novo contra `origin/master`.
+- [x] Revisar app em busca de bugs, inconsistencias e complexidade desnecessaria.
+- [x] Rodar testes sem build/deploy.
+- [x] Corrigir pontos encontrados na revisao.
+- [ ] Abrir PR novo apenas depois das correcoes.
+
+Achados principais:
+
+- `src/hooks/useRemoteAppState.ts`: eventos Realtime recebidos durante save local agora disparam refresh depois que o save termina.
+- `src/hooks/useRemoteAppState.ts`: refresh Realtime nao derruba mais `isRemoteReady`, mantendo o canal estavel.
+- `supabase/realtime-publication.sql`: publicacao agora e criada se faltar e as tabelas usam `REPLICA IDENTITY FULL` para DELETE.
+- `public/sw.js`: rotas diretas do app agora usam fallback para `index.html` quando o GitHub Pages retorna 404.
+- `src/hooks/useLocalNavigation.ts`: hook antigo removido.
+- `src/pages/DietSetupPage.tsx`: `canAddSelectedFood` removido por nao ser usado.
+- Autosaves de treino/dieta funcionam, mas estao mais dificeis de entender do que o ideal para manter o codigo simples.
+
+Verificacao:
+
+- `npm test` falhou nesta shell porque o shim do `npm` depende de `asdf`, que nao estava disponivel.
+- Suite executada pelo comando direto com `/usr/bin/node`: `7/7` testes passando.
+- Build nao foi executado nesta revisao.
 
 ## Ordem recomendada
 
