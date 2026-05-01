@@ -112,6 +112,11 @@ export function WorkoutSetupPage({
     : hasTriedSaveWorkout && draftExercises.length === 0
       ? 'Adicione pelo menos um exercício para salvar o treino.'
       : '';
+  const showNoExerciseResults = debouncedQuery.trim().length > 0
+    && !exerciseSourceId
+    && !isLoadingOptions
+    && !searchErrorMessage
+    && options.length === 0;
 
   useEffect(() => {
     let isActive = true;
@@ -444,6 +449,7 @@ export function WorkoutSetupPage({
           </div>
           {isLoadingOptions ? <p className="form-message">Carregando exercícios...</p> : null}
           {searchErrorMessage ? <p className="form-message form-message--error">{searchErrorMessage}</p> : null}
+          {showNoExerciseResults ? <p className="form-message">Nenhum exercício encontrado.</p> : null}
           {options.length > 0 ? (
             <ul className="search-list">
               {options.map((option) => (
