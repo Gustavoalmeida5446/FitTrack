@@ -181,6 +181,9 @@ Status:
 - `sets`, `loadKg` e `reps` legados sao expandidos para `workoutExerciseSets`.
 - Conversao de volta para `AppState` criada em `convertRelationalRecordsToAppState`, para a UI conseguir ler dados relacionais no mesmo formato atual.
 - Testes adicionados em `tests/relationalAppState.test.ts`.
+- Dry-run local criado em `scripts/dry-run-relational-migration.mjs`.
+- Dry-run executado contra `backups/user_app_states_20260501_003542.jsonl`, sem gravar no banco.
+- Resultado do dry-run: `4` usuarios, `4` perfis, `4` registros de agua, `2` pesos, `2` treinos, `2` exercicios, `6` series, `4` dietas, `2` refeicoes, `2` alimentos, `28` dias de dieta, `5` vinculos dia/refeicao e `0` refeicoes concluidas.
 - Execucao real contra banco ainda pendente ate existir backup.
 
 Critério de aceite:
