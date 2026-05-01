@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import type { AppState } from '../lib/appState';
 import { supabase } from '../lib/supabaseClient';
@@ -44,10 +44,17 @@ export function useRemoteAppState({
   const [remoteSaveRetryTick, setRemoteSaveRetryTick] = useState(0);
   const [realtimeRefreshTick, setRealtimeRefreshTick] = useState(0);
   const [remoteSyncError, setRemoteSyncError] = useState<'load' | 'save' | null>(null);
+  const hasPendingRemoteSaveRef = useRef(false);
+  const missedRealtimeRefreshRef = useRef(false);
 
   useEffect(() => {
+    missedRealtimeRefreshRef.current = false;
     setIsRemoteReady(false);
   }, [session]);
+
+  useEffect(() => {
+    hasPendingRemoteSaveRef.current = hasPendingRemoteSave;
+  }, [hasPendingRemoteSave]);
 
   useEffect(() => {
     if (!session) {
@@ -60,7 +67,6 @@ export function useRemoteAppState({
     }
 
     let isActive = true;
-    setIsRemoteReady(false);
 
     void loadRemoteAppState(session).then((remoteState) => {
       if (!isActive) {
@@ -94,7 +100,8 @@ export function useRemoteAppState({
     const userId = session.user.id;
     const channel = supabase.channel(`app-state:${userId}`);
     const scheduleRefresh = () => {
-      if (hasPendingRemoteSave) {
+      if (hasPendingRemoteSaveRef.current) {
+        missedRealtimeRefreshRef.current = true;
         return;
       }
 
@@ -133,6 +140,15 @@ export function useRemoteAppState({
 
       void supabase.removeChannel(channel);
     };
+  }, [isRemoteReady, session]);
+
+  useEffect(() => {
+    if (!session || !isRemoteReady || hasPendingRemoteSave || !missedRealtimeRefreshRef.current) {
+      return;
+    }
+
+    missedRealtimeRefreshRef.current = false;
+    setRealtimeRefreshTick((currentTick) => currentTick + 1);
   }, [hasPendingRemoteSave, isRemoteReady, session]);
 
   useEffect(() => {
