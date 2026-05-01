@@ -5,11 +5,12 @@ import { AppNumberInput } from '../components/AppNumberInput';
 import { ContextualTutorialCard, type TutorialStepContent } from '../components/ContextualTutorialCard';
 import { InfoBlock } from '../components/InfoBlock';
 import { SelectionSummaryCard } from '../components/SelectionSummaryCard';
-import { MuscleGroup, Workout, WorkoutExercise } from '../data/types';
+import { MuscleGroup, Workout, WorkoutExercise, WorkoutExerciseSet } from '../data/types';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { searchExercises, type ExerciseOption } from '../services/exercises';
 import { PageContainer } from '../components/PageContainer';
 import { isValidWorkoutForSave, isValidWorkoutExerciseForSave } from '../lib/validation';
+import { createWorkoutExerciseSets, normalizeWorkoutExerciseSets, summarizeWorkoutExerciseSets } from '../lib/workoutSets';
 
 interface Props {
   onBack: () => void;
@@ -37,6 +38,25 @@ const defaultExerciseValues = {
   restSeconds: 60
 };
 
+function resizeExerciseSets(
+  currentSets: WorkoutExerciseSet[],
+  exerciseId: string,
+  count: number,
+  loadKg: number,
+  reps: number
+): WorkoutExerciseSet[] {
+  const setCount = Math.max(1, Math.floor(count));
+
+  return Array.from({ length: setCount }, (_, index) => (
+    currentSets[index] ?? {
+      id: `${exerciseId}-set-${index + 1}`,
+      loadKg,
+      reps,
+      done: false
+    }
+  ));
+}
+
 export function WorkoutSetupPage({
   onBack,
   workouts,
@@ -49,6 +69,7 @@ export function WorkoutSetupPage({
   onTutorialSkip
 }: Props) {
   const skipNextSearchRef = useRef(false);
+  const lastAutoSavedWorkoutKeyRef = useRef('');
   const [editingWorkoutId, setEditingWorkoutId] = useState<string | null>(null);
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null);
   const [activePreviewImageIndex, setActivePreviewImageIndex] = useState(0);
@@ -68,6 +89,9 @@ export function WorkoutSetupPage({
   const [loadKg, setLoadKg] = useState(defaultExerciseValues.loadKg);
   const [reps, setReps] = useState(defaultExerciseValues.reps);
   const [sets, setSets] = useState(defaultExerciseValues.sets);
+  const [exerciseSets, setExerciseSets] = useState<WorkoutExerciseSet[]>(() => (
+    createWorkoutExerciseSets('draft-exercise', defaultExerciseValues.sets, defaultExerciseValues.loadKg, defaultExerciseValues.reps)
+  ));
   const [restSeconds, setRestSeconds] = useState(defaultExerciseValues.restSeconds);
   const [hasTriedAddExercise, setHasTriedAddExercise] = useState(false);
   const [hasTriedSaveWorkout, setHasTriedSaveWorkout] = useState(false);
@@ -133,6 +157,64 @@ export function WorkoutSetupPage({
     };
   }, [debouncedQuery]);
 
+  const buildWorkoutForSave = (
+    workoutId: string,
+    workoutName: string,
+    exercises: WorkoutExercise[]
+  ): Workout | null => {
+    const normalizedExercises = exercises.map((exercise) => {
+      const nextSets = normalizeWorkoutExerciseSets(exercise).map((set) => ({ ...set, done: false }));
+      const setSummary = summarizeWorkoutExerciseSets(nextSets);
+
+      return {
+        ...exercise,
+        ...setSummary,
+        setsDetail: nextSets
+      };
+    });
+    const nextWorkout: Workout = {
+      id: workoutId,
+      name: workoutName.trim(),
+      muscleGroups: Array.from(new Set(normalizedExercises.map((exercise) => exercise.muscleGroup))),
+      exercises: normalizedExercises
+    };
+
+    return isValidWorkoutForSave(nextWorkout) ? nextWorkout : null;
+  };
+
+  const persistWorkout = (workout: Workout) => {
+    onSaveWorkouts(workouts.some((item) => item.id === workout.id)
+      ? workouts.map((item) => item.id === workout.id ? workout : item)
+      : [...workouts, workout]);
+    setEditingWorkoutId(workout.id);
+  };
+
+  useEffect(() => {
+    if (!name.trim() || draftExercises.length === 0 || editingExerciseId) {
+      return undefined;
+    }
+
+    const workoutId = editingWorkoutId ?? crypto.randomUUID();
+    const nextWorkout = buildWorkoutForSave(workoutId, name, draftExercises);
+
+    if (!nextWorkout) {
+      return undefined;
+    }
+
+    const autoSaveKey = JSON.stringify(nextWorkout);
+
+    if (autoSaveKey === lastAutoSavedWorkoutKeyRef.current) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      lastAutoSavedWorkoutKeyRef.current = autoSaveKey;
+      persistWorkout(nextWorkout);
+    }, 650);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [draftExercises, editingExerciseId, editingWorkoutId, name, workouts, onSaveWorkouts]);
+
   const resetExerciseForm = () => {
     setHasTriedAddExercise(false);
     setEditingExerciseId(null);
@@ -147,6 +229,7 @@ export function WorkoutSetupPage({
     setLoadKg(defaultExerciseValues.loadKg);
     setReps(defaultExerciseValues.reps);
     setSets(defaultExerciseValues.sets);
+    setExerciseSets(createWorkoutExerciseSets('draft-exercise', defaultExerciseValues.sets, defaultExerciseValues.loadKg, defaultExerciseValues.reps));
     setRestSeconds(defaultExerciseValues.restSeconds);
     setActivePreviewImageIndex(0);
     setIsLoadingOptions(false);
@@ -154,7 +237,36 @@ export function WorkoutSetupPage({
     setOptions([]);
   };
 
+  const handleSetCountChange = (value: number | string) => {
+    const nextSetCount = typeof value === 'number' ? Math.max(1, Math.floor(value)) : sets;
+
+    setSets(nextSetCount);
+    setExerciseSets((prev) => resizeExerciseSets(prev, editingExerciseId ?? 'draft-exercise', nextSetCount, loadKg, reps));
+  };
+
+  const handleDefaultLoadChange = (value: number | string) => {
+    const nextLoad = typeof value === 'number' ? value : loadKg;
+
+    setLoadKg(nextLoad);
+    setExerciseSets((prev) => prev.map((set) => ({ ...set, loadKg: nextLoad })));
+  };
+
+  const handleDefaultRepsChange = (value: number | string) => {
+    const nextReps = typeof value === 'number' ? value : reps;
+
+    setReps(nextReps);
+    setExerciseSets((prev) => prev.map((set) => ({ ...set, reps: nextReps })));
+  };
+
+  const handleExerciseSetChange = (
+    setId: string,
+    patch: Partial<Pick<WorkoutExerciseSet, 'loadKg' | 'reps'>>
+  ) => {
+    setExerciseSets((prev) => prev.map((set) => set.id === setId ? { ...set, ...patch } : set));
+  };
+
   const resetWorkoutForm = () => {
+    lastAutoSavedWorkoutKeyRef.current = '';
     setHasTriedSaveWorkout(false);
     setEditingWorkoutId(null);
     setName('');
@@ -181,8 +293,15 @@ export function WorkoutSetupPage({
 
     if (!canAddExercise) return;
 
+    const exerciseId = editingExerciseId ?? crypto.randomUUID();
+    const nextSets = exerciseSets.map((set, index) => ({
+      ...set,
+      id: `${exerciseId}-set-${index + 1}`,
+      done: false
+    }));
+    const setSummary = summarizeWorkoutExerciseSets(nextSets);
     const nextExercise: WorkoutExercise = {
-      id: editingExerciseId ?? crypto.randomUUID(),
+      id: exerciseId,
       source: 'local',
       sourceId: exerciseSourceId,
       name: exerciseName.trim(),
@@ -191,9 +310,10 @@ export function WorkoutSetupPage({
       mediaType: exerciseMediaType,
       mediaUrl: exerciseMediaUrl,
       mediaUrls: exerciseMediaUrls,
-      loadKg,
-      reps,
-      sets,
+      loadKg: setSummary.loadKg,
+      reps: setSummary.reps,
+      sets: setSummary.sets,
+      setsDetail: nextSets,
       restSeconds,
       done: false
     };
@@ -224,6 +344,7 @@ export function WorkoutSetupPage({
     setLoadKg(exercise.loadKg);
     setReps(exercise.reps);
     setSets(exercise.sets);
+    setExerciseSets(normalizeWorkoutExerciseSets(exercise));
     setRestSeconds(exercise.restSeconds);
     setActivePreviewImageIndex(0);
     setOptions([]);
@@ -241,26 +362,20 @@ export function WorkoutSetupPage({
 
     if (!canSaveWorkout) return;
 
-    const nextWorkout: Workout = {
-      id: editingWorkoutId ?? crypto.randomUUID(),
-      name: name.trim(),
-      muscleGroups: derivedWorkoutGroups,
-      exercises: draftExercises.map((exercise) => ({
-        ...exercise,
-        done: false
-      }))
-    };
+    const nextWorkout = buildWorkoutForSave(editingWorkoutId ?? crypto.randomUUID(), name, draftExercises);
 
-    if (!isValidWorkoutForSave(nextWorkout)) {
+    if (!nextWorkout) {
       return;
     }
 
-    onSaveWorkouts(editingWorkoutId ? workouts.map((workout) => workout.id === editingWorkoutId ? nextWorkout : workout) : [...workouts, nextWorkout]);
+    lastAutoSavedWorkoutKeyRef.current = JSON.stringify(nextWorkout);
+    persistWorkout(nextWorkout);
     setHasTriedSaveWorkout(false);
     resetWorkoutForm();
   };
 
   const handleEditWorkout = (workout: Workout) => {
+    lastAutoSavedWorkoutKeyRef.current = JSON.stringify(workout);
     setEditingWorkoutId(workout.id);
     setName(workout.name);
     setDraftExercises(workout.exercises.map((exercise) => ({ ...exercise })));
@@ -343,10 +458,37 @@ export function WorkoutSetupPage({
             </ul>
           ) : null}
           <div className="setup-card__metrics">
-            <AppNumberInput id="exercise-load" label="Carga (kg)" min={0} value={loadKg} onValueChange={setLoadKg} />
-            <AppNumberInput id="exercise-reps" label="Repetições" min={1} value={reps} onValueChange={setReps} />
-            <AppNumberInput id="exercise-sets" label="Séries" min={1} value={sets} onValueChange={setSets} />
+            <AppNumberInput id="exercise-load" label="Carga padrão (kg)" min={0} value={loadKg} onValueChange={handleDefaultLoadChange} />
+            <AppNumberInput id="exercise-reps" label="Repetições padrão" min={1} value={reps} onValueChange={handleDefaultRepsChange} />
+            <AppNumberInput id="exercise-sets" label="Séries" min={1} value={sets} onValueChange={handleSetCountChange} />
             <AppNumberInput id="exercise-rest" label="Descanso (s)" min={0} value={restSeconds} onValueChange={setRestSeconds} />
+          </div>
+          <div className="workout-set-list workout-set-list--setup">
+            {exerciseSets.map((set, setIndex) => (
+              <div key={set.id} className="workout-set-row">
+                <div className="workout-set-row__info">
+                  <span className="workout-set-row__label">Série {setIndex + 1}</span>
+                </div>
+                <div className="workout-set-row__field">
+                  <AppNumberInput
+                    id={`setup-load-${set.id}`}
+                    label="Carga (kg)"
+                    min={0}
+                    value={set.loadKg}
+                    onValueChange={(value) => handleExerciseSetChange(set.id, { loadKg: typeof value === 'number' ? value : set.loadKg })}
+                  />
+                </div>
+                <div className="workout-set-row__field">
+                  <AppNumberInput
+                    id={`setup-reps-${set.id}`}
+                    label="Repetições"
+                    min={1}
+                    value={set.reps}
+                    onValueChange={(value) => handleExerciseSetChange(set.id, { reps: typeof value === 'number' ? value : set.reps })}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
           {previewImageUrl ? (
             <button
@@ -386,8 +528,7 @@ export function WorkoutSetupPage({
                 )}
                 meta={[
                   exercise.muscleGroup,
-                  `${exercise.loadKg} kg`,
-                  `${exercise.sets}x${exercise.reps}`,
+                  normalizeWorkoutExerciseSets(exercise).map((set, setIndex) => `S${setIndex + 1}: ${set.loadKg} kg x ${set.reps}`).join(' • '),
                   `${exercise.restSeconds}s`
                 ]}
               />

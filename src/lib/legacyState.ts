@@ -1,6 +1,7 @@
 import type { FoodItem, Meal, MuscleGroup, UserProfile, WeeklyDiet, Workout, WorkoutExercise } from '../data/types';
 import type { ActivityLevel, DietType, GoalType } from '../data/types';
 import { calculateAgeFromBirthDate, normalizeBirthDateForStorage } from './date';
+import { withNormalizedWorkoutExerciseSets } from './workoutSets';
 
 type LegacyExercise = WorkoutExercise | {
   id: string;
@@ -104,7 +105,7 @@ function normalizeWorkoutExercise(exercise: LegacyExercise): WorkoutExercise {
     ? exercise.mediaUrls.filter(Boolean).slice(0, 2)
     : exercise.mediaUrl ? [exercise.mediaUrl] : [];
 
-  return {
+  return withNormalizedWorkoutExerciseSets({
     id: exercise.id,
     source: 'local',
     sourceId: exercise.sourceId,
@@ -119,7 +120,7 @@ function normalizeWorkoutExercise(exercise: LegacyExercise): WorkoutExercise {
     sets: exercise.sets,
     restSeconds: exercise.restSeconds,
     done: Boolean(exercise.done)
-  };
+  });
 }
 
 export function isPersistedWorkoutState(workouts: unknown): workouts is PersistedWorkoutState {
@@ -230,7 +231,7 @@ export function normalizeLegacyWorkoutList(workouts?: Workout[] | PersistedWorko
         ? definition.mediaUrls.filter(Boolean).slice(0, 2)
         : definition?.mediaUrl ? [definition.mediaUrl] : [];
 
-      return {
+      return withNormalizedWorkoutExerciseSets({
         id: exercise.id,
         source: 'local',
         sourceId: definition?.sourceId,
@@ -245,7 +246,7 @@ export function normalizeLegacyWorkoutList(workouts?: Workout[] | PersistedWorko
         sets: exercise.sets,
         restSeconds: exercise.restSeconds,
         done: Boolean(exercise.done)
-      };
+      });
     }) : []
   }));
 }

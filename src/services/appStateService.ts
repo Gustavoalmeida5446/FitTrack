@@ -12,6 +12,7 @@ import {
 } from '../lib/appState';
 import { supabase } from '../lib/supabaseClient';
 import { validateAppState } from '../lib/validation';
+import { loadRelationalAppState } from './relationalAppStateService';
 
 interface RemoteAppStateRow {
   profile: AppState['profile'];
@@ -99,6 +100,11 @@ export async function loadRemoteAppState(session: Session): Promise<AppState | n
   }
 
   const mappedState = mapRemoteRow(data as RemoteAppStateRow);
+  const relationalState = await loadRelationalAppState(session, mappedState.workoutsUpdatedAt);
+
+  if (relationalState) {
+    return relationalState;
+  }
 
   return mappedState;
 }

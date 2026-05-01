@@ -1,6 +1,6 @@
 import { CalendarHeatMap, CheckmarkFilled, ChevronLeft, Search, TrashCan } from '@carbon/icons-react';
 import { Button, TextInput, Tile } from '@carbon/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AppNumberInput } from '../components/AppNumberInput';
 import { ContextualTutorialCard, type TutorialStepContent } from '../components/ContextualTutorialCard';
 import { InfoBlock } from '../components/InfoBlock';
@@ -61,6 +61,7 @@ export function DietSetupPage({
   onTutorialNext,
   onTutorialSkip
 }: Props) {
+  const lastAutoSavedMealKeyRef = useRef('');
   const [draftDiet, setDraftDiet] = useState(diet);
   const [selectedDayId, setSelectedDayId] = useState(diet.days[0]?.id ?? 'd-1');
   const [editingMealId, setEditingMealId] = useState<string | null>(null);
@@ -142,7 +143,49 @@ export function DietSetupPage({
     onSaveDiet(nextDiet);
   };
 
+  const buildDietWithMeal = (meal: Meal): WeeklyDiet => ({
+    ...draftDiet,
+    meals: draftDiet.meals.some((item) => item.id === meal.id)
+      ? draftDiet.meals.map((item) => item.id === meal.id ? meal : item)
+      : [...draftDiet.meals, meal]
+  });
+
+  const persistMeal = (meal: Meal) => {
+    commitDiet(buildDietWithMeal(meal));
+    setEditingMealId(meal.id);
+  };
+
+  useEffect(() => {
+    if (!mealName.trim() || selectedFoods.length === 0) {
+      return undefined;
+    }
+
+    const meal: Meal = {
+      id: editingMealId ?? crypto.randomUUID(),
+      name: mealName.trim(),
+      foods: selectedFoods.map((food) => ({ ...food }))
+    };
+
+    if (!isValidMeal(meal)) {
+      return undefined;
+    }
+
+    const autoSaveKey = JSON.stringify(meal);
+
+    if (autoSaveKey === lastAutoSavedMealKeyRef.current) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      lastAutoSavedMealKeyRef.current = autoSaveKey;
+      persistMeal(meal);
+    }, 650);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [draftDiet, editingMealId, mealName, onSaveDiet, selectedFoods]);
+
   const resetMealForm = () => {
+    lastAutoSavedMealKeyRef.current = '';
     setHasTriedAddFood(false);
     setHasTriedSaveMeal(false);
     setEditingMealId(null);
@@ -201,22 +244,17 @@ export function DietSetupPage({
       return;
     }
 
-    const nextDiet: WeeklyDiet = {
-      ...draftDiet,
-      meals: editingMealId
-        ? draftDiet.meals.map((item) => item.id === editingMealId ? meal : item)
-        : [...draftDiet.meals, meal]
-    };
-
-    commitDiet(nextDiet);
+    lastAutoSavedMealKeyRef.current = JSON.stringify(meal);
+    persistMeal(meal);
     setHasTriedSaveMeal(false);
     resetMealForm();
   };
 
   const handleEditMeal = (meal: Meal) => {
+    lastAutoSavedMealKeyRef.current = JSON.stringify(meal);
     setEditingMealId(meal.id);
     setMealName(meal.name);
-    setSelectedFoods(meal.foods.map((food) => ({ ...food, id: crypto.randomUUID() })));
+    setSelectedFoods(meal.foods.map((food) => ({ ...food })));
     setFoodQuery('');
     setFoodOptions([]);
     setSelectedFood(null);
@@ -242,7 +280,27 @@ export function DietSetupPage({
   };
 
   const toggleMealInDay = (mealId: string) => {
-    setSelectedDayMealIds((prev) => prev.includes(mealId) ? prev.filter((id) => id !== mealId) : [...prev, mealId]);
+    const nextMealIds = selectedDayMealIds.includes(mealId)
+      ? selectedDayMealIds.filter((id) => id !== mealId)
+      : [...selectedDayMealIds, mealId];
+
+    setSelectedDayMealIds(nextMealIds);
+    setHasTriedSaveDay(false);
+
+    const nextDiet: WeeklyDiet = {
+      ...draftDiet,
+      days: draftDiet.days.map((day) => {
+        if (day.id !== selectedDay.id) {
+          return day;
+        }
+
+        return {
+          ...syncCompletedMealsWithSelection(day, nextMealIds)
+        };
+      })
+    };
+
+    commitDiet(nextDiet);
   };
 
   const handleSaveDay = () => {

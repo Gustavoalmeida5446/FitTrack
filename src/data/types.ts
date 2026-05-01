@@ -5,6 +5,13 @@ export type GoalType = 'Perda de gordura' | 'Manutenção' | 'Ganho de massa';
 export type DietType = 'Equilibrada' | 'Baixo carboidrato' | 'Alta em carboidrato';
 export type ExerciseMediaType = 'image' | 'video' | 'gif' | 'none';
 
+export interface WorkoutExerciseSet {
+  id: string;
+  loadKg: number;
+  reps: number;
+  done: boolean;
+}
+
 export interface WorkoutExercise {
   id: string;
   source: 'local';
@@ -18,6 +25,7 @@ export interface WorkoutExercise {
   loadKg: number;
   reps: number;
   sets: number;
+  setsDetail?: WorkoutExerciseSet[];
   restSeconds: number;
   done: boolean;
 }

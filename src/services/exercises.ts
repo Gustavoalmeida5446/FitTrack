@@ -56,7 +56,8 @@ const exerciseAliases: Record<string, string[]> = {
   Chair_Squat: ['agachamento barra guiada', 'agachamento smith'],
   Barbell_Squat: ['agachamento livre'],
   Seated_Cable_Rows: ['remada baixa', 'remada sentado'],
-  Leverage_Chest_Press: ['supino articulado maquina']
+  Leverage_Chest_Press: ['supino articulado maquina'],
+  Thigh_Abductor: ['abducao de quadril', 'abdução de quadril', 'abdutor', 'cadeira abdutora', 'maquina abdutora']
 };
 const muscleGroupMap: Record<string, MuscleGroup> = {
   chest: 'Peito',
