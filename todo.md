@@ -321,8 +321,17 @@ Critério de aceite:
 
 ## Fase 9 - Realtime depois
 
-- [ ] Avaliar Supabase Realtime apenas depois da persistencia direta estar correta.
-- [ ] Usar Realtime para sincronizacao/atualizacao de tela, nao para compensar falta de save.
+- [x] Avaliar Supabase Realtime apenas depois da persistencia direta estar correta.
+- [x] Usar Realtime para sincronizacao/atualizacao de tela, nao para compensar falta de save.
+
+Status:
+
+- Realtime foi adicionado depois da persistencia relacional direta e do autosave.
+- `useRemoteAppState` assina as tabelas relacionais `app_*` do usuario logado.
+- Eventos de INSERT/UPDATE/DELETE disparam recarregamento remoto com debounce.
+- Enquanto ha save local pendente, eventos realtime sao ignorados para evitar sobrescrever alteracoes locais em andamento.
+- SQL idempotente criado em `supabase/realtime-publication.sql` para adicionar as tabelas relacionais na publicacao `supabase_realtime`.
+- Realtime nao substitui save: ele apenas atualiza a tela quando outra sessao/dispositivo altera dados ja persistidos.
 
 Critério de aceite:
 
