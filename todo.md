@@ -171,7 +171,7 @@ Critério de aceite:
 - [x] Ler `user_app_states` e converter os JSONs existentes para o novo modelo relacional.
 - [x] Nao modificar o JSON antigo durante a conversao.
 - [x] Criar migracao idempotente: rodar duas vezes nao pode duplicar dados.
-- [ ] Registrar status de conversao em tabela nova, nao dentro de `user_app_states`.
+- [x] Registrar status de conversao em tabela nova, nao dentro de `user_app_states`.
 - [x] Manter fallback de leitura do JSON para usuarios ainda nao convertidos.
 
 Status:
@@ -184,7 +184,13 @@ Status:
 - Dry-run local criado em `scripts/dry-run-relational-migration.mjs`.
 - Dry-run executado contra `backups/user_app_states_20260501_003542.jsonl`, sem gravar no banco.
 - Resultado do dry-run: `4` usuarios, `4` perfis, `4` registros de agua, `2` pesos, `2` treinos, `2` exercicios, `6` series, `4` dietas, `2` refeicoes, `2` alimentos, `28` dias de dieta, `5` vinculos dia/refeicao e `0` refeicoes concluidas.
-- Execucao real contra banco ainda pendente ate existir backup.
+- Script real criado em `scripts/migrate-relational-from-backup.mjs`.
+- Primeira tentativa abortou antes do commit por dieta sem `progressUpdatedAt`; nenhuma linha parcial ficou nas tabelas novas.
+- Script corrigido com fallback de data.
+- Migracao real executada em 2026-05-01 com `COMMIT`.
+- Resultado no banco: `4` perfis, `4` registros de agua, `2` pesos, `2` treinos, `2` exercicios, `6` series, `4` dietas, `2` refeicoes, `2` alimentos, `28` dias de dieta, `5` vinculos dia/refeicao e `0` refeicoes concluidas.
+- `app_data_migrations` ficou com `4` registros `done`.
+- `user_app_states` continuou intacta com `4` linhas.
 
 Critério de aceite:
 
