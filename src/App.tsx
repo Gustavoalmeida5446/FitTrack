@@ -30,6 +30,7 @@ import {
   updatePassword
 } from './services/authService';
 import {
+  replaceRelationalDiet,
   replaceRelationalWeightHistory,
   replaceRelationalWorkouts,
   saveRelationalProfile,
@@ -178,7 +179,10 @@ export default function App() {
   const handleResetDietProgress = useCallback((nextDiet: WeeklyDiet) => {
     setWeeklyDiet(nextDiet);
     markRemoteSavePending();
-  }, [markRemoteSavePending]);
+    if (session) {
+      void replaceRelationalDiet(session, nextDiet);
+    }
+  }, [markRemoteSavePending, session]);
   const handleNavigateTutorial = useCallback((nextView: AppView) => {
     setView(nextView);
   }, [setView]);
@@ -232,10 +236,18 @@ export default function App() {
 
   const updateDiet = (updater: (diet: WeeklyDiet) => WeeklyDiet) => {
     markRemoteSavePending();
-    setWeeklyDiet((prev) => ({
-      ...updater(prev),
-      progressUpdatedAt: getTodayDateString()
-    }));
+    setWeeklyDiet((prev) => {
+      const nextDiet = {
+        ...updater(prev),
+        progressUpdatedAt: getTodayDateString()
+      };
+
+      if (session) {
+        void replaceRelationalDiet(session, nextDiet);
+      }
+
+      return nextDiet;
+    });
   };
 
   const handleUpdateProfile = (nextProfile: AppState['profile']) => {
@@ -304,8 +316,13 @@ export default function App() {
   };
 
   const handleSaveDiet = (nextDiet: WeeklyDiet) => {
+    const normalizedDiet = normalizeWeeklyDiet(nextDiet);
+
     markRemoteSavePending();
-    setWeeklyDiet(normalizeWeeklyDiet(nextDiet));
+    setWeeklyDiet(normalizedDiet);
+    if (session) {
+      void replaceRelationalDiet(session, normalizedDiet);
+    }
   };
 
   const handleLogin = async (email: string, password: string) => {

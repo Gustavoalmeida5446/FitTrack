@@ -215,6 +215,7 @@ Status:
 - Escrita ainda continua no fluxo antigo; isso evita mudar tudo de uma vez.
 - Escrita relacional direta adicionada para perfil, agua e historico de peso.
 - Escrita relacional direta adicionada para treinos, exercicios e series.
+- Escrita relacional direta adicionada para dieta, refeicoes, alimentos, dias e progresso de refeicoes.
 - O fluxo antigo de save continua ativo como fallback enquanto as outras areas ainda nao migraram.
 
 Critério de aceite:

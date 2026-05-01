@@ -1,6 +1,6 @@
 import type { Session } from '@supabase/supabase-js';
 import type { AppState } from '../lib/appState';
-import type { Workout } from '../data/types';
+import type { WeeklyDiet, Workout } from '../data/types';
 import {
   RelationalAppStateRecords,
   convertRelationalRecordsToAppState
@@ -362,6 +362,121 @@ export async function replaceRelationalWorkouts(session: Session, workouts: Work
     const { error } = await supabase.from('app_workout_exercise_sets').insert(setRows);
     if (error) {
       console.error('Erro ao salvar séries relacionais', error);
+      return false;
+    }
+  }
+
+  return true;
+}
+
+export async function replaceRelationalDiet(session: Session, diet: WeeklyDiet) {
+  const userId = session.user.id;
+  const dietId = stableId(userId, 'diet', diet.id);
+  const mealRows = diet.meals.map((meal, mealIndex) => ({
+    id: stableId(userId, 'diet', diet.id, 'meal', meal.id),
+    user_id: userId,
+    diet_id: dietId,
+    legacy_id: meal.id,
+    name: meal.name,
+    position: mealIndex,
+    updated_at: new Date().toISOString()
+  }));
+  const foodRows = diet.meals.flatMap((meal) => meal.foods.map((food, foodIndex) => ({
+    id: stableId(userId, 'diet', diet.id, 'meal', meal.id, 'food', food.id),
+    user_id: userId,
+    meal_id: stableId(userId, 'diet', diet.id, 'meal', meal.id),
+    legacy_id: food.id,
+    food_id: food.foodId,
+    name: food.name,
+    calories: food.calories,
+    protein: food.protein,
+    carbs: food.carbs,
+    fat: food.fat,
+    fiber: food.fiber,
+    quantity: food.quantity,
+    unit: food.unit,
+    base_quantity: food.baseQuantity,
+    base_unit: food.baseUnit,
+    position: foodIndex,
+    updated_at: new Date().toISOString()
+  })));
+  const dayRows = diet.days.map((day, dayIndex) => ({
+    id: stableId(userId, 'diet', diet.id, 'day', day.id),
+    user_id: userId,
+    diet_id: dietId,
+    legacy_id: day.id,
+    label: day.label,
+    position: dayIndex,
+    updated_at: new Date().toISOString()
+  }));
+  const dayMealRows = diet.days.flatMap((day) => day.mealIds.map((mealId, mealIndex) => ({
+    id: stableId(userId, 'diet', diet.id, 'day', day.id, 'meal', mealId),
+    user_id: userId,
+    day_id: stableId(userId, 'diet', diet.id, 'day', day.id),
+    meal_id: stableId(userId, 'diet', diet.id, 'meal', mealId),
+    position: mealIndex
+  })));
+  const completedMealRows = diet.days.flatMap((day) => day.completedMealIds.map((mealId) => ({
+    id: stableId(userId, 'diet', diet.id, 'day', day.id, 'completedMeal', mealId),
+    user_id: userId,
+    day_id: stableId(userId, 'diet', diet.id, 'day', day.id),
+    meal_id: stableId(userId, 'diet', diet.id, 'meal', mealId)
+  })));
+
+  const deleteResult = await supabase.from('app_diets').delete().eq('user_id', userId);
+  if (deleteResult.error) {
+    console.error('Erro ao limpar dieta relacional', deleteResult.error);
+    return false;
+  }
+
+  const dietResult = await supabase.from('app_diets').insert({
+    id: dietId,
+    user_id: userId,
+    legacy_id: diet.id,
+    progress_updated_at: diet.progressUpdatedAt,
+    updated_at: new Date().toISOString()
+  });
+  if (dietResult.error) {
+    console.error('Erro ao salvar dieta relacional', dietResult.error);
+    return false;
+  }
+
+  if (mealRows.length > 0) {
+    const { error } = await supabase.from('app_diet_meals').insert(mealRows);
+    if (error) {
+      console.error('Erro ao salvar refeições relacionais', error);
+      return false;
+    }
+  }
+
+  if (foodRows.length > 0) {
+    const { error } = await supabase.from('app_diet_foods').insert(foodRows);
+    if (error) {
+      console.error('Erro ao salvar alimentos relacionais', error);
+      return false;
+    }
+  }
+
+  if (dayRows.length > 0) {
+    const { error } = await supabase.from('app_diet_days').insert(dayRows);
+    if (error) {
+      console.error('Erro ao salvar dias de dieta relacionais', error);
+      return false;
+    }
+  }
+
+  if (dayMealRows.length > 0) {
+    const { error } = await supabase.from('app_diet_day_meals').insert(dayMealRows);
+    if (error) {
+      console.error('Erro ao salvar vínculos de dieta relacionais', error);
+      return false;
+    }
+  }
+
+  if (completedMealRows.length > 0) {
+    const { error } = await supabase.from('app_diet_completed_meals').insert(completedMealRows);
+    if (error) {
+      console.error('Erro ao salvar progresso de dieta relacional', error);
       return false;
     }
   }
