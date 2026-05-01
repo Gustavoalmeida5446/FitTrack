@@ -168,7 +168,10 @@ export default function App() {
     setWorkouts(nextState.workouts);
     setWorkoutsUpdatedAt(nextState.workoutsUpdatedAt);
     markRemoteSavePending();
-  }, [markRemoteSavePending]);
+    if (session) {
+      void replaceRelationalWorkouts(session, nextState.workouts);
+    }
+  }, [markRemoteSavePending, session]);
   const handleResetWater = useCallback((nextWater: AppState['water']) => {
     setWater(nextWater);
     markRemoteSavePending();

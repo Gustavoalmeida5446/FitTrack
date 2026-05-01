@@ -202,11 +202,11 @@ Critério de aceite:
 ## Fase 4 - Salvar qualquer dado direto no banco
 
 - [x] Criar camada nova de persistencia relacional, separada de `appStateService.ts`.
-- [ ] Salvar diretamente no banco toda alteracao importante do app: perfil, agua, dieta, refeicoes, alimentos, peso, treinos, exercicios e series.
+- [x] Salvar diretamente no banco toda alteracao importante do app: perfil, agua, dieta, refeicoes, alimentos, peso, treinos, exercicios e series.
 - [ ] Estado local deve servir apenas para UI temporaria, nao como fonte unica de verdade.
 - [ ] Remover dependencia de botao manual como unica forma de persistir dados.
 - [ ] Exibir estados de salvamento, sucesso e erro.
-- [ ] Evitar salvar snapshots antigos do app inteiro quando a alteracao e pequena.
+- [x] Evitar salvar snapshots antigos do app inteiro quando a alteracao e pequena.
 
 Status:
 
@@ -216,7 +216,11 @@ Status:
 - Escrita relacional direta adicionada para perfil, agua e historico de peso.
 - Escrita relacional direta adicionada para treinos, exercicios e series.
 - Escrita relacional direta adicionada para dieta, refeicoes, alimentos, dias e progresso de refeicoes.
+- Escrita relacional ajustada para salvar primeiro e remover/marcar dados antigos depois, evitando apagar tabelas antes de inserir.
+- Reset diario de progresso de treino tambem grava nas tabelas relacionais.
+- Corrigido erro `409` ao salvar series relacionais: o app agora usa o mesmo ID deterministico da migracao e faz upsert por `exercise_id,position`.
 - O fluxo antigo de save continua ativo como fallback enquanto as outras areas ainda nao migraram.
+- Falta mostrar erro relacional na UI; hoje erro relacional fica no console e o aviso visivel ainda vem do save antigo.
 
 Critério de aceite:
 

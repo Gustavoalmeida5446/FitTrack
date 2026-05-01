@@ -15,6 +15,65 @@ function mapRowList<Row>(data: Row[] | null): Row[] {
   return Array.isArray(data) ? data : [];
 }
 
+async function deleteMissingRows(tableName: string, userId: string, currentIds: string[]) {
+  const { data, error } = await supabase
+    .from(tableName)
+    .select('id')
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error(`Erro ao buscar linhas antigas em ${tableName}`, error);
+    return false;
+  }
+
+  const currentIdSet = new Set(currentIds);
+  const oldIds = mapRowList(data).map((item) => item.id).filter((id) => !currentIdSet.has(id));
+
+  for (const id of oldIds) {
+    const deleteResult = await supabase.from(tableName).delete().eq('id', id);
+
+    if (deleteResult.error) {
+      console.error(`Erro ao remover linha antiga em ${tableName}`, deleteResult.error);
+      return false;
+    }
+  }
+
+  return true;
+}
+
+async function softDeleteMissingRows(tableName: string, userId: string, currentIds: string[]) {
+  const { data, error } = await supabase
+    .from(tableName)
+    .select('id')
+    .eq('user_id', userId)
+    .is('deleted_at', null);
+
+  if (error) {
+    console.error(`Erro ao buscar linhas antigas em ${tableName}`, error);
+    return false;
+  }
+
+  const currentIdSet = new Set(currentIds);
+  const oldIds = mapRowList(data).map((item) => item.id).filter((id) => !currentIdSet.has(id));
+
+  for (const id of oldIds) {
+    const updateResult = await supabase
+      .from(tableName)
+      .update({
+        deleted_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id);
+
+    if (updateResult.error) {
+      console.error(`Erro ao marcar linha antiga em ${tableName}`, updateResult.error);
+      return false;
+    }
+  }
+
+  return true;
+}
+
 export async function loadRelationalAppState(session: Session, workoutsUpdatedAt: string): Promise<AppState | null> {
   const userId = session.user.id;
   const [
@@ -240,37 +299,25 @@ export async function saveRelationalWater(session: Session, water: AppState['wat
 
 export async function replaceRelationalWeightHistory(session: Session, weightHistory: AppState['weightHistory']) {
   const userId = session.user.id;
-  const deleteResult = await supabase
-    .from('app_weight_logs')
-    .delete()
-    .eq('user_id', userId);
+  const rows = weightHistory.map((item, index) => ({
+    id: stableId(userId, 'weight', item.date, index),
+    user_id: userId,
+    legacy_id: item.date,
+    position: index,
+    logged_at: item.date,
+    weight: item.weight
+  }));
 
-  if (deleteResult.error) {
-    console.error('Erro ao limpar histórico de peso relacional', deleteResult.error);
-    return false;
+  if (rows.length > 0) {
+    const { error } = await supabase.from('app_weight_logs').upsert(rows);
+
+    if (error) {
+      console.error('Erro ao salvar histórico de peso relacional', error);
+      return false;
+    }
   }
 
-  if (weightHistory.length === 0) {
-    return true;
-  }
-
-  const { error } = await supabase
-    .from('app_weight_logs')
-    .insert(weightHistory.map((item, index) => ({
-      id: stableId(userId, 'weight', item.date, index),
-      user_id: userId,
-      legacy_id: item.date,
-      position: index,
-      logged_at: item.date,
-      weight: item.weight
-    })));
-
-  if (error) {
-    console.error('Erro ao salvar histórico de peso relacional', error);
-    return false;
-  }
-
-  return true;
+  return deleteMissingRows('app_weight_logs', userId, rows.map((item) => item.id));
 }
 
 export async function replaceRelationalWorkouts(session: Session, workouts: Workout[]) {
@@ -282,6 +329,7 @@ export async function replaceRelationalWorkouts(session: Session, workouts: Work
     name: workout.name,
     position: workoutIndex,
     muscle_groups: workout.muscleGroups,
+    deleted_at: null,
     updated_at: new Date().toISOString()
   }));
   const exerciseRows = workouts.flatMap((workout) => {
@@ -311,6 +359,7 @@ export async function replaceRelationalWorkouts(session: Session, workouts: Work
         rest_seconds: exercise.restSeconds,
         done: exercise.done,
         position: exerciseIndex,
+        deleted_at: null,
         updated_at: new Date().toISOString()
       };
     });
@@ -323,7 +372,7 @@ export async function replaceRelationalWorkouts(session: Session, workouts: Work
       const setCount = Math.max(0, Math.floor(exercise.sets));
 
       return Array.from({ length: setCount }, (_, setIndex) => ({
-        id: stableId(userId, 'workout', workout.id, 'exercise', exercise.id, 'set', setIndex + 1),
+        id: stableId(userId, 'workout', workoutId, 'exercise', exerciseId, 'set', setIndex + 1),
         user_id: userId,
         workout_id: workoutId,
         exercise_id: exerciseId,
@@ -336,14 +385,8 @@ export async function replaceRelationalWorkouts(session: Session, workouts: Work
     });
   });
 
-  const workoutDelete = await supabase.from('app_workouts').delete().eq('user_id', userId);
-  if (workoutDelete.error) {
-    console.error('Erro ao limpar treinos relacionais', workoutDelete.error);
-    return false;
-  }
-
   if (workoutRows.length > 0) {
-    const { error } = await supabase.from('app_workouts').insert(workoutRows);
+    const { error } = await supabase.from('app_workouts').upsert(workoutRows);
     if (error) {
       console.error('Erro ao salvar treinos relacionais', error);
       return false;
@@ -351,7 +394,7 @@ export async function replaceRelationalWorkouts(session: Session, workouts: Work
   }
 
   if (exerciseRows.length > 0) {
-    const { error } = await supabase.from('app_workout_exercises').insert(exerciseRows);
+    const { error } = await supabase.from('app_workout_exercises').upsert(exerciseRows);
     if (error) {
       console.error('Erro ao salvar exercícios relacionais', error);
       return false;
@@ -359,14 +402,20 @@ export async function replaceRelationalWorkouts(session: Session, workouts: Work
   }
 
   if (setRows.length > 0) {
-    const { error } = await supabase.from('app_workout_exercise_sets').insert(setRows);
+    const { error } = await supabase.from('app_workout_exercise_sets').upsert(setRows, {
+      onConflict: 'exercise_id,position'
+    });
     if (error) {
       console.error('Erro ao salvar séries relacionais', error);
       return false;
     }
   }
 
-  return true;
+  const didSoftDeleteWorkouts = await softDeleteMissingRows('app_workouts', userId, workoutRows.map((item) => item.id));
+  const didSoftDeleteExercises = await softDeleteMissingRows('app_workout_exercises', userId, exerciseRows.map((item) => item.id));
+  const didDeleteSets = await deleteMissingRows('app_workout_exercise_sets', userId, setRows.map((item) => item.id));
+
+  return didSoftDeleteWorkouts && didSoftDeleteExercises && didDeleteSets;
 }
 
 export async function replaceRelationalDiet(session: Session, diet: WeeklyDiet) {
@@ -379,6 +428,7 @@ export async function replaceRelationalDiet(session: Session, diet: WeeklyDiet) 
     legacy_id: meal.id,
     name: meal.name,
     position: mealIndex,
+    deleted_at: null,
     updated_at: new Date().toISOString()
   }));
   const foodRows = diet.meals.flatMap((meal) => meal.foods.map((food, foodIndex) => ({
@@ -423,13 +473,7 @@ export async function replaceRelationalDiet(session: Session, diet: WeeklyDiet) 
     meal_id: stableId(userId, 'diet', diet.id, 'meal', mealId)
   })));
 
-  const deleteResult = await supabase.from('app_diets').delete().eq('user_id', userId);
-  if (deleteResult.error) {
-    console.error('Erro ao limpar dieta relacional', deleteResult.error);
-    return false;
-  }
-
-  const dietResult = await supabase.from('app_diets').insert({
+  const dietResult = await supabase.from('app_diets').upsert({
     id: dietId,
     user_id: userId,
     legacy_id: diet.id,
@@ -442,7 +486,7 @@ export async function replaceRelationalDiet(session: Session, diet: WeeklyDiet) 
   }
 
   if (mealRows.length > 0) {
-    const { error } = await supabase.from('app_diet_meals').insert(mealRows);
+    const { error } = await supabase.from('app_diet_meals').upsert(mealRows);
     if (error) {
       console.error('Erro ao salvar refeições relacionais', error);
       return false;
@@ -450,7 +494,7 @@ export async function replaceRelationalDiet(session: Session, diet: WeeklyDiet) 
   }
 
   if (foodRows.length > 0) {
-    const { error } = await supabase.from('app_diet_foods').insert(foodRows);
+    const { error } = await supabase.from('app_diet_foods').upsert(foodRows);
     if (error) {
       console.error('Erro ao salvar alimentos relacionais', error);
       return false;
@@ -458,7 +502,7 @@ export async function replaceRelationalDiet(session: Session, diet: WeeklyDiet) 
   }
 
   if (dayRows.length > 0) {
-    const { error } = await supabase.from('app_diet_days').insert(dayRows);
+    const { error } = await supabase.from('app_diet_days').upsert(dayRows);
     if (error) {
       console.error('Erro ao salvar dias de dieta relacionais', error);
       return false;
@@ -466,7 +510,7 @@ export async function replaceRelationalDiet(session: Session, diet: WeeklyDiet) 
   }
 
   if (dayMealRows.length > 0) {
-    const { error } = await supabase.from('app_diet_day_meals').insert(dayMealRows);
+    const { error } = await supabase.from('app_diet_day_meals').upsert(dayMealRows);
     if (error) {
       console.error('Erro ao salvar vínculos de dieta relacionais', error);
       return false;
@@ -474,12 +518,17 @@ export async function replaceRelationalDiet(session: Session, diet: WeeklyDiet) 
   }
 
   if (completedMealRows.length > 0) {
-    const { error } = await supabase.from('app_diet_completed_meals').insert(completedMealRows);
+    const { error } = await supabase.from('app_diet_completed_meals').upsert(completedMealRows);
     if (error) {
       console.error('Erro ao salvar progresso de dieta relacional', error);
       return false;
     }
   }
 
-  return true;
+  const didSoftDeleteMeals = await softDeleteMissingRows('app_diet_meals', userId, mealRows.map((item) => item.id));
+  const didDeleteFoods = await deleteMissingRows('app_diet_foods', userId, foodRows.map((item) => item.id));
+  const didDeleteDayMeals = await deleteMissingRows('app_diet_day_meals', userId, dayMealRows.map((item) => item.id));
+  const didDeleteCompletedMeals = await deleteMissingRows('app_diet_completed_meals', userId, completedMealRows.map((item) => item.id));
+
+  return didSoftDeleteMeals && didDeleteFoods && didDeleteDayMeals && didDeleteCompletedMeals;
 }
