@@ -201,12 +201,18 @@ Critério de aceite:
 
 ## Fase 4 - Salvar qualquer dado direto no banco
 
-- [ ] Criar camada nova de persistencia relacional, separada de `appStateService.ts`.
+- [x] Criar camada nova de persistencia relacional, separada de `appStateService.ts`.
 - [ ] Salvar diretamente no banco toda alteracao importante do app: perfil, agua, dieta, refeicoes, alimentos, peso, treinos, exercicios e series.
 - [ ] Estado local deve servir apenas para UI temporaria, nao como fonte unica de verdade.
 - [ ] Remover dependencia de botao manual como unica forma de persistir dados.
 - [ ] Exibir estados de salvamento, sucesso e erro.
 - [ ] Evitar salvar snapshots antigos do app inteiro quando a alteracao e pequena.
+
+Status:
+
+- Leitura relacional criada em `src/services/relationalAppStateService.ts`.
+- `loadRemoteAppState` agora tenta ler tabelas relacionais e cai para `user_app_states` se nao houver dados relacionais.
+- Escrita ainda continua no fluxo antigo; isso evita mudar tudo de uma vez.
 
 Critério de aceite:
 
