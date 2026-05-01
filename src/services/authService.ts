@@ -1,4 +1,10 @@
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
+import {
+  buildAppRedirectUrl,
+  buildCleanAuthRedirectPath,
+  buildPasswordResetRedirectUrl,
+  hasPasswordRecoveryParams
+} from '../lib/authRedirect';
 import { supabase } from '../lib/supabaseClient';
 
 export interface AuthActionResult {
@@ -11,7 +17,15 @@ function getAppRedirectUrl() {
     return undefined;
   }
 
-  return new URL(import.meta.env.BASE_URL, window.location.origin).toString();
+  return buildAppRedirectUrl(import.meta.env.BASE_URL, window.location.origin);
+}
+
+function getPasswordResetRedirectUrl() {
+  if (typeof window === 'undefined') {
+    return undefined;
+  }
+
+  return buildPasswordResetRedirectUrl(import.meta.env.BASE_URL, window.location.origin);
 }
 
 export function isPasswordRecoveryRedirect() {
@@ -19,10 +33,7 @@ export function isPasswordRecoveryRedirect() {
     return false;
   }
 
-  const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-  const searchParams = new URLSearchParams(window.location.search);
-
-  return hashParams.get('type') === 'recovery' || searchParams.get('type') === 'recovery';
+  return hasPasswordRecoveryParams(window.location.search, window.location.hash);
 }
 
 export function clearAuthRedirectUrl() {
@@ -30,7 +41,7 @@ export function clearAuthRedirectUrl() {
     return;
   }
 
-  window.history.replaceState({}, document.title, window.location.pathname);
+  window.history.replaceState({}, document.title, buildCleanAuthRedirectPath(window.location.pathname));
 }
 
 export async function getCurrentSession() {
@@ -80,7 +91,7 @@ export async function signUpWithEmail(email: string, password: string): Promise<
 
 export async function requestPasswordReset(email: string) {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: getAppRedirectUrl()
+    redirectTo: getPasswordResetRedirectUrl()
   });
 
   if (error) {

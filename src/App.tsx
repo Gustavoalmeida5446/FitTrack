@@ -7,10 +7,11 @@ import { useAuthSession } from './hooks/useAuthSession';
 import { useDailyDietReset } from './hooks/useDailyDietReset';
 import { useDailyWaterReset } from './hooks/useDailyWaterReset';
 import { useDailyWorkoutReset } from './hooks/useDailyWorkoutReset';
-import { type AppView, useLocalNavigation } from './hooks/useLocalNavigation';
+import { useAppRouter } from './hooks/useAppRouter';
 import { useRemoteAppState } from './hooks/useRemoteAppState';
 import { useTutorial } from './hooks/useTutorial';
 import { AppState, defaultAppState, normalizeWaterData, normalizeWeeklyDiet } from './lib/appState';
+import { type AppView } from './lib/appRouter';
 import {
   addWaterAmount,
   createWeightHistoryEntry,
@@ -95,7 +96,7 @@ export default function App() {
     openDietSetup,
     openWorkout,
     openDietDay
-  } = useLocalNavigation();
+  } = useAppRouter();
 
   const [profile, setProfile] = useState(defaultAppState.profile);
   const [workouts, setWorkouts] = useState(defaultAppState.workouts);
@@ -154,6 +155,8 @@ export default function App() {
     : remoteSyncError === 'save'
       ? 'Não foi possível sincronizar suas alterações agora. Vamos tentar salvar novamente automaticamente.'
       : '';
+  const shouldShowWorkoutSetup = view === 'workout-setup' || (view === 'workout' && isRemoteReady && !selectedWorkout);
+  const shouldShowDietSetup = view === 'diet-setup' || (view === 'diet-day' && isRemoteReady && !selectedDay);
   const handleResetWorkoutProgress = useCallback((nextState: { workouts: Workout[]; workoutsUpdatedAt: string }) => {
     setWorkouts(nextState.workouts);
     setWorkoutsUpdatedAt(nextState.workoutsUpdatedAt);
@@ -389,7 +392,7 @@ export default function App() {
             />
           ) : null}
 
-          {view === 'workout-setup' ? (
+          {shouldShowWorkoutSetup ? (
             <WorkoutSetupPage
               onBack={openHome}
               workouts={workouts}
@@ -403,7 +406,7 @@ export default function App() {
             />
           ) : null}
 
-          {view === 'diet-setup' ? (
+          {shouldShowDietSetup ? (
             <DietSetupPage
               onBack={openHome}
               diet={weeklyDiet}
@@ -446,13 +449,13 @@ export default function App() {
             </span>
             <span className="bottom-nav__label">Início</span>
           </Button>
-          <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'workout-setup' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={openWorkoutSetup}>
+          <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'workout-setup' || view === 'workout' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={openWorkoutSetup}>
             <span className="bottom-nav__icon" aria-hidden="true">
               <Calendar size={20} />
             </span>
             <span className="bottom-nav__label">Treinos</span>
           </Button>
-          <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'diet-setup' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={openDietSetup}>
+          <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'diet-setup' || view === 'diet-day' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={openDietSetup}>
             <span className="bottom-nav__icon" aria-hidden="true">
               <CalendarHeatMap size={20} />
             </span>
