@@ -8,12 +8,31 @@ import {
 import { supabase } from '../lib/supabaseClient';
 import { normalizeWorkoutExerciseSets, summarizeWorkoutExerciseSets } from '../lib/workoutSets';
 
+interface RelationalAppStateSnapshot {
+  state: AppState;
+  updatedAt: string;
+}
+
 function stableId(...parts: Array<string | number>) {
   return parts.map((part) => encodeURIComponent(String(part))).join(':');
 }
 
 function mapRowList<Row>(data: Row[] | null): Row[] {
   return Array.isArray(data) ? data : [];
+}
+
+function getRowUpdatedAt(row: { updated_at?: string | null } | null | undefined): string | null {
+  return typeof row?.updated_at === 'string' && row.updated_at.trim() ? row.updated_at : null;
+}
+
+function getLatestUpdatedAt(rows: Array<{ updated_at?: string | null } | null | undefined>): string {
+  const timestamps = rows
+    .map(getRowUpdatedAt)
+    .filter((updatedAt): updatedAt is string => Boolean(updatedAt));
+
+  timestamps.sort();
+
+  return timestamps[timestamps.length - 1] ?? '';
 }
 
 async function deleteMissingRows(tableName: string, userId: string, currentIds: string[]) {
@@ -75,7 +94,7 @@ async function softDeleteMissingRows(tableName: string, userId: string, currentI
   return true;
 }
 
-export async function loadRelationalAppState(session: Session, workoutsUpdatedAt: string): Promise<AppState | null> {
+export async function loadRelationalAppStateSnapshot(session: Session, workoutsUpdatedAt: string): Promise<RelationalAppStateSnapshot | null> {
   const userId = session.user.id;
   const [
     profileResult,
@@ -244,7 +263,32 @@ export async function loadRelationalAppState(session: Session, workoutsUpdatedAt
     }))
   };
 
-  return convertRelationalRecordsToAppState(records, workoutsUpdatedAt);
+  const state = convertRelationalRecordsToAppState(records, workoutsUpdatedAt);
+  const updatedAt = getLatestUpdatedAt([
+    profileResult.data,
+    waterResult.data,
+    dietResult.data,
+    ...mapRowList(weightResult.data),
+    ...mapRowList(workoutResult.data),
+    ...mapRowList(exerciseResult.data),
+    ...mapRowList(setResult.data),
+    ...mapRowList(mealResult.data),
+    ...mapRowList(foodResult.data),
+    ...mapRowList(dayResult.data),
+    ...mapRowList(dayMealResult.data),
+    ...mapRowList(completedMealResult.data)
+  ]);
+
+  return {
+    state,
+    updatedAt
+  };
+}
+
+export async function loadRelationalAppState(session: Session, workoutsUpdatedAt: string): Promise<AppState | null> {
+  const snapshot = await loadRelationalAppStateSnapshot(session, workoutsUpdatedAt);
+
+  return snapshot?.state ?? null;
 }
 
 export async function saveRelationalProfile(session: Session, profile: AppState['profile']) {
@@ -306,7 +350,8 @@ export async function replaceRelationalWeightHistory(session: Session, weightHis
     legacy_id: item.date,
     position: index,
     logged_at: item.date,
-    weight: item.weight
+    weight: item.weight,
+    updated_at: new Date().toISOString()
   }));
 
   if (rows.length > 0) {
@@ -465,13 +510,15 @@ export async function replaceRelationalDiet(session: Session, diet: WeeklyDiet) 
     user_id: userId,
     day_id: stableId(userId, 'diet', diet.id, 'day', day.id),
     meal_id: stableId(userId, 'diet', diet.id, 'meal', mealId),
-    position: mealIndex
+    position: mealIndex,
+    updated_at: new Date().toISOString()
   })));
   const completedMealRows = diet.days.flatMap((day) => day.completedMealIds.map((mealId) => ({
     id: stableId(userId, 'diet', diet.id, 'day', day.id, 'completedMeal', mealId),
     user_id: userId,
     day_id: stableId(userId, 'diet', diet.id, 'day', day.id),
-    meal_id: stableId(userId, 'diet', diet.id, 'meal', mealId)
+    meal_id: stableId(userId, 'diet', diet.id, 'meal', mealId),
+    updated_at: new Date().toISOString()
   })));
 
   const dietResult = await supabase.from('app_diets').upsert({

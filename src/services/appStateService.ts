@@ -12,7 +12,7 @@ import {
 } from '../lib/appState';
 import { supabase } from '../lib/supabaseClient';
 import { validateAppState } from '../lib/validation';
-import { loadRelationalAppState } from './relationalAppStateService';
+import { loadRelationalAppStateSnapshot } from './relationalAppStateService';
 
 interface RemoteAppStateRow {
   profile: AppState['profile'];
@@ -20,6 +20,17 @@ interface RemoteAppStateRow {
   water: AppState['water'];
   weekly_diet: unknown;
   weight_history: AppState['weightHistory'];
+  updated_at?: string | null;
+}
+
+function isMissingUpdatedAtColumnError(error: { message?: string; details?: string; hint?: string; code?: string } | null): boolean {
+  if (!error) {
+    return false;
+  }
+
+  const errorText = `${error.message ?? ''} ${error.details ?? ''} ${error.hint ?? ''}`.toLowerCase();
+
+  return error.code === '42703' || errorText.includes('updated_at');
 }
 
 // Formato remoto atual:
@@ -47,6 +58,18 @@ function mapRemoteRow(row: RemoteAppStateRow): AppState {
   return validateAppState(mappedState) ?? sanitizeAppStateForSave(mappedState);
 }
 
+function shouldUseRelationalState(remoteUpdatedAt: string | null | undefined, relationalUpdatedAt: string): boolean {
+  if (!relationalUpdatedAt) {
+    return false;
+  }
+
+  if (!remoteUpdatedAt) {
+    return true;
+  }
+
+  return relationalUpdatedAt >= remoteUpdatedAt;
+}
+
 async function createRemoteAppState(session: Session, state: AppState) {
   const sanitizedState = sanitizeAppStateForSave(state);
   const validState = validateAppState(sanitizedState);
@@ -61,16 +84,33 @@ async function createRemoteAppState(session: Session, state: AppState) {
     return null;
   }
 
+  const row = {
+    user_id: session.user.id,
+    profile: validState.profile,
+    workouts: serializeWorkoutProgressState(validState.workouts, validState.workoutsUpdatedAt),
+    water: validState.water,
+    weekly_diet: validState.weeklyDiet,
+    weight_history: validState.weightHistory
+  };
   const { error } = await supabase
     .from('user_app_states')
     .insert({
-      user_id: session.user.id,
-      profile: validState.profile,
-      workouts: serializeWorkoutProgressState(validState.workouts, validState.workoutsUpdatedAt),
-      water: validState.water,
-      weekly_diet: validState.weeklyDiet,
-      weight_history: validState.weightHistory
+      ...row,
+      updated_at: new Date().toISOString()
     });
+
+  if (isMissingUpdatedAtColumnError(error)) {
+    const fallbackResult = await supabase
+      .from('user_app_states')
+      .insert(row);
+
+    if (fallbackResult.error) {
+      console.error('Erro ao criar estado remoto', fallbackResult.error);
+      return null;
+    }
+
+    return validState;
+  }
 
   if (error) {
     console.error('Erro ao criar estado remoto', error);
@@ -81,11 +121,20 @@ async function createRemoteAppState(session: Session, state: AppState) {
 }
 
 export async function loadRemoteAppState(session: Session): Promise<AppState | null> {
-  const { data, error } = await supabase
+  const result = await supabase
     .from('user_app_states')
-    .select('profile, workouts, water, weekly_diet, weight_history')
+    .select('profile, workouts, water, weekly_diet, weight_history, updated_at')
     .eq('user_id', session.user.id)
     .maybeSingle();
+  const fallbackResult = result.error && isMissingUpdatedAtColumnError(result.error)
+    ? await supabase
+      .from('user_app_states')
+      .select('profile, workouts, water, weekly_diet, weight_history')
+      .eq('user_id', session.user.id)
+      .maybeSingle()
+    : null;
+  const data = fallbackResult ? fallbackResult.data : result.data;
+  const error = fallbackResult ? fallbackResult.error : result.error;
 
   if (error) {
     console.error('Erro ao carregar estado remoto', error);
@@ -99,11 +148,12 @@ export async function loadRemoteAppState(session: Session): Promise<AppState | n
     });
   }
 
-  const mappedState = mapRemoteRow(data as RemoteAppStateRow);
-  const relationalState = await loadRelationalAppState(session, mappedState.workoutsUpdatedAt);
+  const remoteRow = data as RemoteAppStateRow;
+  const mappedState = mapRemoteRow(remoteRow);
+  const relationalSnapshot = await loadRelationalAppStateSnapshot(session, mappedState.workoutsUpdatedAt);
 
-  if (relationalState) {
-    return relationalState;
+  if (relationalSnapshot && shouldUseRelationalState(remoteRow.updated_at, relationalSnapshot.updatedAt)) {
+    return relationalSnapshot.state;
   }
 
   return mappedState;
@@ -123,16 +173,33 @@ export async function saveRemoteAppState(session: Session, state: AppState) {
     return false;
   }
 
+  const row = {
+    user_id: session.user.id,
+    profile: validState.profile,
+    workouts: serializeWorkoutProgressState(validState.workouts, validState.workoutsUpdatedAt),
+    water: validState.water,
+    weekly_diet: validState.weeklyDiet,
+    weight_history: validState.weightHistory
+  };
   const { error } = await supabase
     .from('user_app_states')
     .upsert({
-      user_id: session.user.id,
-      profile: validState.profile,
-      workouts: serializeWorkoutProgressState(validState.workouts, validState.workoutsUpdatedAt),
-      water: validState.water,
-      weekly_diet: validState.weeklyDiet,
-      weight_history: validState.weightHistory
+      ...row,
+      updated_at: new Date().toISOString()
     });
+
+  if (isMissingUpdatedAtColumnError(error)) {
+    const fallbackResult = await supabase
+      .from('user_app_states')
+      .upsert(row);
+
+    if (fallbackResult.error) {
+      console.error('Erro ao salvar estado remoto', fallbackResult.error);
+      return false;
+    }
+
+    return true;
+  }
 
   if (error) {
     console.error('Erro ao salvar estado remoto', error);

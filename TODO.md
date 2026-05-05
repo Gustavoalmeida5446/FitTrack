@@ -74,13 +74,13 @@ Status:
 - [src/hooks/useRemoteAppState.ts](/home/gustavo/projects/FitTrack/src/hooks/useRemoteAppState.ts)
 - [src/hooks/useTutorial.ts](/home/gustavo/projects/FitTrack/src/hooks/useTutorial.ts)
 - [src/hooks/useDailyWorkoutReset.ts](/home/gustavo/projects/FitTrack/src/hooks/useDailyWorkoutReset.ts)
-- [src/hooks/useLocalNavigation.ts](/home/gustavo/projects/FitTrack/src/hooks/useLocalNavigation.ts)
+- [src/hooks/useAppRouter.ts](/home/gustavo/projects/FitTrack/src/hooks/useAppRouter.ts)
 - Tarefas:
 - [x] extrair `useAuthSession`
 - [x] extrair `useRemoteAppState`
 - [x] extrair `useTutorial`
 - [x] extrair `useDailyWorkoutReset`
-- [x] extrair navegação local
+- [x] extrair navegação por rotas reais
 
 ### [x] 5. Separar compatibilidade legada da lógica principal de estado
 - Objetivo: simplificar leitura e manutenção de persistência.

@@ -323,9 +323,9 @@ Status:
 Traducao da base:
 
 - Total de exercicios em `exercises.json`: `873`.
-- Exercicios com `ptName` em `src/data/exercise-name-pt.json`: `296`.
-- Exercicios faltando traducao: `577`.
-- Faltam `12` lotes de `50` traducoes, ou `6` lotes de `100`.
+- Exercicios com `ptName` em `src/data/exercise-name-pt.json`: `873`.
+- Exercicios faltando traducao: `0`.
+- Faltam `0` lotes de `50` traducoes, ou `0` lotes de `100`.
 
 Critério de aceite:
 
@@ -333,6 +333,20 @@ Critério de aceite:
 - Buscar "triceps overhead extension" ou "extensao triceps halter" nao mostra abdominal ou agachamento.
 - Buscar "agachamento halter" ou "dumbbell squat" retorna agachamentos com halteres.
 - Termo sem resultado relevante mostra mensagem de nenhum exercicio encontrado.
+
+## Fase 7.2 - Traducao da base de exercicios
+
+- [x] Traduzir mais um lote de `50` exercicios direto na `master`.
+- [x] Traduzir mais `3` lotes de `50` exercicios direto na `master`.
+- [x] Traduzir mais `4` lotes de `50` exercicios direto na `master`.
+- [x] Traduzir o lote final de `177` exercicios direto na `master`.
+
+Status:
+
+- Base traduzida de `Adductor` ate `Zottman_Preacher_Curl`.
+- Total atualizado: `873` exercicios traduzidos de `873`.
+- Restam `0` exercicios sem traducao.
+- Restam `0` lotes de `50` traducoes, ou `0` lotes de `100`.
 
 ## Fase 8 - Recuperacao de senha
 

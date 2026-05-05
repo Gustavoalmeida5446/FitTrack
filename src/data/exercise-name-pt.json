@@ -912,5 +912,1736 @@
   },
   "Thigh_Abductor": {
     "ptName": "Abdução de quadril na máquina"
+  },
+  "Adductor": {
+    "ptName": "Liberação dos adutores no rolo"
+  },
+  "Adductor_Groin": {
+    "ptName": "Alongamento de adutores e virilha"
+  },
+  "Advanced_Kettlebell_Windmill": {
+    "ptName": "Windmill avançado com kettlebell"
+  },
+  "All_Fours_Quad_Stretch": {
+    "ptName": "Alongamento de quadríceps em quatro apoios"
+  },
+  "Alternate_Heel_Touchers": {
+    "ptName": "Toque alternado nos calcanhares"
+  },
+  "Alternate_Leg_Diagonal_Bound": {
+    "ptName": "Salto diagonal alternado com as pernas"
+  },
+  "Alternating_Hang_Clean": {
+    "ptName": "Clean alternado suspenso com kettlebell"
+  },
+  "Ankle_Circles": {
+    "ptName": "Círculos de tornozelo"
+  },
+  "Ankle_On_The_Knee": {
+    "ptName": "Alongamento de glúteo com tornozelo no joelho"
+  },
+  "Anterior_Tibialis-SMR": {
+    "ptName": "Liberação miofascial do tibial anterior"
+  },
+  "Arm_Circles": {
+    "ptName": "Círculos com os braços"
+  },
+  "Around_The_Worlds": {
+    "ptName": "Volta ao mundo com halteres"
+  },
+  "Atlas_Stone_Trainer": {
+    "ptName": "Treino com pedra atlas"
+  },
+  "Atlas_Stones": {
+    "ptName": "Pedras atlas"
+  },
+  "Backward_Drag": {
+    "ptName": "Arrasto para trás"
+  },
+  "Backward_Medicine_Ball_Throw": {
+    "ptName": "Arremesso para trás com medicine ball"
+  },
+  "Balance_Board": {
+    "ptName": "Prancha de equilíbrio"
+  },
+  "Band_Good_Morning": {
+    "ptName": "Good morning com elástico"
+  },
+  "Band_Good_Morning_Pull_Through": {
+    "ptName": "Good morning com elástico em pull-through"
+  },
+  "Band_Skull_Crusher": {
+    "ptName": "Tríceps testa com elástico"
+  },
+  "Battling_Ropes": {
+    "ptName": "Cordas navais"
+  },
+  "Bear_Crawl_Sled_Drags": {
+    "ptName": "Arrasto de trenó em bear crawl"
+  },
+  "Behind_Head_Chest_Stretch": {
+    "ptName": "Alongamento de peito com mãos atrás da cabeça"
+  },
+  "Bench_Jump": {
+    "ptName": "Salto no banco"
+  },
+  "Bench_Sprint": {
+    "ptName": "Sprint no banco"
+  },
+  "Bent_Press": {
+    "ptName": "Bent press com kettlebell"
+  },
+  "Bicycling": {
+    "ptName": "Ciclismo"
+  },
+  "Bicycling_Stationary": {
+    "ptName": "Bicicleta ergométrica"
+  },
+  "Body-Up": {
+    "ptName": "Extensão de tríceps com peso corporal"
+  },
+  "Bottoms-Up_Clean_From_The_Hang_Position": {
+    "ptName": "Clean bottoms-up a partir da posição suspensa"
+  },
+  "Bottoms_Up": {
+    "ptName": "Elevação de quadril abdominal"
+  },
+  "Box_Jump_Multiple_Response": {
+    "ptName": "Salto na caixa com respostas múltiplas"
+  },
+  "Box_Skip": {
+    "ptName": "Skip na caixa"
+  },
+  "Brachialis-SMR": {
+    "ptName": "Liberação miofascial do braquial"
+  },
+  "Butt-Ups": {
+    "ptName": "Elevação de quadril em prancha"
+  },
+  "Butt_Lift_Bridge": {
+    "ptName": "Ponte de glúteos"
+  },
+  "Calf_Stretch_Elbows_Against_Wall": {
+    "ptName": "Alongamento de panturrilha com cotovelos na parede"
+  },
+  "Calf_Stretch_Hands_Against_Wall": {
+    "ptName": "Alongamento de panturrilha com mãos na parede"
+  },
+  "Calves-SMR": {
+    "ptName": "Liberação miofascial das panturrilhas"
+  },
+  "Car_Drivers": {
+    "ptName": "Volante com barra"
+  },
+  "Carioca_Quick_Step": {
+    "ptName": "Passada carioca rápida"
+  },
+  "Cat_Stretch": {
+    "ptName": "Alongamento gato"
+  },
+  "Catch_and_Overhead_Throw": {
+    "ptName": "Recepção e arremesso acima da cabeça"
+  },
+  "Chair_Leg_Extended_Stretch": {
+    "ptName": "Alongamento de posteriores na cadeira com perna estendida"
+  },
+  "Chair_Lower_Back_Stretch": {
+    "ptName": "Alongamento lombar na cadeira"
+  },
+  "Chair_Upper_Body_Stretch": {
+    "ptName": "Alongamento de tronco na cadeira"
+  },
+  "Chest_And_Front_Of_Shoulder_Stretch": {
+    "ptName": "Alongamento de peito e deltoide anterior"
+  },
+  "Chest_Push_from_3_point_stance": {
+    "ptName": "Arremesso de peito em apoio de três pontos"
+  },
+  "Chest_Push_multiple_response": {
+    "ptName": "Arremesso de peito com respostas múltiplas"
+  },
+  "Chest_Push_single_response": {
+    "ptName": "Arremesso de peito com resposta única"
+  },
+  "Chest_Push_with_Run_Release": {
+    "ptName": "Arremesso de peito com corrida e soltura"
+  },
+  "Chest_Stretch_on_Stability_Ball": {
+    "ptName": "Alongamento de peito na bola de estabilidade"
+  },
+  "Childs_Pose": {
+    "ptName": "Postura da criança"
+  },
+  "Chin_To_Chest_Stretch": {
+    "ptName": "Alongamento do queixo ao peito"
+  },
+  "Circus_Bell": {
+    "ptName": "Circus bell"
+  },
+  "Clean_Pull": {
+    "ptName": "Puxada do clean"
+  },
+  "Clean_Shrug": {
+    "ptName": "Encolhimento do clean"
+  },
+  "Clean_from_Blocks": {
+    "ptName": "Clean a partir dos blocos"
+  },
+  "Cocoons": {
+    "ptName": "Abdominal casulo"
+  },
+  "Conans_Wheel": {
+    "ptName": "Roda de Conan"
+  },
+  "Cross_Over_-_With_Bands": {
+    "ptName": "Cross over com elásticos"
+  },
+  "Crossover_Reverse_Lunge": {
+    "ptName": "Afundo reverso cruzado"
+  },
+  "Crucifix": {
+    "ptName": "Crucifixo isométrico"
+  },
+  "Dancers_Stretch": {
+    "ptName": "Alongamento do dançarino"
+  },
+  "Dead_Bug": {
+    "ptName": "Dead bug"
+  },
+  "Depth_Jump_Leap": {
+    "ptName": "Salto em profundidade com impulsão"
+  },
+  "Double_Kettlebell_Alternating_Hang_Clean": {
+    "ptName": "Clean suspenso alternado com dois kettlebells"
+  },
+  "Double_Kettlebell_Jerk": {
+    "ptName": "Jerk com dois kettlebells"
+  },
+  "Double_Kettlebell_Push_Press": {
+    "ptName": "Push press com dois kettlebells"
+  },
+  "Double_Kettlebell_Snatch": {
+    "ptName": "Snatch com dois kettlebells"
+  },
+  "Double_Kettlebell_Windmill": {
+    "ptName": "Windmill com dois kettlebells"
+  },
+  "Double_Leg_Butt_Kick": {
+    "ptName": "Chute de glúteos com as duas pernas"
+  },
+  "Downward_Facing_Balance": {
+    "ptName": "Equilíbrio voltado para baixo"
+  },
+  "Drop_Push": {
+    "ptName": "Flexão com queda"
+  },
+  "Dumbbell_Clean": {
+    "ptName": "Clean com halteres"
+  },
+  "Dumbbell_Lying_Pronation": {
+    "ptName": "Pronação de punho deitado com halter"
+  },
+  "Dumbbell_Lying_Supination": {
+    "ptName": "Supinação de punho deitado com halter"
+  },
+  "Dumbbell_Scaption": {
+    "ptName": "Scaption com halteres"
+  },
+  "Dumbbell_Seated_Box_Jump": {
+    "ptName": "Salto na caixa sentado com halteres"
+  },
+  "Dumbbell_Side_Bend": {
+    "ptName": "Flexão lateral com halter"
+  },
+  "Dynamic_Back_Stretch": {
+    "ptName": "Alongamento dinâmico das costas"
+  },
+  "Dynamic_Chest_Stretch": {
+    "ptName": "Alongamento dinâmico do peito"
+  },
+  "EZ-Bar_Skullcrusher": {
+    "ptName": "Tríceps testa com barra EZ"
+  },
+  "Elbow_Circles": {
+    "ptName": "Círculos com os cotovelos"
+  },
+  "Elbow_to_Knee": {
+    "ptName": "Abdominal cotovelo no joelho"
+  },
+  "Elbows_Back": {
+    "ptName": "Alongamento com cotovelos para trás"
+  },
+  "Elliptical_Trainer": {
+    "ptName": "Elíptico"
+  },
+  "Exercise_Ball_Pull-In": {
+    "ptName": "Recolhimento de joelhos na bola"
+  },
+  "Extended_Range_One-Arm_Kettlebell_Floor_Press": {
+    "ptName": "Supino no chão unilateral com kettlebell em amplitude estendida"
+  },
+  "External_Rotation": {
+    "ptName": "Rotação externa com halter"
+  },
+  "External_Rotation_with_Band": {
+    "ptName": "Rotação externa com elástico"
+  },
+  "External_Rotation_with_Cable": {
+    "ptName": "Rotação externa no cabo"
+  },
+  "Farmers_Walk": {
+    "ptName": "Caminhada do fazendeiro"
+  },
+  "Fast_Skipping": {
+    "ptName": "Skipping rápido"
+  },
+  "Flexor_Incline_Dumbbell_Curls": {
+    "ptName": "Rosca inclinada para flexores com halteres"
+  },
+  "Flutter_Kicks": {
+    "ptName": "Chutes alternados"
+  },
+  "Foot-SMR": {
+    "ptName": "Liberação miofascial dos pés"
+  },
+  "Forward_Drag_with_Press": {
+    "ptName": "Arrasto para frente com press"
+  },
+  "Frog_Hops": {
+    "ptName": "Saltos de sapo"
+  },
+  "Frog_Sit-Ups": {
+    "ptName": "Abdominal sapo"
+  },
+  "Front_Box_Jump": {
+    "ptName": "Salto frontal na caixa"
+  },
+  "Front_Cone_Hops_or_hurdle_hops": {
+    "ptName": "Saltos frontais sobre cones ou barreiras"
+  },
+  "Front_Leg_Raises": {
+    "ptName": "Elevação frontal de pernas"
+  },
+  "Gironda_Sternum_Chins": {
+    "ptName": "Barra fixa Gironda até o esterno"
+  },
+  "Good_Morning": {
+    "ptName": "Good morning com barra"
+  },
+  "Good_Morning_off_Pins": {
+    "ptName": "Good morning a partir dos pinos"
+  },
+  "Gorilla_Chin_Crunch": {
+    "ptName": "Barra fixa abdominal gorila"
+  },
+  "Groin_and_Back_Stretch": {
+    "ptName": "Alongamento de virilha e costas"
+  },
+  "Groiners": {
+    "ptName": "Alongamento groiner"
+  },
+  "Hamstring-SMR": {
+    "ptName": "Liberação miofascial dos posteriores"
+  },
+  "Hamstring_Stretch": {
+    "ptName": "Alongamento dos posteriores"
+  },
+  "Handstand_Push-Ups": {
+    "ptName": "Flexão em parada de mão"
+  },
+  "Hang_Clean": {
+    "ptName": "Clean suspenso"
+  },
+  "Hang_Clean_-_Below_the_Knees": {
+    "ptName": "Clean suspenso abaixo dos joelhos"
+  },
+  "Hang_Snatch": {
+    "ptName": "Snatch suspenso"
+  },
+  "Hang_Snatch_-_Below_Knees": {
+    "ptName": "Snatch suspenso abaixo dos joelhos"
+  },
+  "Hanging_Bar_Good_Morning": {
+    "ptName": "Good morning com barra suspensa"
+  },
+  "Hanging_Pike": {
+    "ptName": "Pike suspenso"
+  },
+  "Heaving_Snatch_Balance": {
+    "ptName": "Snatch balance com impulso"
+  },
+  "Heavy_Bag_Thrust": {
+    "ptName": "Empurrão em saco pesado"
+  },
+  "Hip_Circles_prone": {
+    "ptName": "Círculos de quadril em pronação"
+  },
+  "Hip_Extension_with_Bands": {
+    "ptName": "Extensão de quadril com elásticos"
+  },
+  "Hip_Flexion_with_Band": {
+    "ptName": "Flexão de quadril com elástico"
+  },
+  "Hip_Lift_with_Band": {
+    "ptName": "Elevação de quadril com elástico"
+  },
+  "Hug_A_Ball": {
+    "ptName": "Abraçar a bola"
+  },
+  "Hug_Knees_To_Chest": {
+    "ptName": "Abraçar joelhos no peito"
+  },
+  "Hurdle_Hops": {
+    "ptName": "Saltos sobre barreiras"
+  },
+  "Hyperextensions_With_No_Hyperextension_Bench": {
+    "ptName": "Hiperextensão sem banco romano"
+  },
+  "IT_Band_and_Glute_Stretch": {
+    "ptName": "Alongamento da banda iliotibial e glúteo"
+  },
+  "Iliotibial_Tract-SMR": {
+    "ptName": "Liberação miofascial da banda iliotibial"
+  },
+  "Inchworm": {
+    "ptName": "Inchworm"
+  },
+  "Intermediate_Groin_Stretch": {
+    "ptName": "Alongamento intermediário de virilha"
+  },
+  "Intermediate_Hip_Flexor_and_Quad_Stretch": {
+    "ptName": "Alongamento intermediário de flexor do quadril e quadríceps"
+  },
+  "Internal_Rotation_with_Band": {
+    "ptName": "Rotação interna com elástico"
+  },
+  "Iron_Cross": {
+    "ptName": "Cruz de ferro com halteres"
+  },
+  "Iron_Crosses_stretch": {
+    "ptName": "Cruz de ferro para alongamento"
+  },
+  "Isometric_Chest_Squeezes": {
+    "ptName": "Contração isométrica de peito"
+  },
+  "Isometric_Neck_Exercise_-_Front_And_Back": {
+    "ptName": "Exercício isométrico de pescoço frontal e posterior"
+  },
+  "Isometric_Neck_Exercise_-_Sides": {
+    "ptName": "Exercício isométrico lateral de pescoço"
+  },
+  "Isometric_Wipers": {
+    "ptName": "Limpadores isométricos"
+  },
+  "Jackknife_Sit-Up": {
+    "ptName": "Abdominal canivete"
+  },
+  "Janda_Sit-Up": {
+    "ptName": "Abdominal Janda"
+  },
+  "Jerk_Balance": {
+    "ptName": "Equilíbrio do jerk"
+  },
+  "Jerk_Dip_Squat": {
+    "ptName": "Agachamento dip do jerk"
+  },
+  "Jogging_Treadmill": {
+    "ptName": "Corrida leve na esteira"
+  },
+  "Keg_Load": {
+    "ptName": "Carga de barril"
+  },
+  "Kettlebell_Arnold_Press": {
+    "ptName": "Desenvolvimento Arnold com kettlebell"
+  },
+  "Kettlebell_Dead_Clean": {
+    "ptName": "Dead clean com kettlebell"
+  },
+  "Kettlebell_Figure_8": {
+    "ptName": "Figura 8 com kettlebell"
+  },
+  "Kettlebell_Hang_Clean": {
+    "ptName": "Clean suspenso com kettlebell"
+  },
+  "Kettlebell_One-Legged_Deadlift": {
+    "ptName": "Levantamento terra unilateral com kettlebell"
+  },
+  "Kettlebell_Pass_Between_The_Legs": {
+    "ptName": "Passagem de kettlebell entre as pernas"
+  },
+  "Kettlebell_Pirate_Ships": {
+    "ptName": "Pirate ships com kettlebell"
+  },
+  "Kettlebell_Pistol_Squat": {
+    "ptName": "Agachamento pistol com kettlebell"
+  },
+  "Kettlebell_Seated_Press": {
+    "ptName": "Desenvolvimento sentado com kettlebell"
+  },
+  "Kettlebell_Seesaw_Press": {
+    "ptName": "Desenvolvimento alternado seesaw com kettlebell"
+  },
+  "Kettlebell_Sumo_High_Pull": {
+    "ptName": "Puxada alta sumô com kettlebell"
+  },
+  "Kettlebell_Thruster": {
+    "ptName": "Thruster com kettlebell"
+  },
+  "Kettlebell_Turkish_Get-Up_Lunge_style": {
+    "ptName": "Turkish get-up com kettlebell estilo afundo"
+  },
+  "Kettlebell_Turkish_Get-Up_Squat_style": {
+    "ptName": "Turkish get-up com kettlebell estilo agachamento"
+  },
+  "Kettlebell_Windmill": {
+    "ptName": "Windmill com kettlebell"
+  },
+  "Kipping_Muscle_Up": {
+    "ptName": "Muscle-up com kipping"
+  },
+  "Knee_Across_The_Body": {
+    "ptName": "Joelho cruzado sobre o corpo"
+  },
+  "Knee_Circles": {
+    "ptName": "Círculos com os joelhos"
+  },
+  "Knee_Tuck_Jump": {
+    "ptName": "Salto com joelhos ao peito"
+  },
+  "Kneeling_Arm_Drill": {
+    "ptName": "Drill de braços ajoelhado"
+  },
+  "Kneeling_Forearm_Stretch": {
+    "ptName": "Alongamento de antebraço ajoelhado"
+  },
+  "Kneeling_Hip_Flexor": {
+    "ptName": "Alongamento de flexor do quadril ajoelhado"
+  },
+  "Kneeling_Jump_Squat": {
+    "ptName": "Agachamento com salto ajoelhado"
+  },
+  "Kneeling_Squat": {
+    "ptName": "Agachamento ajoelhado"
+  },
+  "Landmine_180s": {
+    "ptName": "Rotação 180 no landmine"
+  },
+  "Landmine_Linear_Jammer": {
+    "ptName": "Jammer linear no landmine"
+  },
+  "Lateral_Bound": {
+    "ptName": "Salto lateral"
+  },
+  "Lateral_Box_Jump": {
+    "ptName": "Salto lateral na caixa"
+  },
+  "Lateral_Cone_Hops": {
+    "ptName": "Saltos laterais sobre cones"
+  },
+  "Latissimus_Dorsi-SMR": {
+    "ptName": "Liberação miofascial do latíssimo do dorso"
+  },
+  "Leg-Up_Hamstring_Stretch": {
+    "ptName": "Alongamento de posteriores com perna elevada"
+  },
+  "Leverage_Shrug": {
+    "ptName": "Encolhimento na máquina"
+  },
+  "Linear_3-Part_Start_Technique": {
+    "ptName": "Técnica de saída linear em três partes"
+  },
+  "Linear_Acceleration_Wall_Drill": {
+    "ptName": "Drill de aceleração linear na parede"
+  },
+  "Linear_Depth_Jump": {
+    "ptName": "Salto em profundidade linear"
+  },
+  "Log_Lift": {
+    "ptName": "Levantamento de tronco"
+  },
+  "London_Bridges": {
+    "ptName": "London bridges"
+  },
+  "Looking_At_Ceiling": {
+    "ptName": "Olhar para o teto"
+  },
+  "Lower_Back-SMR": {
+    "ptName": "Liberação miofascial da lombar"
+  },
+  "Lower_Back_Curl": {
+    "ptName": "Flexão lombar"
+  },
+  "Lunge_Pass_Through": {
+    "ptName": "Afundo com passagem do kettlebell"
+  },
+  "Lunge_Sprint": {
+    "ptName": "Sprint em afundo"
+  },
+  "Lying_Bent_Leg_Groin": {
+    "ptName": "Alongamento de virilha deitado com perna flexionada"
+  },
+  "Lying_Close-Grip_Bar_Curl_On_High_Pulley": {
+    "ptName": "Rosca deitado na polia alta com pegada fechada"
+  },
+  "Lying_Close-Grip_Barbell_Triceps_Extension_Behind_The_Head": {
+    "ptName": "Tríceps testa com barra pegada fechada atrás da cabeça"
+  },
+  "Lying_Close-Grip_Barbell_Triceps_Press_To_Chin": {
+    "ptName": "Tríceps com barra pegada fechada até o queixo"
+  },
+  "Lying_Crossover": {
+    "ptName": "Crossover deitado"
+  },
+  "Lying_Dumbbell_Tricep_Extension": {
+    "ptName": "Tríceps testa deitado com halteres"
+  },
+  "Lying_Face_Down_Plate_Neck_Resistance": {
+    "ptName": "Resistência de pescoço deitado de bruços com anilha"
+  },
+  "Lying_Face_Up_Plate_Neck_Resistance": {
+    "ptName": "Resistência de pescoço deitado de costas com anilha"
+  },
+  "Lying_Glute": {
+    "ptName": "Alongamento de glúteo deitado"
+  },
+  "Lying_Hamstring": {
+    "ptName": "Alongamento de posteriores deitado"
+  },
+  "Lying_High_Bench_Barbell_Curl": {
+    "ptName": "Rosca com barra deitado no banco alto"
+  },
+  "Lying_Machine_Squat": {
+    "ptName": "Agachamento deitado na máquina"
+  },
+  "Lying_One-Arm_Lateral_Raise": {
+    "ptName": "Elevação lateral unilateral deitado"
+  },
+  "Lying_Prone_Quadriceps": {
+    "ptName": "Alongamento de quadríceps deitado de bruços"
+  },
+  "Lying_Rear_Delt_Raise": {
+    "ptName": "Elevação de deltoide posterior deitado"
+  },
+  "Lying_Supine_Dumbbell_Curl": {
+    "ptName": "Rosca com halteres deitado de costas"
+  },
+  "Lying_T-Bar_Row": {
+    "ptName": "Remada T-bar deitado"
+  },
+  "Lying_Triceps_Press": {
+    "ptName": "Tríceps press deitado"
+  },
+  "Medicine_Ball_Chest_Pass": {
+    "ptName": "Passe de peito com medicine ball"
+  },
+  "Medicine_Ball_Full_Twist": {
+    "ptName": "Rotação completa com medicine ball"
+  },
+  "Medicine_Ball_Scoop_Throw": {
+    "ptName": "Arremesso scoop com medicine ball"
+  },
+  "Middle_Back_Shrug": {
+    "ptName": "Encolhimento para meio das costas"
+  },
+  "Middle_Back_Stretch": {
+    "ptName": "Alongamento do meio das costas"
+  },
+  "Mixed_Grip_Chin": {
+    "ptName": "Barra fixa com pegada mista"
+  },
+  "Monster_Walk": {
+    "ptName": "Caminhada monster walk"
+  },
+  "Moving_Claw_Series": {
+    "ptName": "Série moving claw"
+  },
+  "Muscle_Snatch": {
+    "ptName": "Muscle snatch"
+  },
+  "Muscle_Up": {
+    "ptName": "Muscle-up"
+  },
+  "Narrow_Stance_Hack_Squats": {
+    "ptName": "Agachamento hack com base fechada"
+  },
+  "Narrow_Stance_Squats": {
+    "ptName": "Agachamento com base fechada"
+  },
+  "Natural_Glute_Ham_Raise": {
+    "ptName": "Elevação natural de glúteos e posteriores"
+  },
+  "Neck-SMR": {
+    "ptName": "Liberação miofascial do pescoço"
+  },
+  "Neck_Press": {
+    "ptName": "Supino até o pescoço"
+  },
+  "Oblique_Crunches_-_On_The_Floor": {
+    "ptName": "Abdominal oblíquo no chão"
+  },
+  "Olympic_Squat": {
+    "ptName": "Agachamento olímpico"
+  },
+  "On-Your-Back_Quad_Stretch": {
+    "ptName": "Alongamento de quadríceps deitado de costas"
+  },
+  "On_Your_Side_Quad_Stretch": {
+    "ptName": "Alongamento de quadríceps de lado"
+  },
+  "One-Arm_Flat_Bench_Dumbbell_Flye": {
+    "ptName": "Crucifixo unilateral com halter no banco reto"
+  },
+  "One-Arm_High-Pulley_Cable_Side_Bends": {
+    "ptName": "Flexão lateral unilateral na polia alta"
+  },
+  "One-Arm_Incline_Lateral_Raise": {
+    "ptName": "Elevação lateral unilateral inclinada"
+  },
+  "One-Arm_Kettlebell_Clean": {
+    "ptName": "Clean unilateral com kettlebell"
+  },
+  "One-Arm_Kettlebell_Clean_and_Jerk": {
+    "ptName": "Clean and jerk unilateral com kettlebell"
+  },
+  "One-Arm_Kettlebell_Floor_Press": {
+    "ptName": "Supino no chão unilateral com kettlebell"
+  },
+  "One-Arm_Kettlebell_Jerk": {
+    "ptName": "Jerk unilateral com kettlebell"
+  },
+  "One-Arm_Kettlebell_Military_Press_To_The_Side": {
+    "ptName": "Desenvolvimento militar lateral unilateral com kettlebell"
+  },
+  "One-Arm_Kettlebell_Para_Press": {
+    "ptName": "Para press unilateral com kettlebell"
+  },
+  "One-Arm_Kettlebell_Push_Press": {
+    "ptName": "Push press unilateral com kettlebell"
+  },
+  "One-Arm_Kettlebell_Row": {
+    "ptName": "Remada unilateral com kettlebell"
+  },
+  "One-Arm_Kettlebell_Snatch": {
+    "ptName": "Snatch unilateral com kettlebell"
+  },
+  "One-Arm_Kettlebell_Split_Jerk": {
+    "ptName": "Split jerk unilateral com kettlebell"
+  },
+  "One-Arm_Kettlebell_Split_Snatch": {
+    "ptName": "Split snatch unilateral com kettlebell"
+  },
+  "One-Arm_Kettlebell_Swings": {
+    "ptName": "Swing unilateral com kettlebell"
+  },
+  "One-Arm_Long_Bar_Row": {
+    "ptName": "Remada unilateral com barra longa"
+  },
+  "One-Arm_Medicine_Ball_Slam": {
+    "ptName": "Slam unilateral com medicine ball"
+  },
+  "One-Arm_Open_Palm_Kettlebell_Clean": {
+    "ptName": "Clean unilateral com kettlebell na palma aberta"
+  },
+  "One-Arm_Overhead_Kettlebell_Squats": {
+    "ptName": "Agachamento unilateral acima da cabeça com kettlebell"
+  },
+  "One-Arm_Side_Deadlift": {
+    "ptName": "Levantamento terra lateral unilateral"
+  },
+  "One-Arm_Side_Laterals": {
+    "ptName": "Elevação lateral unilateral"
+  },
+  "One-Legged_Cable_Kickback": {
+    "ptName": "Coice unilateral no cabo"
+  },
+  "One_Arm_Against_Wall": {
+    "ptName": "Alongamento unilateral na parede"
+  },
+  "One_Arm_Chin-Up": {
+    "ptName": "Barra fixa unilateral"
+  },
+  "One_Arm_Floor_Press": {
+    "ptName": "Supino no chão unilateral"
+  },
+  "One_Arm_Pronated_Dumbbell_Triceps_Extension": {
+    "ptName": "Extensão unilateral de tríceps com halter em pegada pronada"
+  },
+  "One_Arm_Supinated_Dumbbell_Triceps_Extension": {
+    "ptName": "Extensão unilateral de tríceps com halter em pegada supinada"
+  },
+  "One_Half_Locust": {
+    "ptName": "Meia postura do gafanhoto"
+  },
+  "One_Handed_Hang": {
+    "ptName": "Suspensão unilateral"
+  },
+  "One_Knee_To_Chest": {
+    "ptName": "Um joelho ao peito"
+  },
+  "One_Leg_Barbell_Squat": {
+    "ptName": "Agachamento unilateral com barra"
+  },
+  "Open_Palm_Kettlebell_Clean": {
+    "ptName": "Clean com kettlebell na palma aberta"
+  },
+  "Otis-Up": {
+    "ptName": "Abdominal Otis-up"
+  },
+  "Overhead_Cable_Curl": {
+    "ptName": "Rosca no cabo acima da cabeça"
+  },
+  "Overhead_Lat": {
+    "ptName": "Alongamento de dorsais acima da cabeça"
+  },
+  "Overhead_Slam": {
+    "ptName": "Slam acima da cabeça"
+  },
+  "Overhead_Stretch": {
+    "ptName": "Alongamento acima da cabeça"
+  },
+  "Overhead_Triceps": {
+    "ptName": "Alongamento de tríceps acima da cabeça"
+  },
+  "Pallof_Press_With_Rotation": {
+    "ptName": "Press Pallof com rotação"
+  },
+  "Palms-Down_Dumbbell_Wrist_Curl_Over_A_Bench": {
+    "ptName": "Rosca de punho pronada com halter no banco"
+  },
+  "Palms-Down_Wrist_Curl_Over_A_Bench": {
+    "ptName": "Rosca de punho pronada no banco"
+  },
+  "Palms-Up_Barbell_Wrist_Curl_Over_A_Bench": {
+    "ptName": "Rosca de punho supinada com barra no banco"
+  },
+  "Palms-Up_Dumbbell_Wrist_Curl_Over_A_Bench": {
+    "ptName": "Rosca de punho supinada com halter no banco"
+  },
+  "Parallel_Bar_Dip": {
+    "ptName": "Mergulho nas paralelas"
+  },
+  "Pelvic_Tilt_Into_Bridge": {
+    "ptName": "Inclinação pélvica para ponte"
+  },
+  "Peroneals-SMR": {
+    "ptName": "Liberação miofascial dos fibulares"
+  },
+  "Peroneals_Stretch": {
+    "ptName": "Alongamento dos fibulares"
+  },
+  "Physioball_Hip_Bridge": {
+    "ptName": "Ponte de quadril na bola"
+  },
+  "Pin_Presses": {
+    "ptName": "Pin press"
+  },
+  "Piriformis-SMR": {
+    "ptName": "Liberação miofascial do piriforme"
+  },
+  "Plate_Pinch": {
+    "ptName": "Pinça com anilhas"
+  },
+  "Plate_Twist": {
+    "ptName": "Rotação com anilha"
+  },
+  "Platform_Hamstring_Slides": {
+    "ptName": "Deslizamento de posteriores na plataforma"
+  },
+  "Plie_Dumbbell_Squat": {
+    "ptName": "Agachamento plié com halter"
+  },
+  "Plyo_Kettlebell_Pushups": {
+    "ptName": "Flexão pliométrica com kettlebells"
+  },
+  "Plyo_Push-up": {
+    "ptName": "Flexão pliométrica"
+  },
+  "Posterior_Tibialis_Stretch": {
+    "ptName": "Alongamento do tibial posterior"
+  },
+  "Power_Clean": {
+    "ptName": "Power clean"
+  },
+  "Power_Clean_from_Blocks": {
+    "ptName": "Power clean a partir dos blocos"
+  },
+  "Power_Jerk": {
+    "ptName": "Power jerk"
+  },
+  "Power_Partials": {
+    "ptName": "Elevações parciais de ombro"
+  },
+  "Power_Snatch": {
+    "ptName": "Power snatch"
+  },
+  "Power_Snatch_from_Blocks": {
+    "ptName": "Power snatch a partir dos blocos"
+  },
+  "Power_Stairs": {
+    "ptName": "Subida power stairs"
+  },
+  "Preacher_Hammer_Dumbbell_Curl": {
+    "ptName": "Rosca martelo Scott com halteres"
+  },
+  "Press_Sit-Up": {
+    "ptName": "Abdominal com press"
+  },
+  "Prone_Manual_Hamstring": {
+    "ptName": "Flexão manual de posteriores em pronação"
+  },
+  "Prowler_Sprint": {
+    "ptName": "Sprint com prowler"
+  },
+  "Pull_Through": {
+    "ptName": "Pull-through no cabo"
+  },
+  "Push-Ups_With_Feet_On_An_Exercise_Ball": {
+    "ptName": "Flexão com pés na bola"
+  },
+  "Push_Press_-_Behind_the_Neck": {
+    "ptName": "Push press atrás da nuca"
+  },
+  "Push_Up_to_Side_Plank": {
+    "ptName": "Flexão para prancha lateral"
+  },
+  "Pushups_Close_and_Wide_Hand_Positions": {
+    "ptName": "Flexões com mãos fechadas e abertas"
+  },
+  "Pyramid": {
+    "ptName": "Pirâmide"
+  },
+  "Quad_Stretch": {
+    "ptName": "Alongamento de quadríceps"
+  },
+  "Quadriceps-SMR": {
+    "ptName": "Liberação miofascial dos quadríceps"
+  },
+  "Quick_Leap": {
+    "ptName": "Salto rápido"
+  },
+  "Rack_Delivery": {
+    "ptName": "Entrega no rack"
+  },
+  "Rack_Pull_with_Bands": {
+    "ptName": "Rack pull com elásticos"
+  },
+  "Rack_Pulls": {
+    "ptName": "Rack pull"
+  },
+  "Rear_Leg_Raises": {
+    "ptName": "Elevação posterior de pernas"
+  },
+  "Recumbent_Bike": {
+    "ptName": "Bicicleta reclinada"
+  },
+  "Return_Push_from_Stance": {
+    "ptName": "Arremesso de retorno a partir da posição base"
+  },
+  "Reverse_Band_Bench_Press": {
+    "ptName": "Supino com elásticos reversos"
+  },
+  "Reverse_Band_Box_Squat": {
+    "ptName": "Agachamento na caixa com elásticos reversos"
+  },
+  "Reverse_Band_Deadlift": {
+    "ptName": "Levantamento terra com elásticos reversos"
+  },
+  "Reverse_Band_Power_Squat": {
+    "ptName": "Agachamento power com elásticos reversos"
+  },
+  "Reverse_Band_Sumo_Deadlift": {
+    "ptName": "Levantamento terra sumô com elásticos reversos"
+  },
+  "Reverse_Barbell_Preacher_Curls": {
+    "ptName": "Rosca Scott inversa com barra"
+  },
+  "Reverse_Cable_Curl": {
+    "ptName": "Rosca inversa no cabo"
+  },
+  "Reverse_Flyes": {
+    "ptName": "Crucifixo invertido com halteres"
+  },
+  "Reverse_Flyes_With_External_Rotation": {
+    "ptName": "Crucifixo invertido com rotação externa"
+  },
+  "Reverse_Grip_Bent-Over_Rows": {
+    "ptName": "Remada curvada com pegada inversa"
+  },
+  "Reverse_Grip_Triceps_Pushdown": {
+    "ptName": "Tríceps pushdown com pegada inversa"
+  },
+  "Reverse_Hyperextension": {
+    "ptName": "Hiperextensão reversa"
+  },
+  "Reverse_Machine_Flyes": {
+    "ptName": "Crucifixo invertido na máquina"
+  },
+  "Reverse_Plate_Curls": {
+    "ptName": "Rosca inversa com anilha"
+  },
+  "Reverse_Triceps_Bench_Press": {
+    "ptName": "Supino reverso para tríceps"
+  },
+  "Rhomboids-SMR": {
+    "ptName": "Liberação miofascial dos romboides"
+  },
+  "Rickshaw_Carry": {
+    "ptName": "Caminhada com rickshaw"
+  },
+  "Rickshaw_Deadlift": {
+    "ptName": "Levantamento terra com rickshaw"
+  },
+  "Ring_Dips": {
+    "ptName": "Mergulho nas argolas"
+  },
+  "Rocket_Jump": {
+    "ptName": "Salto foguete"
+  },
+  "Rocking_Standing_Calf_Raise": {
+    "ptName": "Panturrilha em pé com balanço"
+  },
+  "Rocky_Pull-Ups_Pulldowns": {
+    "ptName": "Barra fixa e puxada Rocky"
+  },
+  "Romanian_Deadlift_from_Deficit": {
+    "ptName": "Levantamento terra romeno com déficit"
+  },
+  "Rope_Climb": {
+    "ptName": "Subida na corda"
+  },
+  "Rope_Jumping": {
+    "ptName": "Pular corda"
+  },
+  "Round_The_World_Shoulder_Stretch": {
+    "ptName": "Alongamento de ombros volta ao mundo"
+  },
+  "Rowing_Stationary": {
+    "ptName": "Remo estacionário"
+  },
+  "Runners_Stretch": {
+    "ptName": "Alongamento do corredor"
+  },
+  "Running_Treadmill": {
+    "ptName": "Corrida na esteira"
+  },
+  "Sandbag_Load": {
+    "ptName": "Carga com saco de areia"
+  },
+  "Scapular_Pull-Up": {
+    "ptName": "Barra fixa escapular"
+  },
+  "Scissor_Kick": {
+    "ptName": "Chute tesoura"
+  },
+  "Scissors_Jump": {
+    "ptName": "Salto tesoura"
+  },
+  "Seated_Band_Hamstring_Curl": {
+    "ptName": "Flexão de posteriores sentado com elástico"
+  },
+  "Seated_Barbell_Twist": {
+    "ptName": "Rotação sentada com barra"
+  },
+  "Seated_Bent-Over_One-Arm_Dumbbell_Triceps_Extension": {
+    "ptName": "Extensão unilateral de tríceps inclinado sentado com halter"
+  },
+  "Seated_Bent-Over_Two-Arm_Dumbbell_Triceps_Extension": {
+    "ptName": "Extensão de tríceps inclinado sentado com dois halteres"
+  },
+  "Seated_Biceps": {
+    "ptName": "Alongamento de bíceps sentado"
+  },
+  "Seated_Cable_Shoulder_Press": {
+    "ptName": "Desenvolvimento de ombros sentado no cabo"
+  },
+  "Seated_Calf_Stretch": {
+    "ptName": "Alongamento de panturrilha sentado"
+  },
+  "Seated_Close-Grip_Concentration_Barbell_Curl": {
+    "ptName": "Rosca concentrada sentada com barra e pegada fechada"
+  },
+  "Seated_Dumbbell_Inner_Biceps_Curl": {
+    "ptName": "Rosca interna de bíceps sentado com halteres"
+  },
+  "Seated_Dumbbell_Palms-Down_Wrist_Curl": {
+    "ptName": "Rosca de punho sentado com halteres e palmas para baixo"
+  },
+  "Seated_Dumbbell_Palms-Up_Wrist_Curl": {
+    "ptName": "Rosca de punho sentado com halteres e palmas para cima"
+  },
+  "Seated_Flat_Bench_Leg_Pull-In": {
+    "ptName": "Recolhimento de pernas sentado no banco reto"
+  },
+  "Seated_Floor_Hamstring_Stretch": {
+    "ptName": "Alongamento de posteriores sentado no chão"
+  },
+  "Seated_Front_Deltoid": {
+    "ptName": "Alongamento de deltoide anterior sentado"
+  },
+  "Seated_Glute": {
+    "ptName": "Alongamento de glúteo sentado"
+  },
+  "Seated_Good_Mornings": {
+    "ptName": "Good morning sentado"
+  },
+  "Seated_Hamstring": {
+    "ptName": "Alongamento de posteriores sentado"
+  },
+  "Seated_Hamstring_and_Calf_Stretch": {
+    "ptName": "Alongamento sentado de posteriores e panturrilha"
+  },
+  "Seated_Head_Harness_Neck_Resistance": {
+    "ptName": "Resistência de pescoço sentado com harness"
+  },
+  "Seated_Leg_Tucks": {
+    "ptName": "Recolhimento de pernas sentado"
+  },
+  "Seated_One-Arm_Dumbbell_Palms-Down_Wrist_Curl": {
+    "ptName": "Rosca de punho unilateral sentado com halter e palma para baixo"
+  },
+  "Seated_One-Arm_Dumbbell_Palms-Up_Wrist_Curl": {
+    "ptName": "Rosca de punho unilateral sentado com halter e palma para cima"
+  },
+  "Seated_One-arm_Cable_Pulley_Rows": {
+    "ptName": "Remada unilateral sentado no cabo"
+  },
+  "Seated_Overhead_Stretch": {
+    "ptName": "Alongamento acima da cabeça sentado"
+  },
+  "Seated_Palm-Up_Barbell_Wrist_Curl": {
+    "ptName": "Rosca de punho sentado com barra e palma para cima"
+  },
+  "Seated_Palms-Down_Barbell_Wrist_Curl": {
+    "ptName": "Rosca de punho sentado com barra e palmas para baixo"
+  },
+  "Seated_Side_Lateral_Raise": {
+    "ptName": "Elevação lateral sentado"
+  },
+  "Seated_Triceps_Press": {
+    "ptName": "Tríceps press sentado"
+  },
+  "Seated_Two-Arm_Palms-Up_Low-Pulley_Wrist_Curl": {
+    "ptName": "Rosca de punho sentado na polia baixa com palmas para cima"
+  },
+  "See-Saw_Press_Alternating_Side_Press": {
+    "ptName": "Desenvolvimento see-saw alternado"
+  },
+  "Shotgun_Row": {
+    "ptName": "Remada shotgun"
+  },
+  "Shoulder_Circles": {
+    "ptName": "Círculos de ombros"
+  },
+  "Shoulder_Press_-_With_Bands": {
+    "ptName": "Desenvolvimento de ombros com elásticos"
+  },
+  "Shoulder_Raise": {
+    "ptName": "Elevação de ombros"
+  },
+  "Shoulder_Stretch": {
+    "ptName": "Alongamento de ombros"
+  },
+  "Side-Lying_Floor_Stretch": {
+    "ptName": "Alongamento no chão deitado de lado"
+  },
+  "Side_Bridge": {
+    "ptName": "Ponte lateral"
+  },
+  "Side_Hop-Sprint": {
+    "ptName": "Salto lateral com sprint"
+  },
+  "Side_Jackknife": {
+    "ptName": "Abdominal canivete lateral"
+  },
+  "Side_Laterals_to_Front_Raise": {
+    "ptName": "Elevação lateral para elevação frontal"
+  },
+  "Side_Leg_Raises": {
+    "ptName": "Elevação lateral de pernas"
+  },
+  "Side_Lying_Groin_Stretch": {
+    "ptName": "Alongamento de virilha deitado de lado"
+  },
+  "Side_Neck_Stretch": {
+    "ptName": "Alongamento lateral de pescoço"
+  },
+  "Side_Standing_Long_Jump": {
+    "ptName": "Salto em distância lateral parado"
+  },
+  "Side_To_Side_Chins": {
+    "ptName": "Barra fixa lado a lado"
+  },
+  "Side_Wrist_Pull": {
+    "ptName": "Puxada lateral de punho"
+  },
+  "Side_to_Side_Box_Shuffle": {
+    "ptName": "Deslocamento lateral na caixa"
+  },
+  "Single-Arm_Cable_Crossover": {
+    "ptName": "Crossover unilateral no cabo"
+  },
+  "Single-Arm_Linear_Jammer": {
+    "ptName": "Jammer linear unilateral"
+  },
+  "Single-Arm_Push-Up": {
+    "ptName": "Flexão unilateral"
+  },
+  "Single-Cone_Sprint_Drill": {
+    "ptName": "Drill de sprint com cone único"
+  },
+  "Single-Leg_High_Box_Squat": {
+    "ptName": "Agachamento unilateral na caixa alta"
+  },
+  "Single-Leg_Hop_Progression": {
+    "ptName": "Progressão de salto unilateral"
+  },
+  "Single-Leg_Lateral_Hop": {
+    "ptName": "Salto lateral unilateral"
+  },
+  "Single-Leg_Leg_Extension": {
+    "ptName": "Extensão de perna unilateral"
+  },
+  "Single-Leg_Stride_Jump": {
+    "ptName": "Salto em passada unilateral"
+  },
+  "Single_Dumbbell_Raise": {
+    "ptName": "Elevação com halter único"
+  },
+  "Single_Leg_Butt_Kick": {
+    "ptName": "Chute de glúteo unilateral"
+  },
+  "Single_Leg_Glute_Bridge": {
+    "ptName": "Ponte de glúteo unilateral"
+  },
+  "Single_Leg_Push-off": {
+    "ptName": "Impulsão unilateral"
+  },
+  "Sit_Squats": {
+    "ptName": "Agachamento sentado"
+  },
+  "Skating": {
+    "ptName": "Patinação"
+  },
+  "Sled_Drag_-_Harness": {
+    "ptName": "Arrasto de trenó com arnês"
+  },
+  "Sled_Overhead_Backward_Walk": {
+    "ptName": "Caminhada para trás com trenó acima da cabeça"
+  },
+  "Sled_Overhead_Triceps_Extension": {
+    "ptName": "Extensão de tríceps acima da cabeça com trenó"
+  },
+  "Sled_Push": {
+    "ptName": "Empurrão de trenó"
+  },
+  "Sled_Reverse_Flye": {
+    "ptName": "Crucifixo invertido com trenó"
+  },
+  "Sled_Row": {
+    "ptName": "Remada com trenó"
+  },
+  "Sledgehammer_Swings": {
+    "ptName": "Balanços com marreta"
+  },
+  "Smith_Incline_Shoulder_Raise": {
+    "ptName": "Elevação de ombros inclinada no Smith"
+  },
+  "Smith_Machine_Behind_the_Back_Shrug": {
+    "ptName": "Encolhimento atrás do corpo no Smith"
+  },
+  "Smith_Machine_Bent_Over_Row": {
+    "ptName": "Remada curvada no Smith"
+  },
+  "Smith_Machine_Calf_Raise": {
+    "ptName": "Panturrilha no Smith"
+  },
+  "Smith_Machine_Decline_Press": {
+    "ptName": "Supino declinado no Smith"
+  },
+  "Smith_Machine_Hang_Power_Clean": {
+    "ptName": "Power clean suspenso no Smith"
+  },
+  "Smith_Machine_Hip_Raise": {
+    "ptName": "Elevação de quadril no Smith"
+  },
+  "Smith_Machine_Leg_Press": {
+    "ptName": "Leg press no Smith"
+  },
+  "Smith_Machine_One-Arm_Upright_Row": {
+    "ptName": "Remada alta unilateral no Smith"
+  },
+  "Smith_Machine_Overhead_Shoulder_Press": {
+    "ptName": "Desenvolvimento de ombros acima da cabeça no Smith"
+  },
+  "Smith_Machine_Pistol_Squat": {
+    "ptName": "Agachamento pistol no Smith"
+  },
+  "Smith_Machine_Reverse_Calf_Raises": {
+    "ptName": "Panturrilha reversa no Smith"
+  },
+  "Smith_Machine_Squat": {
+    "ptName": "Agachamento no Smith"
+  },
+  "Smith_Machine_Stiff-Legged_Deadlift": {
+    "ptName": "Levantamento terra stiff no Smith"
+  },
+  "Smith_Machine_Upright_Row": {
+    "ptName": "Remada alta no Smith"
+  },
+  "Smith_Single-Leg_Split_Squat": {
+    "ptName": "Agachamento split unilateral no Smith"
+  },
+  "Snatch": {
+    "ptName": "Snatch"
+  },
+  "Snatch_Balance": {
+    "ptName": "Snatch balance"
+  },
+  "Snatch_Deadlift": {
+    "ptName": "Levantamento terra do snatch"
+  },
+  "Snatch_Pull": {
+    "ptName": "Puxada do snatch"
+  },
+  "Snatch_Shrug": {
+    "ptName": "Encolhimento do snatch"
+  },
+  "Snatch_from_Blocks": {
+    "ptName": "Snatch a partir dos blocos"
+  },
+  "Speed_Band_Overhead_Triceps": {
+    "ptName": "Tríceps acima da cabeça com elástico em velocidade"
+  },
+  "Speed_Box_Squat": {
+    "ptName": "Agachamento na caixa em velocidade"
+  },
+  "Speed_Squats": {
+    "ptName": "Agachamentos em velocidade"
+  },
+  "Spell_Caster": {
+    "ptName": "Spell caster com halteres"
+  },
+  "Spider_Crawl": {
+    "ptName": "Caminhada aranha"
+  },
+  "Spider_Curl": {
+    "ptName": "Rosca spider"
+  },
+  "Spinal_Stretch": {
+    "ptName": "Alongamento da coluna"
+  },
+  "Split_Clean": {
+    "ptName": "Split clean"
+  },
+  "Split_Jerk": {
+    "ptName": "Split jerk"
+  },
+  "Split_Jump": {
+    "ptName": "Salto split"
+  },
+  "Split_Snatch": {
+    "ptName": "Split snatch"
+  },
+  "Split_Squat_with_Dumbbells": {
+    "ptName": "Agachamento split com halteres"
+  },
+  "Split_Squats": {
+    "ptName": "Agachamento split"
+  },
+  "Squat_Jerk": {
+    "ptName": "Squat jerk"
+  },
+  "Squat_with_Bands": {
+    "ptName": "Agachamento com elásticos"
+  },
+  "Squat_with_Chains": {
+    "ptName": "Agachamento com correntes"
+  },
+  "Squat_with_Plate_Movers": {
+    "ptName": "Agachamento com plate movers"
+  },
+  "Squats_-_With_Bands": {
+    "ptName": "Agachamentos com elásticos"
+  },
+  "Stairmaster": {
+    "ptName": "Simulador de escadas"
+  },
+  "Standing_Alternating_Dumbbell_Press": {
+    "ptName": "Desenvolvimento alternado em pé com halteres"
+  },
+  "Standing_Barbell_Calf_Raise": {
+    "ptName": "Panturrilha em pé com barra"
+  },
+  "Standing_Barbell_Press_Behind_Neck": {
+    "ptName": "Desenvolvimento com barra atrás da nuca em pé"
+  },
+  "Standing_Bent-Over_One-Arm_Dumbbell_Triceps_Extension": {
+    "ptName": "Extensão unilateral de tríceps inclinado em pé com halter"
+  },
+  "Standing_Bent-Over_Two-Arm_Dumbbell_Triceps_Extension": {
+    "ptName": "Extensão de tríceps inclinado em pé com dois halteres"
+  },
+  "Standing_Biceps_Stretch": {
+    "ptName": "Alongamento de bíceps em pé"
+  },
+  "Standing_Bradford_Press": {
+    "ptName": "Bradford press em pé"
+  },
+  "Standing_Cable_Chest_Press": {
+    "ptName": "Supino em pé no cabo"
+  },
+  "Standing_Cable_Lift": {
+    "ptName": "Elevação no cabo em pé"
+  },
+  "Standing_Cable_Wood_Chop": {
+    "ptName": "Wood chop no cabo em pé"
+  },
+  "Standing_Calf_Raises": {
+    "ptName": "Panturrilha em pé"
+  },
+  "Standing_Concentration_Curl": {
+    "ptName": "Rosca concentrada em pé"
+  },
+  "Standing_Dumbbell_Calf_Raise": {
+    "ptName": "Panturrilha em pé com halter"
+  },
+  "Standing_Dumbbell_Press": {
+    "ptName": "Desenvolvimento em pé com halteres"
+  },
+  "Standing_Dumbbell_Reverse_Curl": {
+    "ptName": "Rosca inversa em pé com halteres"
+  },
+  "Standing_Dumbbell_Straight-Arm_Front_Delt_Raise_Above_Head": {
+    "ptName": "Elevação frontal acima da cabeça com halteres e braços estendidos"
+  },
+  "Standing_Dumbbell_Triceps_Extension": {
+    "ptName": "Extensão de tríceps em pé com halter"
+  },
+  "Standing_Dumbbell_Upright_Row": {
+    "ptName": "Remada alta em pé com halteres"
+  },
+  "Standing_Elevated_Quad_Stretch": {
+    "ptName": "Alongamento de quadríceps em pé elevado"
+  },
+  "Standing_Front_Barbell_Raise_Over_Head": {
+    "ptName": "Elevação frontal com barra acima da cabeça"
+  },
+  "Standing_Gastrocnemius_Calf_Stretch": {
+    "ptName": "Alongamento do gastrocnêmio em pé"
+  },
+  "Standing_Hamstring_and_Calf_Stretch": {
+    "ptName": "Alongamento de posteriores e panturrilha em pé"
+  },
+  "Standing_Hip_Circles": {
+    "ptName": "Círculos de quadril em pé"
+  },
+  "Standing_Hip_Flexors": {
+    "ptName": "Alongamento de flexores do quadril em pé"
+  },
+  "Standing_Inner-Biceps_Curl": {
+    "ptName": "Rosca interna de bíceps em pé"
+  },
+  "Standing_Lateral_Stretch": {
+    "ptName": "Alongamento lateral em pé"
+  },
+  "Standing_Leg_Curl": {
+    "ptName": "Flexão de perna em pé"
+  },
+  "Standing_Long_Jump": {
+    "ptName": "Salto em distância parado"
+  },
+  "Standing_Low-Pulley_Deltoid_Raise": {
+    "ptName": "Elevação de deltoide em pé na polia baixa"
+  },
+  "Standing_Low-Pulley_One-Arm_Triceps_Extension": {
+    "ptName": "Extensão unilateral de tríceps em pé na polia baixa"
+  },
+  "Standing_Military_Press": {
+    "ptName": "Desenvolvimento militar em pé"
+  },
+  "Standing_Olympic_Plate_Hand_Squeeze": {
+    "ptName": "Aperto de anilha olímpica em pé"
+  },
+  "Standing_One-Arm_Cable_Curl": {
+    "ptName": "Rosca unilateral em pé no cabo"
+  },
+  "Standing_One-Arm_Dumbbell_Curl_Over_Incline_Bench": {
+    "ptName": "Rosca unilateral com halter apoiado no banco inclinado"
+  },
+  "Standing_One-Arm_Dumbbell_Triceps_Extension": {
+    "ptName": "Extensão unilateral de tríceps em pé com halter"
+  },
+  "Standing_Overhead_Barbell_Triceps_Extension": {
+    "ptName": "Extensão de tríceps acima da cabeça em pé com barra"
+  },
+  "Standing_Palm-In_One-Arm_Dumbbell_Press": {
+    "ptName": "Desenvolvimento unilateral em pé com halter e pegada neutra"
+  },
+  "Standing_Palms-In_Dumbbell_Press": {
+    "ptName": "Desenvolvimento em pé com halteres e pegada neutra"
+  },
+  "Standing_Palms-Up_Barbell_Behind_The_Back_Wrist_Curl": {
+    "ptName": "Rosca de punho atrás do corpo com barra e palmas para cima"
+  },
+  "Standing_Pelvic_Tilt": {
+    "ptName": "Inclinação pélvica em pé"
+  },
+  "Standing_Rope_Crunch": {
+    "ptName": "Abdominal com corda em pé"
+  },
+  "Standing_Soleus_And_Achilles_Stretch": {
+    "ptName": "Alongamento de sóleo e tendão de Aquiles em pé"
+  },
+  "Standing_Toe_Touches": {
+    "ptName": "Toque nos pés em pé"
+  },
+  "Standing_Towel_Triceps_Extension": {
+    "ptName": "Extensão de tríceps em pé com toalha"
+  },
+  "Standing_Two-Arm_Overhead_Throw": {
+    "ptName": "Arremesso acima da cabeça com dois braços em pé"
+  },
+  "Star_Jump": {
+    "ptName": "Salto estrela"
+  },
+  "Step-up_with_Knee_Raise": {
+    "ptName": "Subida no banco com elevação de joelho"
+  },
+  "Step_Mill": {
+    "ptName": "Escada ergométrica"
+  },
+  "Stiff-Legged_Barbell_Deadlift": {
+    "ptName": "Levantamento terra stiff com barra"
+  },
+  "Stiff-Legged_Dumbbell_Deadlift": {
+    "ptName": "Levantamento terra stiff com halteres"
+  },
+  "Stiff_Leg_Barbell_Good_Morning": {
+    "ptName": "Good morning com barra e pernas estendidas"
+  },
+  "Stomach_Vacuum": {
+    "ptName": "Vácuo abdominal"
+  },
+  "Straight-Arm_Dumbbell_Pullover": {
+    "ptName": "Pullover com halter e braços estendidos"
+  },
+  "Straight-Arm_Pulldown": {
+    "ptName": "Pulldown com braços estendidos"
+  },
+  "Straight_Bar_Bench_Mid_Rows": {
+    "ptName": "Remada média no banco com barra reta"
+  },
+  "Straight_Raises_on_Incline_Bench": {
+    "ptName": "Elevação com braços estendidos no banco inclinado"
+  },
+  "Stride_Jump_Crossover": {
+    "ptName": "Salto em passada cruzado"
+  },
+  "Sumo_Deadlift": {
+    "ptName": "Levantamento terra sumô"
+  },
+  "Sumo_Deadlift_with_Bands": {
+    "ptName": "Levantamento terra sumô com elásticos"
+  },
+  "Sumo_Deadlift_with_Chains": {
+    "ptName": "Levantamento terra sumô com correntes"
+  },
+  "Superman": {
+    "ptName": "Superman"
+  },
+  "Supine_Chest_Throw": {
+    "ptName": "Arremesso de peito deitado"
+  },
+  "Supine_One-Arm_Overhead_Throw": {
+    "ptName": "Arremesso unilateral acima da cabeça deitado"
+  },
+  "Supine_Two-Arm_Overhead_Throw": {
+    "ptName": "Arremesso com dois braços acima da cabeça deitado"
+  },
+  "Suspended_Fallout": {
+    "ptName": "Fallout suspenso"
+  },
+  "Suspended_Push-Up": {
+    "ptName": "Flexão suspensa"
+  },
+  "Suspended_Reverse_Crunch": {
+    "ptName": "Abdominal reverso suspenso"
+  },
+  "Suspended_Row": {
+    "ptName": "Remada suspensa"
+  },
+  "Suspended_Split_Squat": {
+    "ptName": "Agachamento split suspenso"
+  },
+  "Svend_Press": {
+    "ptName": "Svend press"
+  },
+  "T-Bar_Row_with_Handle": {
+    "ptName": "Remada T-bar com pegador"
+  },
+  "Tate_Press": {
+    "ptName": "Tate press"
+  },
+  "The_Straddle": {
+    "ptName": "Alongamento straddle"
+  },
+  "Thigh_Adductor": {
+    "ptName": "Adução de coxa na máquina"
+  },
+  "Tire_Flip": {
+    "ptName": "Virada de pneu"
+  },
+  "Toe_Touchers": {
+    "ptName": "Toque nos pés"
+  },
+  "Torso_Rotation": {
+    "ptName": "Rotação de tronco"
+  },
+  "Trail_Running_Walking": {
+    "ptName": "Corrida ou caminhada em trilha"
+  },
+  "Trap_Bar_Deadlift": {
+    "ptName": "Levantamento terra com trap bar"
+  },
+  "Tricep_Side_Stretch": {
+    "ptName": "Alongamento lateral de tríceps"
+  },
+  "Triceps_Stretch": {
+    "ptName": "Alongamento de tríceps"
+  },
+  "Tuck_Crunch": {
+    "ptName": "Abdominal tuck"
+  },
+  "Two-Arm_Dumbbell_Preacher_Curl": {
+    "ptName": "Rosca Scott com dois halteres"
+  },
+  "Two-Arm_Kettlebell_Clean": {
+    "ptName": "Clean com dois braços e kettlebell"
+  },
+  "Two-Arm_Kettlebell_Jerk": {
+    "ptName": "Jerk com dois braços e kettlebell"
+  },
+  "Two-Arm_Kettlebell_Military_Press": {
+    "ptName": "Desenvolvimento militar com dois braços e kettlebell"
+  },
+  "Two-Arm_Kettlebell_Row": {
+    "ptName": "Remada com dois braços e kettlebell"
+  },
+  "Underhand_Cable_Pulldowns": {
+    "ptName": "Puxada no cabo com pegada supinada"
+  },
+  "Upper_Back-Leg_Grab": {
+    "ptName": "Alongamento de costas altas segurando a perna"
+  },
+  "Upper_Back_Stretch": {
+    "ptName": "Alongamento da parte superior das costas"
+  },
+  "Upright_Barbell_Row": {
+    "ptName": "Remada alta com barra"
+  },
+  "Upright_Cable_Row": {
+    "ptName": "Remada alta no cabo"
+  },
+  "Upright_Row_-_With_Bands": {
+    "ptName": "Remada alta com elásticos"
+  },
+  "Upward_Stretch": {
+    "ptName": "Alongamento para cima"
+  },
+  "V-Bar_Pulldown": {
+    "ptName": "Puxada com barra V"
+  },
+  "V-Bar_Pullup": {
+    "ptName": "Barra fixa com pegador V"
+  },
+  "Vertical_Swing": {
+    "ptName": "Swing vertical"
+  },
+  "Walking_Treadmill": {
+    "ptName": "Caminhada na esteira"
+  },
+  "Weighted_Ball_Hyperextension": {
+    "ptName": "Hiperextensão com bola e carga"
+  },
+  "Weighted_Ball_Side_Bend": {
+    "ptName": "Flexão lateral com bola e carga"
+  },
+  "Weighted_Bench_Dip": {
+    "ptName": "Mergulho no banco com carga"
+  },
+  "Weighted_Crunches": {
+    "ptName": "Abdominais com carga"
+  },
+  "Weighted_Jump_Squat": {
+    "ptName": "Agachamento com salto e carga"
+  },
+  "Weighted_Pull_Ups": {
+    "ptName": "Barra fixa com carga"
+  },
+  "Weighted_Sissy_Squat": {
+    "ptName": "Sissy squat com carga"
+  },
+  "Weighted_Sit-Ups_-_With_Bands": {
+    "ptName": "Abdominal com elásticos e carga"
+  },
+  "Weighted_Squat": {
+    "ptName": "Agachamento com carga"
+  },
+  "Wide-Grip_Barbell_Bench_Press": {
+    "ptName": "Supino com barra e pegada aberta"
+  },
+  "Wide-Grip_Decline_Barbell_Bench_Press": {
+    "ptName": "Supino declinado com barra e pegada aberta"
+  },
+  "Wide-Grip_Decline_Barbell_Pullover": {
+    "ptName": "Pullover declinado com barra e pegada aberta"
+  },
+  "Wide-Grip_Lat_Pulldown": {
+    "ptName": "Puxada aberta para dorsais"
+  },
+  "Wide-Grip_Pulldown_Behind_The_Neck": {
+    "ptName": "Puxada aberta atrás da nuca"
+  },
+  "Wide-Grip_Rear_Pull-Up": {
+    "ptName": "Barra fixa posterior com pegada aberta"
+  },
+  "Wide-Grip_Standing_Barbell_Curl": {
+    "ptName": "Rosca direta em pé com pegada aberta"
+  },
+  "Wide_Stance_Barbell_Squat": {
+    "ptName": "Agachamento com barra e base aberta"
+  },
+  "Wide_Stance_Stiff_Legs": {
+    "ptName": "Stiff com base aberta"
+  },
+  "Wind_Sprints": {
+    "ptName": "Sprints curtos"
+  },
+  "Windmills": {
+    "ptName": "Windmills"
+  },
+  "Worlds_Greatest_Stretch": {
+    "ptName": "Maior alongamento do mundo"
+  },
+  "Wrist_Circles": {
+    "ptName": "Círculos de punho"
+  },
+  "Wrist_Roller": {
+    "ptName": "Rolo de punho"
+  },
+  "Wrist_Rotations_with_Straight_Bar": {
+    "ptName": "Rotações de punho com barra reta"
+  },
+  "Yoke_Walk": {
+    "ptName": "Caminhada com yoke"
+  },
+  "Zercher_Squats": {
+    "ptName": "Agachamento Zercher"
+  },
+  "Zottman_Curl": {
+    "ptName": "Rosca Zottman"
+  },
+  "Zottman_Preacher_Curl": {
+    "ptName": "Rosca Scott Zottman"
   }
 }

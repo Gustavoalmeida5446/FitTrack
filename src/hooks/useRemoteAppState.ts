@@ -85,6 +85,15 @@ export function useRemoteAppState({
       setRemoteSaveRetryTick(0);
       setRemoteSyncError(null);
       setIsRemoteReady(true);
+    }).catch((error) => {
+      console.error('Erro inesperado ao carregar estado remoto', error);
+
+      if (!isActive) {
+        return;
+      }
+
+      setRemoteSyncError('load');
+      setIsRemoteReady(true);
     });
 
     return () => {
@@ -177,6 +186,12 @@ export function useRemoteAppState({
           return;
         }
 
+        setRemoteSyncError('save');
+        window.setTimeout(() => {
+          setRemoteSaveRetryTick((currentTick) => currentTick + 1);
+        }, 2000);
+      }).catch((error) => {
+        console.error('Erro inesperado ao salvar estado remoto', error);
         setRemoteSyncError('save');
         window.setTimeout(() => {
           setRemoteSaveRetryTick((currentTick) => currentTick + 1);
