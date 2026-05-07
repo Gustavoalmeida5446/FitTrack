@@ -9,6 +9,7 @@ import { MuscleGroup, Workout, WorkoutExercise, WorkoutExerciseSet } from '../da
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { searchExercises, type ExerciseOption } from '../services/exercises';
 import { PageContainer } from '../components/PageContainer';
+import { getExerciseDisplayName } from '../lib/exerciseNames';
 import { isValidWorkoutForSave, isValidWorkoutExerciseForSave } from '../lib/validation';
 import { createWorkoutExerciseSets, normalizeWorkoutExerciseSets, summarizeWorkoutExerciseSets } from '../lib/workoutSets';
 
@@ -336,11 +337,13 @@ export function WorkoutSetupPage({
   };
 
   const handleEditExercise = (exercise: WorkoutExercise) => {
+    const displayName = getExerciseDisplayName(exercise.sourceId, exercise.name, exercise.ptName);
+
     skipNextSearchRef.current = true;
     setEditingExerciseId(exercise.id);
-    setQuery(exercise.ptName ?? exercise.name);
+    setQuery(displayName);
     setExerciseName(exercise.name);
-    setExercisePtName(exercise.ptName);
+    setExercisePtName(displayName);
     setExerciseGroup(exercise.muscleGroup);
     setExerciseMediaUrl(exercise.mediaUrl);
     setExerciseMediaUrls(exercise.mediaUrls ?? (exercise.mediaUrl ? [exercise.mediaUrl] : []));
@@ -525,7 +528,7 @@ export function WorkoutSetupPage({
               <SelectionSummaryCard
                 key={exercise.id}
                 label={`Exercício ${index + 1}`}
-                title={exercise.ptName ?? exercise.name}
+                title={getExerciseDisplayName(exercise.sourceId, exercise.name, exercise.ptName)}
                 actions={(
                   <>
                     <Button kind="ghost" size="sm" onClick={() => handleEditExercise(exercise)}>Editar</Button>

@@ -7,6 +7,7 @@ import { PageContainer } from '../components/PageContainer';
 import { StatsGrid } from '../components/StatsGrid';
 import { SummaryStatsCard } from '../components/SummaryStatsCard';
 import { Workout, WorkoutExerciseSet } from '../data/types';
+import { getExerciseDisplayName } from '../lib/exerciseNames';
 import { normalizeWorkoutExerciseSets } from '../lib/workoutSets';
 
 interface Props {
@@ -76,7 +77,7 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateSet
 
       <div className="stack">
         {workout.exercises.map((exercise) => {
-          const displayName = exercise.ptName ?? exercise.name;
+          const displayName = getExerciseDisplayName(exercise.sourceId, exercise.name, exercise.ptName);
           const mediaUrls = Array.isArray(exercise.mediaUrls) && exercise.mediaUrls.length > 0
             ? exercise.mediaUrls
             : exercise.mediaUrl ? [exercise.mediaUrl] : [];

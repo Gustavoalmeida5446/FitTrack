@@ -41,6 +41,26 @@ const dumbbellRow: ExerciseSearchDocument = {
   ]
 };
 
+const latPulldown: ExerciseSearchDocument = {
+  fields: [
+    { value: 'Puxada aberta para dorsais', weight: 5 },
+    { value: 'Wide-Grip Lat Pulldown', weight: 4 },
+    { value: 'pulley frente', weight: 4 },
+    { value: 'lats', weight: 3 },
+    { value: 'cable', weight: 3 },
+    { value: 'cabo pulley', weight: 3 }
+  ]
+};
+
+const machineBenchPress: ExerciseSearchDocument = {
+  fields: [
+    { value: 'Supino no Smith', weight: 5 },
+    { value: 'Smith Machine Bench Press', weight: 4 },
+    { value: 'chest', weight: 3 },
+    { value: 'máquina aparelho', weight: 3 }
+  ]
+};
+
 test('busca longa de extensão de tríceps prioriza exercício relacionado', () => {
   const query = 'Seated One-Arm Dumbbell Overhead Triceps Extension';
 
@@ -74,4 +94,15 @@ test('termo sem relação fica abaixo do corte de relevância', () => {
   assert.equal(getExerciseSearchScore(query, tricepsExtension), -1);
   assert.equal(getExerciseSearchScore(query, dumbbellSquat), -1);
   assert.equal(getExerciseSearchScore(query, abdominalCrunch), -1);
+});
+
+test('busca por termos comuns de academia em português encontra puxada no pulley', () => {
+  assert.ok(getExerciseSearchScore('pulley frente', latPulldown) > 0);
+  assert.ok(getExerciseSearchScore('puxada dorsal cabo', latPulldown) > 0);
+  assert.equal(getExerciseSearchScore('pulley frente', dumbbellSquat), -1);
+});
+
+test('busca por máquina e supino entende sinônimos de equipamento', () => {
+  assert.ok(getExerciseSearchScore('supino maquina peito', machineBenchPress) > 0);
+  assert.equal(getExerciseSearchScore('supino maquina peito', dumbbellRow), -1);
 });
