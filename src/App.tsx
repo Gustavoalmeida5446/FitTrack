@@ -44,6 +44,9 @@ const DietSetupPage = lazy(() => import('./pages/DietSetupPage').then((module) =
 const NutritionGoalsPage = lazy(() => import('./pages/NutritionGoalsPage').then((module) => ({ default: module.NutritionGoalsPage })));
 const WorkoutSetupPage = lazy(() => import('./pages/WorkoutSetupPage').then((module) => ({ default: module.WorkoutSetupPage })));
 const LoginPage = lazy(() => import('./pages/LoginPage').then((module) => ({ default: module.LoginPage })));
+const appThemeStorageKey = 'fittrack-theme';
+
+type AppTheme = 'dark' | 'light';
 
 const onboardingSteps: Array<TutorialStepContent & { view: AppView }> = [
   {
@@ -84,6 +87,16 @@ function AppLoadingState() {
   );
 }
 
+function getInitialAppTheme(): AppTheme {
+  if (typeof window === 'undefined') {
+    return 'dark';
+  }
+
+  const savedTheme = window.localStorage.getItem(appThemeStorageKey);
+
+  return savedTheme === 'light' || savedTheme === 'dark' ? savedTheme : 'dark';
+}
+
 export default function App() {
   const {
     session,
@@ -114,6 +127,11 @@ export default function App() {
   const [pendingRelationalSaves, setPendingRelationalSaves] = useState(0);
   const [hasRelationalSaveError, setHasRelationalSaveError] = useState(false);
   const [recentRelationalSaveSuccess, setRecentRelationalSaveSuccess] = useState(false);
+  const [appTheme, setAppTheme] = useState<AppTheme>(getInitialAppTheme);
+  const carbonTheme = appTheme === 'light' ? 'white' : 'g100';
+  const toggleAppTheme = useCallback(() => {
+    setAppTheme((currentTheme) => currentTheme === 'light' ? 'dark' : 'light');
+  }, []);
 
   const appState = useMemo<AppState>(() => ({
     profile,
@@ -179,6 +197,10 @@ export default function App() {
       setPendingRelationalSaves((count) => Math.max(0, count - 1));
     });
   }, []);
+  useEffect(() => {
+    document.documentElement.dataset.appTheme = appTheme;
+    window.localStorage.setItem(appThemeStorageKey, appTheme);
+  }, [appTheme]);
   useEffect(() => {
     if (!recentRelationalSaveSuccess) {
       return undefined;
@@ -422,8 +444,8 @@ export default function App() {
 
   if (!isAuthReady) {
     return (
-      <Theme theme="g100">
-        <div className="app-shell">
+      <Theme theme={carbonTheme}>
+        <div className="app-shell" data-app-theme={appTheme}>
           <AppLoadingState />
         </div>
       </Theme>
@@ -432,8 +454,8 @@ export default function App() {
 
   if (!session || isPasswordRecovery) {
     return (
-      <Theme theme="g100">
-        <div className="app-shell">
+      <Theme theme={carbonTheme}>
+        <div className="app-shell" data-app-theme={appTheme}>
           <Suspense fallback={<AppLoadingState />}>
             <LoginPage
               onLogin={handleLogin}
@@ -450,8 +472,8 @@ export default function App() {
   }
 
   return (
-    <Theme theme="g100">
-      <div className="app-shell">
+    <Theme theme={carbonTheme}>
+      <div className="app-shell" data-app-theme={appTheme}>
         {remoteSyncMessage ? (
           <div className={`sync-status ${remoteSyncStatusKind ? `sync-status--${remoteSyncStatusKind}` : ''}`} role="status" aria-live="polite">
             {remoteSyncMessage}
@@ -544,6 +566,8 @@ export default function App() {
               onAddWeight={handleAddWeight}
               onRemoveWeight={handleRemoveWeight}
               session={session}
+              appTheme={appTheme}
+              onToggleTheme={toggleAppTheme}
               onSignOut={handleSignOut}
             />
           ) : null}

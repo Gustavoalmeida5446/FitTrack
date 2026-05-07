@@ -1,4 +1,4 @@
-import { ChartLine, CheckmarkFilled, ChevronLeft, Logout, TrashCan, UserAvatar } from '@carbon/icons-react';
+import { ChartLine, CheckmarkFilled, ChevronLeft, Logout, Moon, Sun, TrashCan, UserAvatar } from '@carbon/icons-react';
 import { Button, DatePicker, DatePickerInput, Select, SelectItem, Tile } from '@carbon/react';
 import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
@@ -36,6 +36,8 @@ interface Props {
   onAddWeight: (weight: number) => void;
   onRemoveWeight: (index: number) => void;
   session: Session;
+  appTheme: 'dark' | 'light';
+  onToggleTheme: () => void;
   onSignOut: () => Promise<void>;
 }
 
@@ -59,6 +61,8 @@ export function NutritionGoalsPage({
   onAddWeight,
   onRemoveWeight,
   session,
+  appTheme,
+  onToggleTheme,
   onSignOut
 }: Props) {
   const [newWeight, setNewWeight] = useState(profile.currentWeight);
@@ -75,6 +79,7 @@ export function NutritionGoalsPage({
   const newWeightMessage = hasTriedSaveWeight && newWeight <= 0
     ? 'Informe um peso maior que zero para salvar.'
     : '';
+  const isLightTheme = appTheme === 'light';
 
   return (
     <PageContainer title="Metas nutricionais" subtitle="Defina suas metas do dia" actions={<Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button>}>
@@ -102,6 +107,15 @@ export function NutritionGoalsPage({
             <div className="row-actions">
               <Button kind="ghost" onClick={onReplayTutorial}>
                 Rever tutorial
+              </Button>
+              <Button
+                kind="ghost"
+                className="theme-toggle"
+                renderIcon={isLightTheme ? Moon : Sun}
+                iconDescription={isLightTheme ? 'Mudar para tema escuro' : 'Mudar para tema claro'}
+                onClick={onToggleTheme}
+              >
+                {isLightTheme ? 'Tema escuro' : 'Tema claro'}
               </Button>
               <Button kind="ghost" renderIcon={Logout} onClick={() => void onSignOut()}>
                 Sair

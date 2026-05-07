@@ -9,6 +9,19 @@
   --color-icon: #dde1e6;
   --color-primary: #1f70ff;
   --color-accent-purple: #7c3aed;
+  --color-field-bg: #262626;
+  --color-field-border: #393939;
+  --color-soft-surface: rgba(255, 255, 255, 0.04);
+  --color-soft-surface-strong: rgba(255, 255, 255, 0.06);
+  --color-row-surface: rgba(255, 255, 255, 0.025);
+  --color-bottom-nav-bg: rgba(11, 13, 18, 0.96);
+  --color-bottom-nav-muted: #8d96a8;
+  --color-bottom-nav-active: #f5f8ff;
+  --color-bottom-nav-hover: #dfe6f3;
+  --color-positive: #6fdc8c;
+  --color-danger: #ff8389;
+  --color-link: #78a9ff;
+  --color-link-hover: #a6c8ff;
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -18,6 +31,32 @@
   --radius-md: 16px;
   --radius-pill: 999px;
   --content-width: 460px;
+}
+
+:root[data-app-theme='light'] {
+  color-scheme: light;
+  --color-bg: #f4f6fb;
+  --color-surface: #ffffff;
+  --color-border: #d9e1ec;
+  --color-text: #161616;
+  --color-text-muted: #525f70;
+  --color-text-subtle: #697586;
+  --color-icon: #344054;
+  --color-primary: #0f62fe;
+  --color-accent-purple: #6d42d8;
+  --color-field-bg: #ffffff;
+  --color-field-border: #d0d7e2;
+  --color-soft-surface: rgba(17, 24, 39, 0.045);
+  --color-soft-surface-strong: rgba(17, 24, 39, 0.07);
+  --color-row-surface: rgba(17, 24, 39, 0.035);
+  --color-bottom-nav-bg: rgba(255, 255, 255, 0.95);
+  --color-bottom-nav-muted: #5b6678;
+  --color-bottom-nav-active: #0f172a;
+  --color-bottom-nav-hover: #1f2937;
+  --color-positive: #198038;
+  --color-danger: #da1e28;
+  --color-link: #0f62fe;
+  --color-link-hover: #0043ce;
 }
 
 * {
@@ -45,6 +84,20 @@ body {
   width: 100%;
   max-width: var(--content-width);
   margin: 0 auto;
+}
+
+.theme-toggle.cds--btn.cds--btn--ghost {
+  min-block-size: 2.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-soft-surface);
+  color: var(--color-text);
+}
+
+.theme-toggle.cds--btn.cds--btn--ghost:hover,
+.theme-toggle.cds--btn.cds--btn--ghost:focus-visible {
+  background: var(--color-soft-surface-strong);
+  color: var(--color-text);
 }
 
 .sync-status {
@@ -393,8 +446,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
-  background: #262626;
-  border: 1px solid #393939;
+  background: var(--color-field-bg);
+  border: 1px solid var(--color-field-border);
   color: var(--color-text);
   border-radius: 6px;
   cursor: pointer;
@@ -443,7 +496,7 @@ body {
   justify-content: space-evenly;
   gap: 0.5rem;
   padding: var(--space-2) var(--space-3) calc(0.65rem + env(safe-area-inset-bottom));
-  background: rgba(11, 13, 18, 0.96);
+  background: var(--color-bottom-nav-bg);
   border-top: 1px solid var(--color-border);
   backdrop-filter: blur(12px);
 }
@@ -458,7 +511,7 @@ body {
 .bottom-nav__item.cds--btn.cds--btn--ghost {
   min-height: 4rem;
   padding: 0.55rem 0.6rem;
-  color: #8d96a8;
+  color: var(--color-bottom-nav-muted);
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -487,7 +540,7 @@ body {
 
 .bottom-tabbar__item--active.cds--btn.cds--btn--ghost,
 .bottom-nav__item--active.cds--btn.cds--btn--ghost {
-  color: #f5f8ff;
+  color: var(--color-bottom-nav-active);
   background: linear-gradient(180deg, rgba(69, 137, 255, 0.28), rgba(69, 137, 255, 0.14));
   box-shadow: inset 0 0 0 1px rgba(69, 137, 255, 0.32);
 }
@@ -497,7 +550,7 @@ body {
 .bottom-tabbar__item.cds--btn.cds--btn--ghost:focus-visible,
 .bottom-nav__item.cds--btn.cds--btn--ghost:focus-visible {
   background: rgba(255, 255, 255, 0.06);
-  color: #dfe6f3;
+  color: var(--color-bottom-nav-hover);
 }
 
 .workout-summary-card__row strong {
@@ -527,7 +580,7 @@ body {
   gap: 0.2rem;
   padding: 0.7rem 0.8rem;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--color-soft-surface);
   border: 1px solid var(--color-border);
 }
 
@@ -563,7 +616,7 @@ body {
 }
 
 .workout-load-status--saved {
-  color: #6fdc8c;
+  color: var(--color-positive);
   font-weight: 600;
 }
 
@@ -577,7 +630,7 @@ body {
   padding: 0.75rem;
   border: 1px solid var(--color-border);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--color-soft-surface);
 }
 
 .workout-set-row {
@@ -589,9 +642,9 @@ body {
     "done done";
   gap: var(--space-3);
   padding: 0.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.025);
+  background: var(--color-row-surface);
 }
 
 .workout-set-row--done {
@@ -683,7 +736,7 @@ body {
   gap: var(--space-3);
   padding: 0.75rem 0.85rem;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--color-soft-surface);
   border: 1px solid var(--color-border);
 }
 
@@ -760,7 +813,7 @@ body {
 .setup-selection-card {
   padding: 0.8rem 0.9rem;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--color-soft-surface);
   border: 1px solid var(--color-border);
 }
 
@@ -780,7 +833,7 @@ body {
   padding: 0.7rem 0.8rem;
   border-radius: 10px;
   border: 1px solid var(--color-border);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--color-soft-surface);
   color: var(--color-text);
   cursor: pointer;
   overflow-wrap: anywhere;
@@ -806,7 +859,7 @@ body {
   padding: 0.8rem 0.9rem;
   border-radius: 12px;
   border: 1px solid var(--color-border);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--color-soft-surface);
   color: var(--color-text);
   text-align: left;
   cursor: pointer;
@@ -856,7 +909,7 @@ body {
 .setup-selection-card__meta span {
   padding: 0.4rem 0.6rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--color-soft-surface-strong);
   border: 1px solid var(--color-border);
   color: var(--color-text-muted);
   font-size: 0.82rem;
@@ -916,7 +969,7 @@ body {
   gap: var(--space-2);
   padding: 0.35rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--color-soft-surface);
   border: 1px solid var(--color-border);
 }
 
@@ -951,14 +1004,14 @@ body {
   padding: 0;
   border: 0;
   background: transparent;
-  color: #78a9ff;
+  color: var(--color-link);
   cursor: pointer;
   font: inherit;
 }
 
 .auth-link-button:hover,
 .auth-link-button:focus-visible {
-  color: #a6c8ff;
+  color: var(--color-link-hover);
   text-decoration: underline;
 }
 
@@ -968,11 +1021,11 @@ body {
 }
 
 .auth-message--error {
-  color: #ff8389;
+  color: var(--color-danger);
 }
 
 .auth-message--success {
-  color: #6fdc8c;
+  color: var(--color-positive);
 }
 
 .form-message {
@@ -982,7 +1035,7 @@ body {
 }
 
 .form-message--error {
-  color: #ff8389;
+  color: var(--color-danger);
 }
 
 .tutorial-inline-card {
@@ -1035,7 +1088,7 @@ body {
   flex: 1 1 0;
   height: 6px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--color-soft-surface-strong);
 }
 
 .tutorial-inline-card__dot--active {
@@ -1066,7 +1119,7 @@ body {
   align-self: flex-start;
   padding: 0.2rem 0.45rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-soft-surface);
   border: 1px solid var(--color-border);
   color: var(--color-text-muted);
   font-size: 0.72rem;
@@ -1167,7 +1220,7 @@ body {
   gap: var(--space-3);
   padding: 0.75rem 0.85rem;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--color-soft-surface);
   border: 1px solid var(--color-border);
 }
 
