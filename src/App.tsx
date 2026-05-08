@@ -397,15 +397,20 @@ export default function App() {
   };
 
   const handleLogin = async (email: string, password: string) => {
-    const nextSession = await signInWithEmail(email, password);
+    const result = await signInWithEmail(email, password);
 
-    if (!nextSession) {
-      return false;
+    if (!result.success || !result.session) {
+      return {
+        success: false,
+        message: result.message
+      };
     }
 
-    setSession(nextSession);
+    setSession(result.session);
     openGoals();
-    return true;
+    return {
+      success: true
+    };
   };
 
   const handleSignUp = async (email: string, password: string) => signUpWithEmail(email, password);

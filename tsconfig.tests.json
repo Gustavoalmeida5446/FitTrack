@@ -16,6 +16,7 @@
     "src/lib/appState.ts",
     "src/lib/appRouter.ts",
     "src/lib/authRedirect.ts",
+    "src/lib/authErrors.ts",
     "src/lib/date.ts",
     "src/lib/exerciseNames.ts",
     "src/lib/exerciseSearch.ts",

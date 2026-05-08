@@ -13,8 +13,8 @@ import appLogo from '../../favicon/android-chrome-192x192.png';
 
 interface Props {
   onBack?: () => void;
-  onLogin: (email: string, password: string) => Promise<boolean>;
-  onSignUp: (email: string, password: string) => Promise<{ success: boolean; requiresEmailConfirmation?: boolean }>;
+  onLogin: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
+  onSignUp: (email: string, password: string) => Promise<{ success: boolean; requiresEmailConfirmation?: boolean; message?: string }>;
   onRequestPasswordReset: (email: string) => Promise<boolean>;
   onUpdatePassword: (password: string) => Promise<boolean>;
   isPasswordRecoveryActive?: boolean;
@@ -179,10 +179,10 @@ export function LoginPage({
     }
 
     if (!isSignupMode) {
-      const success = await onLogin(email.trim(), password);
+      const result = await onLogin(email.trim(), password);
 
-      if (!success) {
-        setErrorMessage('Não foi possível entrar com esse e-mail e senha.');
+      if (!result.success) {
+        setErrorMessage(result.message ?? 'Não foi possível entrar com esse e-mail e senha.');
       }
 
       setIsSubmitting(false);
@@ -192,12 +192,12 @@ export function LoginPage({
     const result = await onSignUp(email.trim(), password);
 
     if (!result.success) {
-      setErrorMessage('Não foi possível criar sua conta agora.');
+      setErrorMessage(result.message ?? 'Não foi possível criar sua conta agora.');
       setIsSubmitting(false);
       return;
     }
 
-    setSuccessMessage(result.requiresEmailConfirmation ? 'Conta criada. Confirme seu e-mail para entrar.' : 'Conta criada com sucesso. Você já pode usar o app.');
+    setSuccessMessage(result.message ?? (result.requiresEmailConfirmation ? 'Conta criada. Confirme seu e-mail para entrar.' : 'Conta criada com sucesso. Você já pode usar o app.'));
     setPassword('');
     setConfirmPassword('');
     resetTouchState();

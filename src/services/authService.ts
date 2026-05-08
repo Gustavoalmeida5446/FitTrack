@@ -5,11 +5,17 @@ import {
   buildPasswordResetRedirectUrl,
   hasPasswordRecoveryParams
 } from '../lib/authRedirect';
+import { getAuthErrorMessage } from '../lib/authErrors';
 import { supabase } from '../lib/supabaseClient';
 
 export interface AuthActionResult {
   success: boolean;
   requiresEmailConfirmation?: boolean;
+  message?: string;
+}
+
+export interface AuthSessionResult extends AuthActionResult {
+  session: Session | null;
 }
 
 function getAppRedirectUrl() {
@@ -55,7 +61,7 @@ export async function getCurrentSession() {
   return data.session;
 }
 
-export async function signInWithEmail(email: string, password: string) {
+export async function signInWithEmail(email: string, password: string): Promise<AuthSessionResult> {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password
@@ -63,10 +69,18 @@ export async function signInWithEmail(email: string, password: string) {
 
   if (error) {
     console.error('Erro ao fazer login', error);
-    return null;
+    return {
+      success: false,
+      session: null,
+      message: getAuthErrorMessage('login', error)
+    };
   }
 
-  return data.session;
+  return {
+    success: Boolean(data.session),
+    session: data.session,
+    message: data.session ? undefined : 'Não foi possível iniciar sua sessão agora. Tente novamente.'
+  };
 }
 
 export async function signUpWithEmail(email: string, password: string): Promise<AuthActionResult> {
@@ -80,12 +94,20 @@ export async function signUpWithEmail(email: string, password: string): Promise<
 
   if (error) {
     console.error('Erro ao criar conta', error);
-    return { success: false };
+    return {
+      success: false,
+      message: getAuthErrorMessage('signup', error)
+    };
   }
+
+  const requiresEmailConfirmation = !data.session;
 
   return {
     success: true,
-    requiresEmailConfirmation: !data.session
+    requiresEmailConfirmation,
+    message: requiresEmailConfirmation
+      ? 'Conta criada. Enviamos um e-mail de confirmação; confirme seu e-mail antes de entrar.'
+      : 'Conta criada com sucesso. Você já pode usar o app.'
   };
 }
 
