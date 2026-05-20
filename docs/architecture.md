@@ -152,7 +152,7 @@ Ainda legado ou de compatibilidade:
 - `user_app_states` continua sendo salvo em toda alteracao relevante como snapshot agregado.
 - `src/lib/legacyState.ts` ainda aceita formatos antigos de treino e dieta.
 - `src/services/appStateService.ts` ainda e necessario como fallback.
-- `MAINTENANCE.md` contem a lista atual de tarefas de manutencao.
+- `TODO.md` contem a lista atual de tarefas de manutencao.
 
 ## Pontos de Atencao
 
