@@ -35,6 +35,7 @@ export interface Workout {
   name: string;
   muscleGroups: MuscleGroup[];
   exercises: WorkoutExercise[];
+  archivedAt?: string | null;
 }
 
 export interface WaterData {

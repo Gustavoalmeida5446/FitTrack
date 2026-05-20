@@ -6,6 +6,9 @@ Esta lista descreve apenas funcionalidades implementadas no codigo atual.
 
 - Cadastro de treinos em `src/pages/WorkoutSetupPage.tsx`.
 - Edicao e remocao de treinos cadastrados.
+- Arquivamento de treinos para esconder fichas antigas da Home sem apagar.
+- Aba de treinos ativos e aba de treinos arquivados.
+- Exportacao e importacao de treinos por arquivo JSON do FitTrack.
 - Busca de exercicios baseada em `exercises.json`, aliases de `src/services/exercises.ts` e traducoes de `src/data/exercise-name-pt.json`.
 - Adicao de exercicios com grupo muscular, carga, repeticoes, series e descanso.
 - Series individuais por exercicio via `setsDetail`.

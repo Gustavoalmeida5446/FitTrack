@@ -31,6 +31,7 @@ function createLegacyState(): AppState {
         id: 'w-1',
         name: 'Treino A',
         muscleGroups: ['Pernas'],
+        archivedAt: null,
         exercises: [
           {
             id: 'e-1',
@@ -111,6 +112,7 @@ test('convertAppStateToRelationalRecords preserva dados principais do JSON legad
   assert.equal(records.weightHistory.length, 1);
   assert.equal(records.workouts.length, 1);
   assert.equal(records.workouts[0]?.legacyId, 'w-1');
+  assert.equal(records.workouts[0]?.archivedAt, null);
   assert.equal(records.workoutExercises.length, 1);
   assert.equal(records.workoutExercises[0]?.legacyId, 'e-1');
   assert.equal(records.workoutExercises[0]?.sourceId, 'Thigh_Abductor');
@@ -120,6 +122,17 @@ test('convertAppStateToRelationalRecords preserva dados principais do JSON legad
   assert.equal(records.dietDays.length, 1);
   assert.equal(records.dietDayMeals.length, 1);
   assert.equal(records.dietCompletedMeals.length, 1);
+});
+
+test('conversao relacional preserva treino arquivado', () => {
+  const legacyState = createLegacyState();
+  legacyState.workouts[0].archivedAt = '2026-05-20T12:00:00.000Z';
+
+  const records = convertAppStateToRelationalRecords('u-1', legacyState);
+  const restoredState = convertRelationalRecordsToAppState(records, '2026-05-20');
+
+  assert.equal(records.workouts[0]?.archivedAt, '2026-05-20T12:00:00.000Z');
+  assert.equal(restoredState.workouts[0]?.archivedAt, '2026-05-20T12:00:00.000Z');
 });
 
 test('convertAppStateToRelationalRecords gera ids estaveis para conversao idempotente', () => {

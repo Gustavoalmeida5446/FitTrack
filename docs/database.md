@@ -37,6 +37,7 @@ Definidas em `supabase/relational-schema-plan.sql`.
 ### Treinos
 
 - `app_workouts`: treino por usuario, com `legacy_id`, nome, posicao, grupos musculares em `jsonb` e `deleted_at`.
+- `app_workouts.archived_at`: marca treinos arquivados. Arquivado nao e removido; apenas deixa de aparecer na Home.
 - `app_workout_exercises`: exercicios de um treino. Relaciona `workout_id` com `app_workouts(id)`, guarda nome, traducao, grupo, midia, carga/reps/series resumidas, descanso, status e posicao.
 - `app_workout_exercise_sets`: series de um exercicio. Relaciona `workout_id` e `exercise_id`, guarda posicao, carga, repeticoes e concluido. Tem chave unica `(exercise_id, position)`.
 
@@ -74,6 +75,8 @@ Definidas em `supabase/relational-schema-plan.sql`.
 ## Realtime
 
 `supabase/realtime-publication.sql` adiciona as tabelas relacionais a publicacao `supabase_realtime` e define `replica identity full`.
+
+`supabase/workout-archive.sql` adiciona `archived_at` em `app_workouts` de forma idempotente para ambientes ja existentes.
 
 `src/hooks/useRemoteAppState.ts` assina eventos `postgres_changes` nas tabelas:
 

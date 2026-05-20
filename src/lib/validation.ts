@@ -86,7 +86,8 @@ export const workoutSchema = z.object({
   id: nonEmptyStringSchema,
   name: nonEmptyStringSchema,
   muscleGroups: z.array(muscleGroupSchema),
-  exercises: z.array(workoutExerciseSchema)
+  exercises: z.array(workoutExerciseSchema),
+  archivedAt: z.string().trim().min(1).nullable().optional()
 });
 
 const workoutExerciseForSaveSchema = workoutExerciseSchema.extend({

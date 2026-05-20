@@ -45,6 +45,7 @@ export interface RelationalWorkoutRecord {
   name: string;
   position: number;
   muscleGroups: MuscleGroup[];
+  archivedAt?: string | null;
 }
 
 export interface RelationalWorkoutExerciseRecord {
@@ -220,7 +221,8 @@ export function convertAppStateToRelationalRecords(userId: string, state: AppSta
       legacyId: workout.id,
       name: workout.name,
       position: workoutIndex,
-      muscleGroups: workout.muscleGroups
+      muscleGroups: workout.muscleGroups,
+      archivedAt: workout.archivedAt ?? null
     });
 
     workout.exercises.forEach((exercise, exerciseIndex) => {
@@ -353,6 +355,7 @@ export function convertRelationalRecordsToAppState(records: RelationalAppStateRe
       id: workout.legacyId,
       name: workout.name,
       muscleGroups: workout.muscleGroups,
+      archivedAt: workout.archivedAt ?? null,
       exercises: records.workoutExercises
         .filter((exercise) => exercise.workoutId === workout.id)
         .sort((a, b) => a.position - b.position)

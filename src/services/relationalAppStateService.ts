@@ -176,7 +176,8 @@ export async function loadRelationalAppStateSnapshot(session: Session, workoutsU
       legacyId: item.legacy_id,
       name: item.name,
       position: Number(item.position),
-      muscleGroups: item.muscle_groups
+      muscleGroups: item.muscle_groups,
+      archivedAt: item.archived_at ?? null
     })),
     workoutExercises: mapRowList(exerciseResult.data).map((item) => ({
       id: item.id,
@@ -375,6 +376,7 @@ export async function replaceRelationalWorkouts(session: Session, workouts: Work
     name: workout.name,
     position: workoutIndex,
     muscle_groups: workout.muscleGroups,
+    archived_at: workout.archivedAt ?? null,
     deleted_at: null,
     updated_at: new Date().toISOString()
   }));

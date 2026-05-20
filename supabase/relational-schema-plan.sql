@@ -60,11 +60,15 @@ create table if not exists public.app_workouts (
   name text not null,
   position integer not null default 0,
   muscle_groups jsonb not null default '[]'::jsonb,
+  archived_at timestamptz,
   deleted_at timestamptz,
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now()),
   unique (user_id, legacy_id)
 );
+
+alter table public.app_workouts
+add column if not exists archived_at timestamptz;
 
 create table if not exists public.app_workout_exercises (
   id text primary key,

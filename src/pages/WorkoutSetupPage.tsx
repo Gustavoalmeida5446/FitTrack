@@ -1,4 +1,4 @@
-import { CheckmarkFilled, ChevronLeft, Search, TrashCan } from '@carbon/icons-react';
+import { Archive, CheckmarkFilled, ChevronLeft, DocumentDownload, DocumentImport, TrashCan, Undo } from '@carbon/icons-react';
 import { Button, TextInput, Tile } from '@carbon/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AppNumberInput } from '../components/AppNumberInput';
@@ -12,6 +12,7 @@ import { PageContainer } from '../components/PageContainer';
 import { getExerciseDisplayName } from '../lib/exerciseNames';
 import { isValidWorkoutForSave, isValidWorkoutExerciseForSave } from '../lib/validation';
 import { createWorkoutExerciseSets, normalizeWorkoutExerciseSets, summarizeWorkoutExerciseSets } from '../lib/workoutSets';
+import { createWorkoutExportText, getWorkoutExportFileName, parseImportedWorkoutFile } from '../lib/workoutSharing';
 
 interface Props {
   onBack: () => void;
@@ -71,8 +72,11 @@ export function WorkoutSetupPage({
 }: Props) {
   const skipNextSearchRef = useRef(false);
   const lastAutoSavedWorkoutKeyRef = useRef('');
+  const importInputRef = useRef<HTMLInputElement | null>(null);
   const [editingWorkoutId, setEditingWorkoutId] = useState<string | null>(null);
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null);
+  const [workoutListTab, setWorkoutListTab] = useState<'active' | 'archived'>('active');
+  const [importMessage, setImportMessage] = useState('');
   const [activePreviewImageIndex, setActivePreviewImageIndex] = useState(0);
   const [query, setQuery] = useState('');
   const [options, setOptions] = useState<ExerciseOption[]>([]);
@@ -97,6 +101,9 @@ export function WorkoutSetupPage({
   const [hasTriedAddExercise, setHasTriedAddExercise] = useState(false);
   const [hasTriedSaveWorkout, setHasTriedSaveWorkout] = useState(false);
   const debouncedQuery = useDebouncedValue(query, 200);
+  const activeWorkouts = useMemo(() => workouts.filter((workout) => !workout.archivedAt), [workouts]);
+  const archivedWorkouts = useMemo(() => workouts.filter((workout) => Boolean(workout.archivedAt)), [workouts]);
+  const visibleWorkouts = workoutListTab === 'active' ? activeWorkouts : archivedWorkouts;
 
   const canAddExercise = useMemo(() => exerciseName.trim().length > 0 && Boolean(exerciseSourceId), [exerciseName, exerciseSourceId]);
   const derivedWorkoutGroups = useMemo(() => Array.from(new Set(draftExercises.map((exercise) => exercise.muscleGroup))), [draftExercises]);
@@ -178,11 +185,13 @@ export function WorkoutSetupPage({
         setsDetail: nextSets
       };
     });
+    const savedWorkout = workouts.find((workout) => workout.id === workoutId);
     const nextWorkout: Workout = {
       id: workoutId,
       name: workoutName.trim(),
       muscleGroups: Array.from(new Set(normalizedExercises.map((exercise) => exercise.muscleGroup))),
-      exercises: normalizedExercises
+      exercises: normalizedExercises,
+      archivedAt: savedWorkout?.archivedAt ?? null
     };
 
     return isValidWorkoutForSave(nextWorkout) ? nextWorkout : null;
@@ -398,6 +407,55 @@ export function WorkoutSetupPage({
     }
   };
 
+  const handleArchiveWorkout = (workoutId: string) => {
+    onSaveWorkouts(workouts.map((workout) => (
+      workout.id === workoutId
+        ? { ...workout, archivedAt: new Date().toISOString() }
+        : workout
+    )));
+
+    if (editingWorkoutId === workoutId) {
+      resetWorkoutForm();
+    }
+  };
+
+  const handleRestoreWorkout = (workoutId: string) => {
+    onSaveWorkouts(workouts.map((workout) => (
+      workout.id === workoutId
+        ? { ...workout, archivedAt: null }
+        : workout
+    )));
+  };
+
+  const handleExportWorkout = (workout: Workout) => {
+    const fileText = createWorkoutExportText(workout);
+    const file = new Blob([fileText], { type: 'application/json' });
+    const fileUrl = URL.createObjectURL(file);
+    const link = document.createElement('a');
+
+    link.href = fileUrl;
+    link.download = getWorkoutExportFileName(workout);
+    link.click();
+    URL.revokeObjectURL(fileUrl);
+  };
+
+  const handleImportWorkout = async (file: File | null) => {
+    if (!file) {
+      return;
+    }
+
+    const result = parseImportedWorkoutFile(await file.text());
+
+    if (!result.success || !result.workout) {
+      setImportMessage(result.message ?? 'Não foi possível importar este treino.');
+      return;
+    }
+
+    onSaveWorkouts([...workouts, result.workout]);
+    setWorkoutListTab('active');
+    setImportMessage(`Treino "${result.workout.name}" importado.`);
+  };
+
   const previewImageUrl = exerciseMediaUrls[activePreviewImageIndex] ?? exerciseMediaUrl;
   const canTogglePreviewImage = exerciseMediaUrls.length > 1;
 
@@ -564,12 +622,54 @@ export function WorkoutSetupPage({
               </div>
               <div className="card-head__title">
                 <h3>Treinos salvos</h3>
-                <p>Edite ou remova os treinos que já foram cadastrados</p>
+                <p>Arquive fichas antigas, restaure quando quiser ou compartilhe por arquivo</p>
               </div>
             </div>
           </div>
+          <div className="workout-list-tools">
+            <div className="workout-tabs" role="tablist" aria-label="Lista de treinos">
+              <Button
+                kind={workoutListTab === 'active' ? 'primary' : 'tertiary'}
+                size="sm"
+                role="tab"
+                aria-selected={workoutListTab === 'active'}
+                onClick={() => setWorkoutListTab('active')}
+              >
+                Ativos ({activeWorkouts.length})
+              </Button>
+              <Button
+                kind={workoutListTab === 'archived' ? 'primary' : 'tertiary'}
+                size="sm"
+                role="tab"
+                aria-selected={workoutListTab === 'archived'}
+                onClick={() => setWorkoutListTab('archived')}
+              >
+                Arquivados ({archivedWorkouts.length})
+              </Button>
+            </div>
+            <input
+              ref={importInputRef}
+              className="visually-hidden"
+              type="file"
+              accept="application/json,.json"
+              onChange={(event) => {
+                void handleImportWorkout(event.target.files?.[0] ?? null);
+                event.target.value = '';
+              }}
+            />
+            <Button
+              kind="tertiary"
+              size="sm"
+              renderIcon={DocumentImport}
+              iconDescription="Importar treino"
+              onClick={() => importInputRef.current?.click()}
+            >
+              Importar
+            </Button>
+          </div>
+          {importMessage ? <p className="form-message">{importMessage}</p> : null}
           <div className="stack">
-            {workouts.length > 0 ? workouts.map((workout) => (
+            {visibleWorkouts.length > 0 ? visibleWorkouts.map((workout) => (
               <SelectionSummaryCard
                 key={workout.id}
                 label={`${workout.exercises.length} exercício(s)`}
@@ -577,14 +677,22 @@ export function WorkoutSetupPage({
                 actions={(
                   <>
                     <Button kind="ghost" size="sm" onClick={() => handleEditWorkout(workout)}>Editar</Button>
+                    <Button kind="ghost" size="sm" renderIcon={DocumentDownload} iconDescription="Exportar treino" onClick={() => handleExportWorkout(workout)}>Exportar</Button>
+                    {workout.archivedAt ? (
+                      <Button kind="ghost" size="sm" renderIcon={Undo} iconDescription="Restaurar treino" onClick={() => handleRestoreWorkout(workout.id)}>Restaurar</Button>
+                    ) : (
+                      <Button kind="ghost" size="sm" renderIcon={Archive} iconDescription="Arquivar treino" onClick={() => handleArchiveWorkout(workout.id)}>Arquivar</Button>
+                    )}
                     <Button kind="ghost" size="sm" renderIcon={TrashCan} iconDescription="Remover treino" onClick={() => handleRemoveWorkout(workout.id)}>Remover</Button>
                   </>
                 )}
-                meta={workout.muscleGroups}
+                meta={workout.archivedAt ? [...workout.muscleGroups, 'Arquivado'] : workout.muscleGroups}
               />
             )) : (
-              <InfoBlock label="Treinos">
-                Nenhum treino salvo ainda.
+              <InfoBlock label={workoutListTab === 'active' ? 'Treinos ativos' : 'Treinos arquivados'}>
+                {workoutListTab === 'active'
+                  ? 'Nenhum treino ativo salvo ainda.'
+                  : 'Nenhum treino arquivado ainda.'}
               </InfoBlock>
             )}
           </div>

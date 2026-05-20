@@ -143,6 +143,7 @@ export default function App() {
   }), [profile, workouts, workoutsUpdatedAt, water, weeklyDiet, weightHistory]);
 
   const targets = useMemo(() => calculateNutritionTargets(profile), [profile]);
+  const activeWorkouts = useMemo(() => workouts.filter((workout) => !workout.archivedAt), [workouts]);
   const selectedWorkout = useMemo(() => workouts.find((item) => item.id === selectedWorkoutId), [workouts, selectedWorkoutId]);
   const selectedDay = useMemo(() => weeklyDiet.days.find((item) => item.id === selectedDayId), [weeklyDiet.days, selectedDayId]);
   const selectedDayMeals = useMemo(() => {
@@ -487,7 +488,7 @@ export default function App() {
         <Suspense fallback={<AppLoadingState />}>
           {view === 'home' ? (
             <HomePage
-              workouts={workouts}
+              workouts={activeWorkouts}
               water={water}
               weeklyDiet={weeklyDiet}
               waterGoalMl={targets.waterDailyMl}

@@ -26,6 +26,7 @@ export type LegacyWorkout = {
   name: string;
   muscleGroups: MuscleGroup[];
   exercises: LegacyExercise[];
+  archivedAt?: string | null;
 };
 
 export type LegacyWorkoutState = {
@@ -204,7 +205,8 @@ export function normalizeLegacyWorkoutList(workouts?: Workout[] | PersistedWorko
       id: workout.id,
       name: workout.name,
       muscleGroups: Array.isArray(workout.muscleGroups) ? workout.muscleGroups : [],
-      exercises: Array.isArray(workout.exercises) ? workout.exercises.map(normalizeWorkoutExercise) : []
+      exercises: Array.isArray(workout.exercises) ? workout.exercises.map(normalizeWorkoutExercise) : [],
+      archivedAt: typeof workout.archivedAt === 'string' ? workout.archivedAt : null
     }));
   }
 
@@ -213,7 +215,8 @@ export function normalizeLegacyWorkoutList(workouts?: Workout[] | PersistedWorko
       id: workout.id,
       name: workout.name,
       muscleGroups: Array.isArray(workout.muscleGroups) ? workout.muscleGroups : [],
-      exercises: Array.isArray(workout.exercises) ? workout.exercises.map(normalizeWorkoutExercise) : []
+      exercises: Array.isArray(workout.exercises) ? workout.exercises.map(normalizeWorkoutExercise) : [],
+      archivedAt: typeof workout.archivedAt === 'string' ? workout.archivedAt : null
     })) ?? [];
   }
 
@@ -247,7 +250,8 @@ export function normalizeLegacyWorkoutList(workouts?: Workout[] | PersistedWorko
         restSeconds: exercise.restSeconds,
         done: Boolean(exercise.done)
       });
-    }) : []
+    }) : [],
+    archivedAt: null
   }));
 }
 

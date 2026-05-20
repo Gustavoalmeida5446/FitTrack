@@ -10,4 +10,9 @@ Todas as mudancas relevantes deste projeto devem ser documentadas aqui.
 - Documentado o fluxo de deploy GitHub Pages e PWA.
 - Documentadas funcionalidades reais existentes.
 - Criadas regras de manutencao do projeto.
-- Atualizado `TODO.md` com tarefas baseadas no estado atual do codigo.
+- Atualizado `MAINTENANCE.md` com tarefas baseadas no estado atual do codigo.
+
+## Treinos arquivados e compartilhamento
+
+- Adicionado arquivamento de treinos para esconder fichas antigas da Home sem apagar.
+- Adicionada exportacao e importacao de treino por arquivo JSON.

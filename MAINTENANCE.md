@@ -1,9 +1,19 @@
-# TODO - FitTrack
+# Manutencao - FitTrack
 
 Lista baseada no estado atual do codigo em 2026-05-09.
 
 ## Prioridade Alta
 
+- Implementar arquivamento de treinos:
+  - adicionar estado simples de arquivado no modelo de treino;
+  - esconder treinos arquivados da Home;
+  - mostrar treinos ativos e arquivados em abas na tela de Treinos;
+  - permitir arquivar e restaurar sem apagar a ficha.
+- Implementar compartilhamento de treinos:
+  - exportar um treino salvo para arquivo JSON versionado;
+  - importar arquivo de treino e criar uma nova ficha para o usuario atual;
+  - validar arquivo importado antes de salvar;
+  - manter exercicios, series, cargas, repeticoes e descanso.
 - Verificar no Supabase real se `app_diet_day_meals` e `app_diet_completed_meals` possuem coluna `updated_at`. O schema em `supabase/relational-schema-plan.sql` nao define essa coluna, mas `src/services/relationalAppStateService.ts` envia `updated_at` nos upserts dessas tabelas.
 - Revisar a resolucao de conflito entre `user_app_states.updated_at` e timestamps relacionais em `src/services/appStateService.ts`, porque o app ainda escolhe entre snapshot legado e relacional por data.
 - Validar o fluxo de escrita dupla entre `src/services/appStateService.ts` e `src/services/relationalAppStateService.ts`, principalmente falhas parciais em `replaceRelationalWorkouts`, `replaceRelationalDiet` e `replaceRelationalWeightHistory`.
@@ -13,7 +23,7 @@ Lista baseada no estado atual do codigo em 2026-05-09.
 
 - Atualizar `README.md` para apontar o PWA para `public/manifest.webmanifest`, pois o texto atual menciona `favicon/site.webmanifest`.
 - Revisar `.env.example`: as variaveis WGER, ExerciseDB e USDA aparecem no exemplo, mas a implementacao atual usa base local de exercicios e TACO.
-- Decidir o papel de `todo.md` minúsculo, que contem plano tecnico antigo semelhante ao antigo `TODO.md`.
+- Manter este arquivo como fonte unica de tarefas de manutencao.
 - Avaliar se `app_weight_logs` precisa de `updated_at`, ja que o carregamento relacional calcula o timestamp mais recente a partir de linhas que podem ou nao ter essa coluna.
 - Documentar procedimento operacional de backup antes de qualquer nova migration Supabase.
 - Revisar se `dist/`, `.test-dist/` e arquivos `*.tsbuildinfo` devem permanecer no diretorio local ou ser limpos/ignorados conforme politica do repositorio.
