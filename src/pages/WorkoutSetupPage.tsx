@@ -1,4 +1,4 @@
-import { Archive, CheckmarkFilled, ChevronLeft, DocumentDownload, DocumentImport, TrashCan, Undo } from '@carbon/icons-react';
+import { Archive, ArrowDown, ArrowUp, CheckmarkFilled, ChevronLeft, DocumentDownload, DocumentImport, TrashCan, Undo } from '@carbon/icons-react';
 import { Button, TextArea, TextInput, Tile } from '@carbon/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AppNumberInput } from '../components/AppNumberInput';
@@ -379,6 +379,21 @@ export function WorkoutSetupPage({
     }
   };
 
+  const handleMoveExercise = (exerciseId: string, direction: -1 | 1) => {
+    setDraftExercises((prev) => {
+      const currentIndex = prev.findIndex((exercise) => exercise.id === exerciseId);
+      const nextIndex = currentIndex + direction;
+
+      if (currentIndex < 0 || nextIndex < 0 || nextIndex >= prev.length) {
+        return prev;
+      }
+
+      const nextExercises = [...prev];
+      [nextExercises[currentIndex], nextExercises[nextIndex]] = [nextExercises[nextIndex], nextExercises[currentIndex]];
+      return nextExercises;
+    });
+  };
+
   const handleSaveWorkout = () => {
     setHasTriedSaveWorkout(true);
 
@@ -600,6 +615,28 @@ export function WorkoutSetupPage({
                 key={exercise.id}
                 label={`Exercício ${index + 1}`}
                 title={getExerciseDisplayName(exercise.sourceId, exercise.name, exercise.ptName)}
+                labelActions={(
+                  <>
+                    <Button
+                      kind="ghost"
+                      size="sm"
+                      hasIconOnly
+                      renderIcon={ArrowUp}
+                      iconDescription="Mover exercício para cima"
+                      disabled={index === 0}
+                      onClick={() => handleMoveExercise(exercise.id, -1)}
+                    />
+                    <Button
+                      kind="ghost"
+                      size="sm"
+                      hasIconOnly
+                      renderIcon={ArrowDown}
+                      iconDescription="Mover exercício para baixo"
+                      disabled={index === draftExercises.length - 1}
+                      onClick={() => handleMoveExercise(exercise.id, 1)}
+                    />
+                  </>
+                )}
                 actions={(
                   <>
                     <Button kind="ghost" size="sm" onClick={() => handleEditExercise(exercise)}>Editar</Button>
