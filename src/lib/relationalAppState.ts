@@ -57,6 +57,7 @@ export interface RelationalWorkoutExerciseRecord {
   sourceId?: string;
   name: string;
   ptName?: string;
+  notes?: string;
   muscleGroup: MuscleGroup;
   mediaType: ExerciseMediaType;
   mediaUrl: string | null;
@@ -231,6 +232,8 @@ export function convertAppStateToRelationalRecords(userId: string, state: AppSta
         ? exercise.mediaUrls.filter(Boolean)
         : exercise.mediaUrl ? [exercise.mediaUrl] : [];
 
+      const notes = exercise.notes?.trim();
+
       workoutExercises.push({
         id: exerciseId,
         userId,
@@ -240,6 +243,7 @@ export function convertAppStateToRelationalRecords(userId: string, state: AppSta
         sourceId: exercise.sourceId,
         name: exercise.name,
         ptName: exercise.ptName,
+        ...(notes ? { notes } : {}),
         muscleGroup: exercise.muscleGroup,
         mediaType: exercise.mediaType,
         mediaUrl: exercise.mediaUrl,
@@ -384,6 +388,7 @@ export function convertRelationalRecordsToAppState(records: RelationalAppStateRe
             sourceId: exercise.sourceId,
             name: exercise.name,
             ptName: exercise.ptName,
+            ...(exercise.notes?.trim() ? { notes: exercise.notes.trim() } : {}),
             muscleGroup: exercise.muscleGroup,
             mediaType: exercise.mediaType,
             mediaUrl: exercise.mediaUrl,

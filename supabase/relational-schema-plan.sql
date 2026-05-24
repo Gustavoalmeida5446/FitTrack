@@ -79,6 +79,7 @@ create table if not exists public.app_workout_exercises (
   source_id text,
   name text not null,
   pt_name text,
+  notes text,
   muscle_group text not null,
   media_type text not null default 'none',
   media_url text,

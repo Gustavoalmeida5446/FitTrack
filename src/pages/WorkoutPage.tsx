@@ -84,6 +84,7 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateSet
           const activeImageIndex = mediaUrls.length > 1 ? activeImageIndexes[exercise.id] ?? 0 : 0;
           const activeImageUrl = mediaUrls[activeImageIndex] ?? null;
           const exerciseSets = normalizeWorkoutExerciseSets(exercise);
+          const exerciseNotes = exercise.notes?.trim();
 
           return (
             <Tile key={exercise.id} className={`card metric-card workout-exercise-card ${exercise.done ? 'workout-exercise-card--done' : ''}`}>
@@ -105,6 +106,12 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateSet
                     className="exercise-media"
                   />
                 </button>
+              ) : null}
+              {exerciseNotes ? (
+                <div className="workout-exercise-note">
+                  <span>Observação</span>
+                  <p>{exerciseNotes}</p>
+                </div>
               ) : null}
               <StatsGrid
                 className="workout-exercise-card__meta"

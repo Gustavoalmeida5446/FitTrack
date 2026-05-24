@@ -20,6 +20,11 @@
   --color-bottom-nav-hover: #dfe6f3;
   --color-positive: #6fdc8c;
   --color-danger: #ff8389;
+  --color-danger-bg: rgba(218, 30, 40, 0.16);
+  --color-danger-border: rgba(255, 131, 137, 0.5);
+  --color-warning: #f1c21b;
+  --color-warning-bg: rgba(241, 194, 27, 0.16);
+  --color-warning-border: rgba(241, 194, 27, 0.48);
   --color-link: #78a9ff;
   --color-link-hover: #a6c8ff;
   --space-1: 0.25rem;
@@ -54,7 +59,12 @@
   --color-bottom-nav-active: #0f172a;
   --color-bottom-nav-hover: #1f2937;
   --color-positive: #198038;
-  --color-danger: #da1e28;
+  --color-danger: #a2191f;
+  --color-danger-bg: #fff1f1;
+  --color-danger-border: #fa4d56;
+  --color-warning: #8a3800;
+  --color-warning-bg: #fff8e1;
+  --color-warning-border: #f1c21b;
   --color-link: #0f62fe;
   --color-link-hover: #0043ce;
 }
@@ -111,10 +121,10 @@ body {
 }
 
 .sync-status--error {
-  border: 1px solid #6f1d1b;
-  background: rgba(111, 29, 27, 0.22);
-  color: #ffd7d5;
-  box-shadow: inset 0 0 0 1px rgba(255, 215, 213, 0.04);
+  border: 1px solid var(--color-danger-border);
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
 .sync-status--pending {
@@ -435,6 +445,30 @@ body {
   width: 100%;
   max-width: 220px;
   margin-bottom: 0;
+}
+
+.workout-exercise-note {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--color-warning-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-warning-bg);
+}
+
+.workout-exercise-note span {
+  color: var(--color-warning);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.workout-exercise-note p {
+  margin: 0;
+  color: var(--color-text);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .check-grid {
@@ -1051,6 +1085,10 @@ body {
 }
 
 .auth-message--error {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--color-danger-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-bg);
   color: var(--color-danger);
 }
 
@@ -1065,6 +1103,10 @@ body {
 }
 
 .form-message--error {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--color-danger-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-bg);
   color: var(--color-danger);
 }
 

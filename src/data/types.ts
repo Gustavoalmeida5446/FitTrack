@@ -18,6 +18,7 @@ export interface WorkoutExercise {
   sourceId?: string;
   name: string;
   ptName?: string;
+  notes?: string;
   muscleGroup: MuscleGroup;
   mediaType: ExerciseMediaType;
   mediaUrl: string | null;

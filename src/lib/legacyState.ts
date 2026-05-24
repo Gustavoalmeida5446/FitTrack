@@ -10,6 +10,7 @@ type LegacyExercise = WorkoutExercise | {
   sourceId?: string;
   name: string;
   ptName?: string;
+  notes?: string;
   muscleGroup: MuscleGroup;
   mediaType?: WorkoutExercise['mediaType'];
   mediaUrl?: string | null;
@@ -105,6 +106,9 @@ function normalizeWorkoutExercise(exercise: LegacyExercise): WorkoutExercise {
   const mediaUrls = Array.isArray(exercise.mediaUrls)
     ? exercise.mediaUrls.filter(Boolean).slice(0, 2)
     : exercise.mediaUrl ? [exercise.mediaUrl] : [];
+  const notes = typeof exercise.notes === 'string' && exercise.notes.trim()
+    ? exercise.notes.trim()
+    : undefined;
 
   return withNormalizedWorkoutExerciseSets({
     id: exercise.id,
@@ -112,6 +116,7 @@ function normalizeWorkoutExercise(exercise: LegacyExercise): WorkoutExercise {
     sourceId: exercise.sourceId,
     name: exercise.name,
     ptName: exercise.ptName,
+    ...(notes ? { notes } : {}),
     muscleGroup: exercise.muscleGroup,
     mediaType: exercise.mediaType ?? (mediaUrls.length > 0 ? 'image' : 'none'),
     mediaUrl: mediaUrls[0] ?? exercise.mediaUrl ?? null,

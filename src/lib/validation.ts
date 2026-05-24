@@ -70,6 +70,7 @@ export const workoutExerciseSchema = z.object({
   sourceId: nonEmptyStringSchema.optional(),
   name: nonEmptyStringSchema,
   ptName: nonEmptyStringSchema.optional(),
+  notes: z.string().optional(),
   muscleGroup: muscleGroupSchema,
   mediaType: mediaTypeSchema,
   mediaUrl: z.string().trim().min(1).nullable(),

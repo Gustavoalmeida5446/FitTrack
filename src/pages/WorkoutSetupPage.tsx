@@ -1,5 +1,5 @@
 import { Archive, CheckmarkFilled, ChevronLeft, DocumentDownload, DocumentImport, TrashCan, Undo } from '@carbon/icons-react';
-import { Button, TextInput, Tile } from '@carbon/react';
+import { Button, TextArea, TextInput, Tile } from '@carbon/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AppNumberInput } from '../components/AppNumberInput';
 import { ContextualTutorialCard, type TutorialStepContent } from '../components/ContextualTutorialCard';
@@ -34,6 +34,7 @@ const defaultExerciseValues = {
   mediaUrls: [] as string[],
   mediaType: 'none' as WorkoutExercise['mediaType'],
   sourceId: undefined as string | undefined,
+  notes: '',
   loadKg: 10,
   reps: 10,
   sets: 3,
@@ -91,6 +92,7 @@ export function WorkoutSetupPage({
   const [exerciseMediaUrls, setExerciseMediaUrls] = useState<string[]>(defaultExerciseValues.mediaUrls);
   const [exerciseMediaType, setExerciseMediaType] = useState<WorkoutExercise['mediaType']>(defaultExerciseValues.mediaType);
   const [exerciseSourceId, setExerciseSourceId] = useState<string | undefined>(defaultExerciseValues.sourceId);
+  const [exerciseNotes, setExerciseNotes] = useState(defaultExerciseValues.notes);
   const [loadKg, setLoadKg] = useState(defaultExerciseValues.loadKg);
   const [reps, setReps] = useState(defaultExerciseValues.reps);
   const [sets, setSets] = useState(defaultExerciseValues.sets);
@@ -241,6 +243,7 @@ export function WorkoutSetupPage({
     setExerciseMediaUrls(defaultExerciseValues.mediaUrls);
     setExerciseMediaType(defaultExerciseValues.mediaType);
     setExerciseSourceId(defaultExerciseValues.sourceId);
+    setExerciseNotes(defaultExerciseValues.notes);
     setLoadKg(defaultExerciseValues.loadKg);
     setReps(defaultExerciseValues.reps);
     setSets(defaultExerciseValues.sets);
@@ -321,6 +324,7 @@ export function WorkoutSetupPage({
       sourceId: exerciseSourceId,
       name: exerciseName.trim(),
       ptName: exercisePtName,
+      notes: exerciseNotes.trim() || undefined,
       muscleGroup: exerciseGroup,
       mediaType: exerciseMediaType,
       mediaUrl: exerciseMediaUrl,
@@ -358,6 +362,7 @@ export function WorkoutSetupPage({
     setExerciseMediaUrls(exercise.mediaUrls ?? (exercise.mediaUrl ? [exercise.mediaUrl] : []));
     setExerciseMediaType(exercise.mediaType);
     setExerciseSourceId(exercise.sourceId);
+    setExerciseNotes(exercise.notes ?? '');
     setLoadKg(exercise.loadKg);
     setReps(exercise.reps);
     setSets(exercise.sets);
@@ -502,6 +507,7 @@ export function WorkoutSetupPage({
                 setExerciseMediaUrls([]);
                 setExerciseMediaType('none');
                 setExerciseSourceId(undefined);
+                setExerciseNotes(defaultExerciseValues.notes);
                 setActivePreviewImageIndex(0);
                 setSearchErrorMessage('');
               }}
@@ -574,6 +580,13 @@ export function WorkoutSetupPage({
                 />
               </button>
           ) : null}
+          <TextArea
+            id="exercise-notes"
+            labelText="Observação do exercício"
+            rows={3}
+            value={exerciseNotes}
+            onChange={(event) => setExerciseNotes(event.target.value)}
+          />
           <div className="inline-actions">
             <Button onClick={handleAddExercise}>{editingExerciseId ? 'Atualizar exercício' : 'Adicionar exercício'}</Button>
             {editingExerciseId ? <Button kind="ghost" onClick={resetExerciseForm}>Cancelar edição</Button> : null}
@@ -595,9 +608,10 @@ export function WorkoutSetupPage({
                 )}
                 meta={[
                   exercise.muscleGroup,
+                  exercise.notes?.trim() ? `Obs: ${exercise.notes.trim()}` : '',
                   normalizeWorkoutExerciseSets(exercise).map((set, setIndex) => `S${setIndex + 1}: ${set.loadKg} kg x ${set.reps}`).join(' • '),
                   `${exercise.restSeconds}s`
-                ]}
+                ].filter(Boolean)}
               />
             )) : (
               <InfoBlock label="Exercícios do treino">
