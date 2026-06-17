@@ -12,11 +12,22 @@ npm run dev
 
 ## Deploy GitHub Pages
 
+O deploy de produção roda automaticamente no GitHub Actions quando há push/merge na branch `main` ou `master`. O workflow executa:
+
+- `npm ci`
+- `npm test`
+- `npm run build`
+- publicação do conteúdo de `dist/` no GitHub Pages
+
+Também é possível disparar o workflow manualmente pela aba Actions (`workflow_dispatch`).
+
+Para publicar manualmente pelo computador local, ainda existe:
+
 ```bash
 npm run deploy
 ```
 
-O script:
+O script local:
 
 - gera o build em `dist/`
 - copia `dist/index.html` para `dist/404.html`

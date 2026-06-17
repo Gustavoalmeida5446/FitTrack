@@ -1,6 +1,6 @@
 import { Calendar, CalendarHeatMap, Home, UserAvatar } from '@carbon/icons-react';
 import { Button, Theme } from '@carbon/react';
-import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { type TutorialStepContent } from './components/ContextualTutorialCard';
 import { WeeklyDiet, Workout } from './data/types';
 import { useAuthSession } from './hooks/useAuthSession';
@@ -127,6 +127,7 @@ export default function App() {
   const [pendingRelationalSaves, setPendingRelationalSaves] = useState(0);
   const [hasRelationalSaveError, setHasRelationalSaveError] = useState(false);
   const [recentRelationalSaveSuccess, setRecentRelationalSaveSuccess] = useState(false);
+  const relationalSaveQueueRef = useRef(Promise.resolve());
   const [appTheme, setAppTheme] = useState<AppTheme>(getInitialAppTheme);
   const carbonTheme = appTheme === 'light' ? 'white' : 'g100';
   const toggleAppTheme = useCallback(() => {
@@ -178,14 +179,18 @@ export default function App() {
     session,
     appState,
     onHydrate: handleHydrateRemoteState,
-    onReset: handleResetLocalState
+    onReset: handleResetLocalState,
+    isExternalSavePending: pendingRelationalSaves > 0
   });
-  const trackRelationalSave = useCallback((savePromise: Promise<boolean>) => {
+  const trackRelationalSave = useCallback((saveTask: () => Promise<boolean>) => {
     setPendingRelationalSaves((count) => count + 1);
     setHasRelationalSaveError(false);
     setRecentRelationalSaveSuccess(false);
 
-    void savePromise.then((didSave) => {
+    const runSave = relationalSaveQueueRef.current.then(saveTask, saveTask);
+    relationalSaveQueueRef.current = runSave.then(() => undefined, () => undefined);
+
+    void runSave.then((didSave) => {
       if (!didSave) {
         setHasRelationalSaveError(true);
         return;
@@ -238,21 +243,21 @@ export default function App() {
     setWorkoutsUpdatedAt(nextState.workoutsUpdatedAt);
     markRemoteSavePending();
     if (session) {
-      trackRelationalSave(replaceRelationalWorkouts(session, nextState.workouts));
+      trackRelationalSave(() => replaceRelationalWorkouts(session, nextState.workouts));
     }
   }, [markRemoteSavePending, session, trackRelationalSave]);
   const handleResetWater = useCallback((nextWater: AppState['water']) => {
     setWater(nextWater);
     markRemoteSavePending();
     if (session) {
-      trackRelationalSave(saveRelationalWater(session, nextWater));
+      trackRelationalSave(() => saveRelationalWater(session, nextWater));
     }
   }, [markRemoteSavePending, session, trackRelationalSave]);
   const handleResetDietProgress = useCallback((nextDiet: WeeklyDiet) => {
     setWeeklyDiet(nextDiet);
     markRemoteSavePending();
     if (session) {
-      trackRelationalSave(replaceRelationalDiet(session, nextDiet));
+      trackRelationalSave(() => replaceRelationalDiet(session, nextDiet));
     }
   }, [markRemoteSavePending, session, trackRelationalSave]);
   const handleNavigateTutorial = useCallback((nextView: AppView) => {
@@ -299,7 +304,7 @@ export default function App() {
       const nextWorkouts = prev.map((workout) => (workout.id === workoutId ? updater(workout) : workout));
 
       if (session) {
-        trackRelationalSave(replaceRelationalWorkouts(session, nextWorkouts));
+        trackRelationalSave(() => replaceRelationalWorkouts(session, nextWorkouts));
       }
 
       return nextWorkouts;
@@ -315,7 +320,7 @@ export default function App() {
       };
 
       if (session) {
-        trackRelationalSave(replaceRelationalDiet(session, nextDiet));
+        trackRelationalSave(() => replaceRelationalDiet(session, nextDiet));
       }
 
       return nextDiet;
@@ -326,7 +331,7 @@ export default function App() {
     markRemoteSavePending();
     setProfile(nextProfile);
     if (session) {
-      trackRelationalSave(saveRelationalProfile(session, nextProfile));
+      trackRelationalSave(() => saveRelationalProfile(session, nextProfile));
     }
   };
 
@@ -335,7 +340,7 @@ export default function App() {
     setWorkoutsUpdatedAt(getTodayDateString());
     setWorkouts(nextWorkouts);
     if (session) {
-      trackRelationalSave(replaceRelationalWorkouts(session, nextWorkouts));
+      trackRelationalSave(() => replaceRelationalWorkouts(session, nextWorkouts));
     }
   };
 
@@ -350,8 +355,8 @@ export default function App() {
     setWeightHistory(nextHistory);
     setProfile(nextProfile);
     if (session) {
-      trackRelationalSave(saveRelationalProfile(session, nextProfile));
-      trackRelationalSave(replaceRelationalWeightHistory(session, nextHistory));
+      trackRelationalSave(() => saveRelationalProfile(session, nextProfile));
+      trackRelationalSave(() => replaceRelationalWeightHistory(session, nextHistory));
     }
   };
 
@@ -371,9 +376,9 @@ export default function App() {
     }
     if (session) {
       if (index === 0) {
-        trackRelationalSave(saveRelationalProfile(session, nextProfile));
+        trackRelationalSave(() => saveRelationalProfile(session, nextProfile));
       }
-      trackRelationalSave(replaceRelationalWeightHistory(session, nextHistory));
+      trackRelationalSave(() => replaceRelationalWeightHistory(session, nextHistory));
     }
   };
 
@@ -383,7 +388,7 @@ export default function App() {
     markRemoteSavePending();
     setWater(nextWater);
     if (session) {
-      trackRelationalSave(saveRelationalWater(session, nextWater));
+      trackRelationalSave(() => saveRelationalWater(session, nextWater));
     }
   };
 
@@ -393,7 +398,7 @@ export default function App() {
     markRemoteSavePending();
     setWeeklyDiet(normalizedDiet);
     if (session) {
-      trackRelationalSave(replaceRelationalDiet(session, normalizedDiet));
+      trackRelationalSave(() => replaceRelationalDiet(session, normalizedDiet));
     }
   };
 
