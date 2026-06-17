@@ -24,6 +24,7 @@ interface UseRemoteAppStateParams {
   appState: AppState;
   onHydrate: (state: AppState) => void;
   onReset: () => void;
+  isExternalSavePending?: boolean;
 }
 
 interface UseRemoteAppStateResult {
@@ -37,7 +38,8 @@ export function useRemoteAppState({
   session,
   appState,
   onHydrate,
-  onReset
+  onReset,
+  isExternalSavePending = false
 }: UseRemoteAppStateParams): UseRemoteAppStateResult {
   const userId = session?.user.id ?? '';
   const [isRemoteReady, setIsRemoteReady] = useState(false);
@@ -54,8 +56,8 @@ export function useRemoteAppState({
   }, [userId]);
 
   useEffect(() => {
-    hasPendingRemoteSaveRef.current = hasPendingRemoteSave;
-  }, [hasPendingRemoteSave]);
+    hasPendingRemoteSaveRef.current = hasPendingRemoteSave || isExternalSavePending;
+  }, [hasPendingRemoteSave, isExternalSavePending]);
 
   useEffect(() => {
     if (!session) {
@@ -164,13 +166,13 @@ export function useRemoteAppState({
   }, [isRemoteReady, userId]);
 
   useEffect(() => {
-    if (!userId || !isRemoteReady || hasPendingRemoteSave || !missedRealtimeRefreshRef.current) {
+    if (!userId || !isRemoteReady || hasPendingRemoteSave || isExternalSavePending || !missedRealtimeRefreshRef.current) {
       return;
     }
 
     missedRealtimeRefreshRef.current = false;
     setRealtimeRefreshTick((currentTick) => currentTick + 1);
-  }, [hasPendingRemoteSave, isRemoteReady, userId]);
+  }, [hasPendingRemoteSave, isExternalSavePending, isRemoteReady, userId]);
 
   useEffect(() => {
     if (!session || !isRemoteReady || !hasPendingRemoteSave) {
@@ -205,6 +207,7 @@ export function useRemoteAppState({
   }, [appState, hasPendingRemoteSave, isRemoteReady, remoteSaveRetryTick, session]);
 
   const markRemoteSavePending = useCallback(() => {
+    hasPendingRemoteSaveRef.current = true;
     setHasPendingRemoteSave(true);
   }, []);
 

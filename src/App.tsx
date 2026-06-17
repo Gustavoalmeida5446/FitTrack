@@ -178,7 +178,8 @@ export default function App() {
     session,
     appState,
     onHydrate: handleHydrateRemoteState,
-    onReset: handleResetLocalState
+    onReset: handleResetLocalState,
+    isExternalSavePending: pendingRelationalSaves > 0
   });
   const trackRelationalSave = useCallback((savePromise: Promise<boolean>) => {
     setPendingRelationalSaves((count) => count + 1);
