@@ -83,6 +83,45 @@ test('normalizeWorkoutProgressForToday reseta exercícios concluídos quando o d
   assert.equal(state.workouts[0]?.exercises[0]?.done, false);
 });
 
+test('normalizeWorkoutProgressForToday mantém cargas atualizadas ao resetar progresso diário', () => {
+  const state = normalizeWorkoutProgressForToday([
+    {
+      id: 'w-1',
+      name: 'Leg day',
+      muscleGroups: ['Pernas'],
+      exercises: [
+        {
+          id: 'e-1',
+          source: 'local',
+          sourceId: 'squat',
+          name: 'Agachamento',
+          ptName: 'Agachamento',
+          muscleGroup: 'Pernas',
+          mediaType: 'none',
+          mediaUrl: null,
+          loadKg: 50,
+          reps: 8,
+          sets: 2,
+          restSeconds: 90,
+          done: true,
+          setsDetail: [
+            { id: 'e-1-set-1', loadKg: 50, reps: 8, done: true },
+            { id: 'e-1-set-2', loadKg: 55, reps: 6, done: true }
+          ]
+        }
+      ]
+    }
+  ], '2000-01-01');
+
+  const exercise = state.workouts[0]?.exercises[0];
+
+  assert.equal(exercise?.done, false);
+  assert.equal(exercise?.setsDetail?.[0]?.loadKg, 50);
+  assert.equal(exercise?.setsDetail?.[1]?.loadKg, 55);
+  assert.equal(exercise?.setsDetail?.[0]?.done, false);
+  assert.equal(exercise?.setsDetail?.[1]?.done, false);
+});
+
 test('normalizeWaterData reseta consumo de água quando o dia mudou', () => {
   const water = normalizeWaterData({
     goalMl: 3000,

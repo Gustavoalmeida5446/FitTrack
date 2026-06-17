@@ -205,6 +205,7 @@ export function useRemoteAppState({
   }, [appState, hasPendingRemoteSave, isRemoteReady, remoteSaveRetryTick, session]);
 
   const markRemoteSavePending = useCallback(() => {
+    hasPendingRemoteSaveRef.current = true;
     setHasPendingRemoteSave(true);
   }, []);
 
