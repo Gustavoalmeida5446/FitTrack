@@ -90,21 +90,11 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateSet
             <Tile key={exercise.id} className={`card metric-card workout-exercise-card ${exercise.done ? 'workout-exercise-card--done' : ''}`}>
               <details className="workout-exercise-accordion">
                 <summary className="workout-exercise-accordion__summary">
-                  <div className="workout-exercise-summary-title">
-                    <div className={`workout-exercise-thumbnail-badge${headerThumbnailUrl ? ' workout-exercise-thumbnail-badge--image' : ''}`}>
-                      {headerThumbnailUrl ? (
-                        <img
-                          src={headerThumbnailUrl}
-                          alt={`Miniatura do exercício ${displayName}`}
-                          className="workout-exercise-thumbnail"
-                        />
-                      ) : <CheckmarkFilled size={20} />}
-                    </div>
-                    <div className="workout-exercise-summary-title__text">
-                      <h3>{displayName}</h3>
-                      <p>{exercise.muscleGroup}</p>
-                    </div>
-                  </div>
+                  <CardHeader
+                    icon={<CheckmarkFilled size={20} />}
+                    title={displayName}
+                    description={exercise.muscleGroup}
+                  />
                   <div className="workout-exercise-accordion__summary-meta">
                     <span>{exerciseSets.length} séries</span>
                     <ChevronDown className="workout-exercise-accordion__chevron" size={20} aria-hidden="true" />
