@@ -91,7 +91,13 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateSet
               <details className="workout-exercise-accordion">
                 <summary className="workout-exercise-accordion__summary">
                   <CardHeader
-                    icon={<CheckmarkFilled size={20} />}
+                    icon={activeImageUrl ? (
+                      <img
+                        src={activeImageUrl}
+                        alt=""
+                        className="workout-exercise-thumbnail"
+                      />
+                    ) : <CheckmarkFilled size={20} />}
                     title={displayName}
                     description={exercise.muscleGroup}
                   />
