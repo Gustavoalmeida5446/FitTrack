@@ -10,7 +10,7 @@ import {
   serializeWorkoutProgressState
 } from '../src/lib/appState';
 import type { AppState } from '../src/lib/appState';
-import { createWeightHistoryEntry } from '../src/lib/appUpdates';
+import { createWeightHistoryEntry, updateWorkoutExerciseSet } from '../src/lib/appUpdates';
 import { getTodayDateString } from '../src/lib/date';
 
 function createState(overrides: Partial<AppState> = {}): AppState {
@@ -120,6 +120,43 @@ test('normalizeWorkoutProgressForToday mantém cargas atualizadas ao resetar pro
   assert.equal(exercise?.setsDetail?.[1]?.loadKg, 55);
   assert.equal(exercise?.setsDetail?.[0]?.done, false);
   assert.equal(exercise?.setsDetail?.[1]?.done, false);
+});
+
+
+test('updateWorkoutExerciseSet preserva cargas diferentes em cada série', () => {
+  const workout = {
+    id: 'w-1',
+    name: 'Leg day',
+    muscleGroups: ['Pernas' as const],
+    exercises: [
+      {
+        id: 'e-1',
+        source: 'local' as const,
+        sourceId: 'squat',
+        name: 'Agachamento',
+        ptName: 'Agachamento',
+        muscleGroup: 'Pernas' as const,
+        mediaType: 'none' as const,
+        mediaUrl: null,
+        loadKg: 40,
+        reps: 10,
+        sets: 3,
+        setsDetail: [
+          { id: 'e-1-set-1', loadKg: 40, reps: 10, done: false },
+          { id: 'e-1-set-2', loadKg: 45, reps: 9, done: false },
+          { id: 'e-1-set-3', loadKg: 50, reps: 8, done: false }
+        ],
+        restSeconds: 90,
+        done: false
+      }
+    ]
+  };
+
+  const updatedWorkout = updateWorkoutExerciseSet(workout, 'e-1', 'e-1-set-2', { loadKg: 47 });
+  const updatedExercise = updatedWorkout.exercises[0];
+
+  assert.deepEqual(updatedExercise?.setsDetail?.map((set) => set.loadKg), [40, 47, 50]);
+  assert.equal(updatedExercise?.loadKg, 40);
 });
 
 test('normalizeWaterData reseta consumo de água quando o dia mudou', () => {
