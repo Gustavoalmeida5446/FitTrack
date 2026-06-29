@@ -1,8 +1,7 @@
-import { CheckmarkFilled, ChevronLeft, Timer } from '@carbon/icons-react';
+import { CheckmarkFilled, ChevronDown, ChevronLeft, Timer } from '@carbon/icons-react';
 import { Button, Checkbox, Tile } from '@carbon/react';
 import { useEffect, useState } from 'react';
 import { AppNumberInput } from '../components/AppNumberInput';
-import { CardHeader } from '../components/CardHeader';
 import { PageContainer } from '../components/PageContainer';
 import { StatsGrid } from '../components/StatsGrid';
 import { SummaryStatsCard } from '../components/SummaryStatsCard';
@@ -81,6 +80,7 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateSet
           const mediaUrls = Array.isArray(exercise.mediaUrls) && exercise.mediaUrls.length > 0
             ? exercise.mediaUrls
             : exercise.mediaUrl ? [exercise.mediaUrl] : [];
+          const headerThumbnailUrl = mediaUrls[0] ?? null;
           const activeImageIndex = mediaUrls.length > 1 ? activeImageIndexes[exercise.id] ?? 0 : 0;
           const activeImageUrl = mediaUrls[activeImageIndex] ?? null;
           const exerciseSets = normalizeWorkoutExerciseSets(exercise);
@@ -88,87 +88,107 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateSet
 
           return (
             <Tile key={exercise.id} className={`card metric-card workout-exercise-card ${exercise.done ? 'workout-exercise-card--done' : ''}`}>
-              <CardHeader
-                icon={<CheckmarkFilled size={20} />}
-                title={displayName}
-                description={exercise.muscleGroup}
-              />
-              {activeImageUrl ? (
-                <button
-                  type="button"
-                  className={`exercise-media-button${mediaUrls.length > 1 ? ' exercise-media-button--interactive' : ''}`}
-                  onClick={() => handleToggleExerciseImage(exercise.id, mediaUrls.length)}
-                  aria-label={mediaUrls.length > 1 ? `Alternar imagem do exercício ${displayName}` : `Imagem do exercício ${displayName}`}
-                >
-                  <img
-                    src={activeImageUrl}
-                    alt={`${displayName} - ${activeImageIndex === 0 ? 'posição inicial' : 'posição final'}`}
-                    className="exercise-media"
-                  />
-                </button>
-              ) : null}
-              {exerciseNotes ? (
-                <div className="workout-exercise-note">
-                  <span>Observação</span>
-                  <p>{exerciseNotes}</p>
-                </div>
-              ) : null}
-              <StatsGrid
-                className="workout-exercise-card__meta"
-                items={[
-                  { label: 'Repetições', value: exercise.reps },
-                  { label: 'Séries', value: exercise.sets },
-                  { label: <span className="stat-pill__icon"><Timer size={14} /></span>, value: `${exercise.restSeconds}s` }
-                ]}
-              />
-              <div className="workout-set-list">
-                {exerciseSets.map((set, setIndex) => {
-                  const setWasUpdated = recentlyUpdatedSets[set.id] ?? false;
-
-                  return (
-                    <div key={set.id} className={`workout-set-row ${set.done ? 'workout-set-row--done' : ''}`}>
-                      <div className="workout-set-row__info">
-                        <span className="workout-set-row__label">Série {setIndex + 1}</span>
-                        <span className={`workout-load-status${setWasUpdated ? ' workout-load-status--saved' : ''}`}>
-                          {setWasUpdated ? 'Série atualizada' : `${set.loadKg} kg x ${set.reps}`}
-                        </span>
-                      </div>
-                      <div className="workout-set-row__field">
-                        <AppNumberInput
-                          id={`load-${exercise.id}-${set.id}`}
-                          label="Carga (kg)"
-                          min={0}
-                          value={set.loadKg}
-                          onValueChange={(value) => handleUpdateSet(exercise.id, set.id, { loadKg: typeof value === 'number' ? value : set.loadKg })}
+              <details className="workout-exercise-accordion">
+                <summary className="workout-exercise-accordion__summary">
+                  <div className="workout-exercise-summary-title">
+                    <div className={`workout-exercise-thumbnail-badge${headerThumbnailUrl ? ' workout-exercise-thumbnail-badge--image' : ''}`}>
+                      {headerThumbnailUrl ? (
+                        <img
+                          src={headerThumbnailUrl}
+                          alt={`Miniatura do exercício ${displayName}`}
+                          className="workout-exercise-thumbnail"
                         />
-                      </div>
-                      <div className="workout-set-row__field">
-                        <AppNumberInput
-                          id={`reps-${exercise.id}-${set.id}`}
-                          label="Repetições"
-                          min={1}
-                          value={set.reps}
-                          onValueChange={(value) => handleUpdateSet(exercise.id, set.id, { reps: typeof value === 'number' ? value : set.reps })}
-                        />
-                      </div>
-                      <div className="workout-set-row__done">
-                        <Checkbox
-                          id={`done-${exercise.id}-${set.id}`}
-                          labelText="Feita"
-                          checked={set.done}
-                          onChange={() => handleUpdateSet(exercise.id, set.id, { done: !set.done })}
-                        />
-                      </div>
+                      ) : <CheckmarkFilled size={20} />}
                     </div>
-                  );
-                })}
-              </div>
-              <div className="workout-exercise-card__footer">
-                <span className="meta-label">
-                  {mediaUrls.length > 1 ? `Imagem ${activeImageIndex + 1} de ${mediaUrls.length}` : `Mídia: ${exercise.mediaType}`}
-                </span>
-                <Checkbox id={`done-${exercise.id}`} labelText="Feito" checked={exercise.done} onChange={() => onToggleExerciseDone(exercise.id)} />
-              </div>
+                    <div className="workout-exercise-summary-title__text">
+                      <h3>{displayName}</h3>
+                      <p>{exercise.muscleGroup}</p>
+                    </div>
+                  </div>
+                  <div className="workout-exercise-accordion__summary-meta">
+                    <span>{exerciseSets.length} séries</span>
+                    <ChevronDown className="workout-exercise-accordion__chevron" size={20} aria-hidden="true" />
+                  </div>
+                </summary>
+                <div className="workout-exercise-accordion__content">
+                  {activeImageUrl ? (
+                    <button
+                      type="button"
+                      className={`exercise-media-button${mediaUrls.length > 1 ? ' exercise-media-button--interactive' : ''}`}
+                      onClick={() => handleToggleExerciseImage(exercise.id, mediaUrls.length)}
+                      aria-label={mediaUrls.length > 1 ? `Alternar imagem do exercício ${displayName}` : `Imagem do exercício ${displayName}`}
+                    >
+                      <img
+                        src={activeImageUrl}
+                        alt={`${displayName} - ${activeImageIndex === 0 ? 'posição inicial' : 'posição final'}`}
+                        className="exercise-media"
+                      />
+                    </button>
+                  ) : null}
+                  {exerciseNotes ? (
+                    <div className="workout-exercise-note">
+                      <span>Observação</span>
+                      <p>{exerciseNotes}</p>
+                    </div>
+                  ) : null}
+                  <StatsGrid
+                    className="workout-exercise-card__meta"
+                    items={[
+                      { label: 'Repetições', value: exercise.reps },
+                      { label: 'Séries', value: exercise.sets },
+                      { label: <span className="stat-pill__icon"><Timer size={14} /></span>, value: `${exercise.restSeconds}s` }
+                    ]}
+                  />
+                  <div className="workout-set-list">
+                    {exerciseSets.map((set, setIndex) => {
+                      const setWasUpdated = recentlyUpdatedSets[set.id] ?? false;
+
+                      return (
+                        <div key={set.id} className={`workout-set-row ${set.done ? 'workout-set-row--done' : ''}`}>
+                          <div className="workout-set-row__info">
+                            <span className="workout-set-row__label">Série {setIndex + 1}</span>
+                            <span className={`workout-load-status${setWasUpdated ? ' workout-load-status--saved' : ''}`}>
+                              {setWasUpdated ? 'Série atualizada' : `${set.loadKg} kg x ${set.reps}`}
+                            </span>
+                          </div>
+                          <div className="workout-set-row__field">
+                            <AppNumberInput
+                              id={`load-${exercise.id}-${set.id}`}
+                              label="Carga (kg)"
+                              min={0}
+                              value={set.loadKg}
+                              onValueChange={(value) => handleUpdateSet(exercise.id, set.id, { loadKg: typeof value === 'number' ? value : set.loadKg })}
+                            />
+                          </div>
+                          <div className="workout-set-row__field">
+                            <AppNumberInput
+                              id={`reps-${exercise.id}-${set.id}`}
+                              label="Repetições"
+                              min={1}
+                              value={set.reps}
+                              onValueChange={(value) => handleUpdateSet(exercise.id, set.id, { reps: typeof value === 'number' ? value : set.reps })}
+                            />
+                          </div>
+                          <div className="workout-set-row__done">
+                            <Checkbox
+                              id={`done-${exercise.id}-${set.id}`}
+                              labelText="Feita"
+                              checked={set.done}
+                              onChange={() => handleUpdateSet(exercise.id, set.id, { done: !set.done })}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="workout-exercise-card__footer">
+                    <span className="meta-label">
+                      {mediaUrls.length > 1 ? `Imagem ${activeImageIndex + 1} de ${mediaUrls.length}` : `Mídia: ${exercise.mediaType}`}
+                    </span>
+                    <Checkbox id={`done-${exercise.id}`} labelText="Feito" checked={exercise.done} onChange={() => onToggleExerciseDone(exercise.id)} />
+                  </div>
+                </div>
+              </details>
             </Tile>
           );
         })}
