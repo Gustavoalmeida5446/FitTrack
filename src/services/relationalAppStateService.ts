@@ -352,8 +352,7 @@ export async function replaceRelationalWeightHistory(session: Session, weightHis
     legacy_id: item.date,
     position: index,
     logged_at: item.date,
-    weight: item.weight,
-    updated_at: new Date().toISOString()
+    weight: item.weight
   }));
 
   if (rows.length > 0) {
@@ -514,15 +513,13 @@ export async function replaceRelationalDiet(session: Session, diet: WeeklyDiet) 
     user_id: userId,
     day_id: stableId(userId, 'diet', diet.id, 'day', day.id),
     meal_id: stableId(userId, 'diet', diet.id, 'meal', mealId),
-    position: mealIndex,
-    updated_at: new Date().toISOString()
+    position: mealIndex
   })));
   const completedMealRows = diet.days.flatMap((day) => day.completedMealIds.map((mealId) => ({
     id: stableId(userId, 'diet', diet.id, 'day', day.id, 'completedMeal', mealId),
     user_id: userId,
     day_id: stableId(userId, 'diet', diet.id, 'day', day.id),
-    meal_id: stableId(userId, 'diet', diet.id, 'meal', mealId),
-    updated_at: new Date().toISOString()
+    meal_id: stableId(userId, 'diet', diet.id, 'meal', mealId)
   })));
 
   const dietResult = await supabase.from('app_diets').upsert({
