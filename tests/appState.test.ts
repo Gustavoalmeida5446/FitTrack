@@ -116,6 +116,8 @@ test('normalizeWorkoutProgressForToday mantém cargas atualizadas ao resetar pro
   const exercise = state.workouts[0]?.exercises[0];
 
   assert.equal(exercise?.done, false);
+  assert.equal(exercise?.loadKg, 50);
+  assert.equal(exercise?.reps, 8);
   assert.equal(exercise?.setsDetail?.[0]?.loadKg, 50);
   assert.equal(exercise?.setsDetail?.[1]?.loadKg, 55);
   assert.equal(exercise?.setsDetail?.[0]?.done, false);

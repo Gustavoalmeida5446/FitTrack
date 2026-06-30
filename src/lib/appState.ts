@@ -30,7 +30,7 @@ import {
   validateWeightHistory,
   validateWorkouts
 } from './validation';
-import { normalizeWorkoutExerciseSets } from './workoutSets';
+import { normalizeWorkoutExerciseSets, summarizeWorkoutExerciseSets } from './workoutSets';
 
 export interface AppState {
   profile: UserProfile;
@@ -113,11 +113,15 @@ export const defaultAppState: AppState = {
 function resetWorkoutProgress(workouts: Workout[]): Workout[] {
   return workouts.map((workout) => ({
     ...workout,
-    exercises: workout.exercises.map((exercise) => ({
-      ...exercise,
-      setsDetail: normalizeWorkoutExerciseSets(exercise).map((set) => ({ ...set, done: false })),
-      done: false
-    }))
+    exercises: workout.exercises.map((exercise) => {
+      const setsDetail = normalizeWorkoutExerciseSets(exercise).map((set) => ({ ...set, done: false }));
+
+      return {
+        ...exercise,
+        ...summarizeWorkoutExerciseSets(setsDetail),
+        setsDetail
+      };
+    })
   }));
 }
 
