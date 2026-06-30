@@ -129,7 +129,7 @@ Isso e intencional no estado atual do projeto para compatibilidade e fallback.
 - Resolucao por timestamp: `shouldUseRelationalState` compara timestamps e pode escolher dados agregados se `user_app_states.updated_at` estiver mais recente.
 - Substituicoes completas: `replaceRelationalWorkouts`, `replaceRelationalDiet` e `replaceRelationalWeightHistory` fazem upsert dos registros atuais e removem/marcam ausentes. Erro no meio pode deixar parte da operacao gravada.
 - `app_weight_logs` nao tem `updated_at` no schema, mas `getLatestUpdatedAt` considera timestamps quando existem; peso pode nao influenciar o timestamp relacional mais recente.
-- `app_diet_day_meals` e `app_diet_completed_meals` nao possuem `updated_at` no schema, mas o service envia `updated_at` em alguns upserts. Se o schema real nao tiver essa coluna, essas escritas podem falhar.
+- `app_diet_day_meals`, `app_diet_completed_meals` e `app_weight_logs` nao possuem `updated_at` no schema; essas tabelas nao devem receber esse campo nos upserts.
 - `user_app_states` aceita JSON amplo; validacao e normalizacao ficam na aplicacao, nao no banco.
 
 Nenhuma migracao ou alteracao de schema foi criada nesta documentacao.
