@@ -186,10 +186,10 @@ test('updateWorkoutExerciseNotes atualiza observação direto no exercício', ()
     ]
   };
 
-  const updatedWorkout = updateWorkoutExerciseNotes(workout, 'e-1', '  Ombros para trás  ');
+  const updatedWorkout = updateWorkoutExerciseNotes(workout, 'e-1', 'Ombros para trás ');
   const clearedWorkout = updateWorkoutExerciseNotes(updatedWorkout, 'e-1', '   ');
 
-  assert.equal(updatedWorkout.exercises[0]?.notes, 'Ombros para trás');
+  assert.equal(updatedWorkout.exercises[0]?.notes, 'Ombros para trás ');
   assert.equal(clearedWorkout.exercises[0]?.notes, undefined);
 });
 

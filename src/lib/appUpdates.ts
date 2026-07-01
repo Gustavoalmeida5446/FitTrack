@@ -87,7 +87,7 @@ export function updateWorkoutExerciseSet(
 }
 
 export function updateWorkoutExerciseNotes(workout: Workout, exerciseId: string, notes: string): Workout {
-  const trimmedNotes = notes.trim();
+  const nextNotes = notes.trim() ? notes : undefined;
 
   return {
     ...workout,
@@ -98,7 +98,7 @@ export function updateWorkoutExerciseNotes(workout: Workout, exerciseId: string,
 
       return {
         ...exercise,
-        notes: trimmedNotes || undefined
+        notes: nextNotes
       };
     })
   };
