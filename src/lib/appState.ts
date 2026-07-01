@@ -78,7 +78,8 @@ function createEmptyWeeklyDiet(): WeeklyDiet {
       id: `d-${index + 1}`,
       label,
       mealIds: [],
-      completedMealIds: []
+      completedMealIds: [],
+      completedMealQuantities: {}
     }))
   };
 }
@@ -96,7 +97,8 @@ function resetWeeklyDietProgress(diet: WeeklyDiet): WeeklyDiet {
     ...diet,
     days: diet.days.map((day) => ({
       ...day,
-      completedMealIds: []
+      completedMealIds: [],
+      completedMealQuantities: {}
     }))
   };
 }

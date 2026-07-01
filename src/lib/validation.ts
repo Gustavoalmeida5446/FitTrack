@@ -130,7 +130,8 @@ export const dietDaySchema = z.object({
   id: nonEmptyStringSchema,
   label: nonEmptyStringSchema,
   mealIds: z.array(nonEmptyStringSchema),
-  completedMealIds: z.array(nonEmptyStringSchema)
+  completedMealIds: z.array(nonEmptyStringSchema),
+  completedMealQuantities: z.record(nonEmptyStringSchema, z.number().positive()).optional()
 });
 
 export const weeklyDietSchema = z.object({
@@ -192,7 +193,12 @@ export function validateWeeklyDiet(diet: WeeklyDiet, fallback: WeeklyDiet): Week
     return {
       ...nextDay,
       mealIds,
-      completedMealIds: nextDay.completedMealIds.filter((mealId) => mealIds.includes(mealId))
+      completedMealIds: nextDay.completedMealIds.filter((mealId) => mealIds.includes(mealId)),
+      completedMealQuantities: Object.fromEntries(
+        Object.entries(nextDay.completedMealQuantities ?? {}).filter(([mealId, quantity]) => (
+          mealIds.includes(mealId) && typeof quantity === 'number' && Number.isFinite(quantity) && quantity > 0
+        ))
+      )
     };
   });
 
