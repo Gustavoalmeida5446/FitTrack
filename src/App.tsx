@@ -18,6 +18,7 @@ import {
   getCurrentWeightFromHistory,
   toggleCompletedMealForDay,
   toggleWorkoutExerciseDone,
+  updateCompletedMealQuantityForDay,
   updateWorkoutExerciseSet
 } from './lib/appUpdates';
 import { getTodayDateString } from './lib/date';
@@ -528,6 +529,10 @@ export default function App() {
               onToggleMealDone={(mealId) => updateDiet((diet) => ({
                 ...diet,
                 days: diet.days.map((day) => day.id !== selectedDay.id ? day : toggleCompletedMealForDay(day, mealId))
+              }))}
+              onUpdateMealQuantity={(mealId, quantity) => updateDiet((diet) => ({
+                ...diet,
+                days: diet.days.map((day) => day.id !== selectedDay.id ? day : updateCompletedMealQuantityForDay(day, mealId, quantity))
               }))}
             />
           ) : null}

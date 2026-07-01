@@ -87,11 +87,37 @@ export function updateWorkoutExerciseSet(
 }
 
 export function toggleCompletedMealForDay(day: DietDay, mealId: string): DietDay {
+  const isCompleted = day.completedMealIds.includes(mealId);
+  const completedMealQuantities = { ...(day.completedMealQuantities ?? {}) };
+
+  if (isCompleted) {
+    delete completedMealQuantities[mealId];
+  } else {
+    completedMealQuantities[mealId] = 1;
+  }
+
   return {
     ...day,
-    completedMealIds: day.completedMealIds.includes(mealId)
+    completedMealIds: isCompleted
       ? day.completedMealIds.filter((item) => item !== mealId)
-      : [...day.completedMealIds, mealId]
+      : [...day.completedMealIds, mealId],
+    completedMealQuantities
+  };
+}
+
+export function updateCompletedMealQuantityForDay(day: DietDay, mealId: string, quantity: number): DietDay {
+  if (!day.completedMealIds.includes(mealId)) {
+    return day;
+  }
+
+  const safeQuantity = Number.isFinite(quantity) && quantity > 0 ? quantity : 1;
+
+  return {
+    ...day,
+    completedMealQuantities: {
+      ...(day.completedMealQuantities ?? {}),
+      [mealId]: safeQuantity
+    }
   };
 }
 
@@ -99,7 +125,10 @@ export function syncCompletedMealsWithSelection(day: DietDay, mealIds: string[])
   return {
     ...day,
     mealIds,
-    completedMealIds: day.completedMealIds.filter((mealId) => mealIds.includes(mealId))
+    completedMealIds: day.completedMealIds.filter((mealId) => mealIds.includes(mealId)),
+    completedMealQuantities: Object.fromEntries(
+      Object.entries(day.completedMealQuantities ?? {}).filter(([mealId]) => mealIds.includes(mealId))
+    )
   };
 }
 
@@ -107,6 +136,7 @@ export function clearDietDayMeals(day: DietDay): DietDay {
   return {
     ...day,
     mealIds: [],
-    completedMealIds: []
+    completedMealIds: [],
+    completedMealQuantities: {}
   };
 }

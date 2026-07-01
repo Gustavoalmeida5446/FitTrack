@@ -138,6 +138,7 @@ export interface RelationalDietCompletedMealRecord {
   userId: string;
   dayId: string;
   mealId: string;
+  quantity: number;
 }
 
 export interface RelationalAppStateRecords {
@@ -332,7 +333,8 @@ export function convertAppStateToRelationalRecords(userId: string, state: AppSta
       id: stableId(userId, 'diet', state.weeklyDiet.id, 'day', day.id, 'completedMeal', mealId),
       userId,
       dayId,
-      mealId: stableId(userId, 'diet', state.weeklyDiet.id, 'meal', mealId)
+      mealId: stableId(userId, 'diet', state.weeklyDiet.id, 'meal', mealId),
+      quantity: day.completedMealQuantities?.[mealId] ?? 1
     }));
   });
 
@@ -438,7 +440,14 @@ export function convertRelationalRecordsToAppState(records: RelationalAppStateRe
       completedMealIds: records.dietCompletedMeals
         .filter((completedMeal) => completedMeal.dayId === day.id)
         .map((completedMeal) => records.dietMeals.find((meal) => meal.id === completedMeal.mealId)?.legacyId)
-        .filter((mealId): mealId is string => Boolean(mealId))
+        .filter((mealId): mealId is string => Boolean(mealId)),
+      completedMealQuantities: Object.fromEntries(records.dietCompletedMeals
+        .filter((completedMeal) => completedMeal.dayId === day.id)
+        .map((completedMeal) => [
+          records.dietMeals.find((meal) => meal.id === completedMeal.mealId)?.legacyId,
+          completedMeal.quantity
+        ])
+        .filter((entry): entry is [string, number] => Boolean(entry[0]) && typeof entry[1] === 'number' && entry[1] > 0 && entry[1] !== 1))
     }));
 
   return {

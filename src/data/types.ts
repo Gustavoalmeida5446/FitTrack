@@ -71,6 +71,7 @@ export interface DietDay {
   label: string;
   mealIds: string[];
   completedMealIds: string[];
+  completedMealQuantities?: Record<string, number>;
 }
 
 export interface WeeklyDiet {

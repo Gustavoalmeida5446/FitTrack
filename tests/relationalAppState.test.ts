@@ -87,7 +87,8 @@ function createLegacyState(): AppState {
           id: 'd-1',
           label: 'Segunda',
           mealIds: ['m-1'],
-          completedMealIds: ['m-1']
+          completedMealIds: ['m-1'],
+          completedMealQuantities: {}
         }
       ]
     }

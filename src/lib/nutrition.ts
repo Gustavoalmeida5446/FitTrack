@@ -146,8 +146,16 @@ export function calculateFoodTotals(foods: FoodItem[]): MealTotals {
   });
 }
 
-export function calculateMealTotals(meal: Meal): MealTotals {
-  return calculateFoodTotals(meal.foods);
+export function calculateMealTotals(meal: Meal, multiplier = 1): MealTotals {
+  const safeMultiplier = Number.isFinite(multiplier) && multiplier > 0 ? multiplier : 1;
+  const totals = calculateFoodTotals(meal.foods);
+
+  return {
+    calories: totals.calories * safeMultiplier,
+    protein: totals.protein * safeMultiplier,
+    carbs: totals.carbs * safeMultiplier,
+    fat: totals.fat * safeMultiplier
+  };
 }
 
 export function calculateMealsTotals(meals: Meal[]): MealTotals {
@@ -168,16 +176,23 @@ export function calculateMealsTotals(meals: Meal[]): MealTotals {
   });
 }
 
-export function calculateDietProgress(meals: Meal[], completedMealIds: string[]): DietProgressTotals {
+export function getMealCompletionQuantity(mealId: string, completedMealQuantities?: Record<string, number>): number {
+  const quantity = completedMealQuantities?.[mealId];
+
+  return typeof quantity === 'number' && Number.isFinite(quantity) && quantity > 0 ? quantity : 1;
+}
+
+export function calculateDietProgress(meals: Meal[], completedMealIds: string[], completedMealQuantities?: Record<string, number>): DietProgressTotals {
   return meals.reduce<DietProgressTotals>((totals, meal) => {
     const mealTotals = calculateMealTotals(meal);
     const isCompleted = completedMealIds.includes(meal.id);
+    const completionQuantity = isCompleted ? getMealCompletionQuantity(meal.id, completedMealQuantities) : 0;
 
     return {
       plannedCalories: totals.plannedCalories + mealTotals.calories,
       plannedProtein: totals.plannedProtein + mealTotals.protein,
-      consumedCalories: totals.consumedCalories + (isCompleted ? mealTotals.calories : 0),
-      consumedProtein: totals.consumedProtein + (isCompleted ? mealTotals.protein : 0)
+      consumedCalories: totals.consumedCalories + mealTotals.calories * completionQuantity,
+      consumedProtein: totals.consumedProtein + mealTotals.protein * completionQuantity
     };
   }, {
     plannedCalories: 0,

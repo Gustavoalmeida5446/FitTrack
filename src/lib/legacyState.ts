@@ -299,7 +299,10 @@ export function normalizeLegacyWeeklyDiet(diet: WeeklyDiet | LegacyWeeklyDiet | 
           id: existingDay.id,
           label: !existingDay.label || /^Dia \d+$/i.test(existingDay.label) ? baseDay.label : existingDay.label,
           mealIds: Array.isArray(existingDay.mealIds) ? existingDay.mealIds : [],
-          completedMealIds: Array.isArray(existingDay.completedMealIds) ? existingDay.completedMealIds : []
+          completedMealIds: Array.isArray(existingDay.completedMealIds) ? existingDay.completedMealIds : [],
+          completedMealQuantities: typeof existingDay.completedMealQuantities === 'object' && existingDay.completedMealQuantities !== null
+            ? existingDay.completedMealQuantities
+            : {}
         };
       })
     };
@@ -330,7 +333,8 @@ export function normalizeLegacyWeeklyDiet(diet: WeeklyDiet | LegacyWeeklyDiet | 
       id: legacyDay.id,
       label: !legacyDay.label || /^Dia \d+$/i.test(legacyDay.label) ? baseDay.label : legacyDay.label,
       mealIds,
-      completedMealIds: dayMeals.filter((meal) => Boolean(meal.done)).map((meal) => meal.id)
+      completedMealIds: dayMeals.filter((meal) => Boolean(meal.done)).map((meal) => meal.id),
+      completedMealQuantities: {}
     };
   });
 

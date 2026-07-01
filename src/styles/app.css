@@ -820,7 +820,10 @@ body {
 
 .diet-meal-card__footer {
   display: flex;
-  justify-content: flex-end;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
 }
 
 .diet-targets-card,
@@ -1675,4 +1678,12 @@ body {
   border-color: rgba(111, 220, 140, 0.8);
   background: linear-gradient(135deg, rgba(36, 161, 72, 0.32), rgba(36, 161, 72, 0.16));
   box-shadow: inset 0 0 0 1px rgba(111, 220, 140, 0.22);
+}
+
+.diet-meal-accordion {
+  width: 100%;
+}
+
+.diet-meal-card__quantity-field {
+  width: min(12rem, 100%);
 }

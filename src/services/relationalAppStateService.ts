@@ -261,7 +261,8 @@ export async function loadRelationalAppStateSnapshot(session: Session, workoutsU
       id: item.id,
       userId: item.user_id,
       dayId: item.day_id,
-      mealId: item.meal_id
+      mealId: item.meal_id,
+      quantity: Number.isFinite(Number(item.quantity)) && Number(item.quantity) > 0 ? Number(item.quantity) : 1
     }))
   };
 
@@ -519,7 +520,8 @@ export async function replaceRelationalDiet(session: Session, diet: WeeklyDiet) 
     id: stableId(userId, 'diet', diet.id, 'day', day.id, 'completedMeal', mealId),
     user_id: userId,
     day_id: stableId(userId, 'diet', diet.id, 'day', day.id),
-    meal_id: stableId(userId, 'diet', diet.id, 'meal', mealId)
+    meal_id: stableId(userId, 'diet', diet.id, 'meal', mealId),
+    quantity: day.completedMealQuantities?.[mealId] ?? 1
   })));
 
   const dietResult = await supabase.from('app_diets').upsert({

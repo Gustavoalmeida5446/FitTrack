@@ -65,12 +65,12 @@ test('calculateDietProgress soma planejado e consumido só para refeições conc
     }
   ];
 
-  const progress = calculateDietProgress(meals, ['m-2']);
+  const progress = calculateDietProgress(meals, ['m-2'], { 'm-2': 2 });
 
   assert.deepEqual(progress, {
     plannedCalories: 300,
     plannedProtein: 14,
-    consumedCalories: 200,
-    consumedProtein: 4
+    consumedCalories: 400,
+    consumedProtein: 8
   });
 });

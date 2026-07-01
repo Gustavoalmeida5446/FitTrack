@@ -203,7 +203,8 @@ test('normalizeWeeklyDietProgressForToday reseta refeições concluídas quando 
         id: 'd-1',
         label: 'Segunda',
         mealIds: ['meal-1'],
-        completedMealIds: ['meal-1']
+        completedMealIds: ['meal-1'],
+        completedMealQuantities: { 'meal-1': 2 }
       },
       ...defaultAppState.weeklyDiet.days.slice(1)
     ]
@@ -211,6 +212,7 @@ test('normalizeWeeklyDietProgressForToday reseta refeições concluídas quando 
 
   assert.notEqual(weeklyDiet.progressUpdatedAt, '2000-01-01');
   assert.deepEqual(weeklyDiet.days[0]?.completedMealIds, []);
+  assert.deepEqual(weeklyDiet.days[0]?.completedMealQuantities, {});
 });
 
 test('sanitizeAppStateForSave normaliza payload e remove weightHistory inválido', () => {
