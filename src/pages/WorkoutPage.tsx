@@ -1,5 +1,5 @@
 import { CheckmarkFilled, ChevronDown, ChevronLeft, Timer } from '@carbon/icons-react';
-import { Button, Checkbox, Tile } from '@carbon/react';
+import { Button, Checkbox, TextArea, Tile } from '@carbon/react';
 import { useEffect, useState } from 'react';
 import { AppNumberInput } from '../components/AppNumberInput';
 import { CardHeader } from '../components/CardHeader';
@@ -15,9 +15,10 @@ interface Props {
   onBack: () => void;
   onToggleExerciseDone: (exerciseId: string) => void;
   onUpdateSet: (exerciseId: string, setId: string, patch: Partial<Pick<WorkoutExerciseSet, 'loadKg' | 'reps' | 'done'>>) => void;
+  onUpdateExerciseNotes: (exerciseId: string, notes: string) => void;
 }
 
-export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateSet }: Props) {
+export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateSet, onUpdateExerciseNotes }: Props) {
   const completedExercises = workout.exercises.filter((exercise) => exercise.done).length;
   const [activeImageIndexes, setActiveImageIndexes] = useState<Record<string, number>>({});
   const [recentlyUpdatedSets, setRecentlyUpdatedSets] = useState<Record<string, boolean>>({});
@@ -84,7 +85,6 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateSet
           const activeImageIndex = mediaUrls.length > 1 ? activeImageIndexes[exercise.id] ?? 0 : 0;
           const activeImageUrl = mediaUrls[activeImageIndex] ?? null;
           const exerciseSets = normalizeWorkoutExerciseSets(exercise);
-          const exerciseNotes = exercise.notes?.trim();
 
           return (
             <Tile key={exercise.id} className={`card metric-card workout-exercise-card ${exercise.done ? 'workout-exercise-card--done' : ''}`}>
@@ -121,12 +121,16 @@ export function WorkoutPage({ workout, onBack, onToggleExerciseDone, onUpdateSet
                       />
                     </button>
                   ) : null}
-                  {exerciseNotes ? (
-                    <div className="workout-exercise-note">
-                      <span>Observação</span>
-                      <p>{exerciseNotes}</p>
-                    </div>
-                  ) : null}
+                  <div className="workout-exercise-note">
+                    <TextArea
+                      id={`notes-${exercise.id}`}
+                      labelText="Observação"
+                      rows={3}
+                      value={exercise.notes ?? ''}
+                      placeholder="Adicione ou altere uma observação para este exercício"
+                      onChange={(event) => onUpdateExerciseNotes(exercise.id, event.target.value)}
+                    />
+                  </div>
                   <StatsGrid
                     className="workout-exercise-card__meta"
                     items={[

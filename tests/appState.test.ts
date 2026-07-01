@@ -10,7 +10,7 @@ import {
   serializeWorkoutProgressState
 } from '../src/lib/appState';
 import type { AppState } from '../src/lib/appState';
-import { createWeightHistoryEntry, updateWorkoutExerciseSet } from '../src/lib/appUpdates';
+import { createWeightHistoryEntry, updateWorkoutExerciseNotes, updateWorkoutExerciseSet } from '../src/lib/appUpdates';
 import { getTodayDateString } from '../src/lib/date';
 
 function createState(overrides: Partial<AppState> = {}): AppState {
@@ -159,6 +159,38 @@ test('updateWorkoutExerciseSet preserva cargas diferentes em cada série', () =>
 
   assert.deepEqual(updatedExercise?.setsDetail?.map((set) => set.loadKg), [40, 47, 50]);
   assert.equal(updatedExercise?.loadKg, 40);
+});
+
+
+test('updateWorkoutExerciseNotes atualiza observação direto no exercício', () => {
+  const workout = {
+    id: 'w-1',
+    name: 'Upper',
+    muscleGroups: ['Peito' as const],
+    exercises: [
+      {
+        id: 'e-1',
+        source: 'local' as const,
+        sourceId: 'push-up',
+        name: 'Flexão',
+        ptName: 'Flexão',
+        muscleGroup: 'Peito' as const,
+        mediaType: 'none' as const,
+        mediaUrl: null,
+        loadKg: 0,
+        reps: 12,
+        sets: 4,
+        restSeconds: 60,
+        done: false
+      }
+    ]
+  };
+
+  const updatedWorkout = updateWorkoutExerciseNotes(workout, 'e-1', '  Ombros para trás  ');
+  const clearedWorkout = updateWorkoutExerciseNotes(updatedWorkout, 'e-1', '   ');
+
+  assert.equal(updatedWorkout.exercises[0]?.notes, 'Ombros para trás');
+  assert.equal(clearedWorkout.exercises[0]?.notes, undefined);
 });
 
 test('normalizeWaterData reseta consumo de água quando o dia mudou', () => {

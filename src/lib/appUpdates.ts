@@ -86,6 +86,24 @@ export function updateWorkoutExerciseSet(
   };
 }
 
+export function updateWorkoutExerciseNotes(workout: Workout, exerciseId: string, notes: string): Workout {
+  const trimmedNotes = notes.trim();
+
+  return {
+    ...workout,
+    exercises: workout.exercises.map((exercise) => {
+      if (exercise.id !== exerciseId) {
+        return exercise;
+      }
+
+      return {
+        ...exercise,
+        notes: trimmedNotes || undefined
+      };
+    })
+  };
+}
+
 export function toggleCompletedMealForDay(day: DietDay, mealId: string): DietDay {
   return {
     ...day,

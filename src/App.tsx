@@ -18,6 +18,7 @@ import {
   getCurrentWeightFromHistory,
   toggleCompletedMealForDay,
   toggleWorkoutExerciseDone,
+  updateWorkoutExerciseNotes,
   updateWorkoutExerciseSet
 } from './lib/appUpdates';
 import { getTodayDateString } from './lib/date';
@@ -516,6 +517,7 @@ export default function App() {
               onBack={openHome}
               onToggleExerciseDone={(exerciseId) => updateWorkout(selectedWorkout.id, (workout) => toggleWorkoutExerciseDone(workout, exerciseId))}
               onUpdateSet={(exerciseId, setId, patch) => updateWorkout(selectedWorkout.id, (workout) => updateWorkoutExerciseSet(workout, exerciseId, setId, patch))}
+              onUpdateExerciseNotes={(exerciseId, notes) => updateWorkout(selectedWorkout.id, (workout) => updateWorkoutExerciseNotes(workout, exerciseId, notes))}
             />
           ) : null}
 
