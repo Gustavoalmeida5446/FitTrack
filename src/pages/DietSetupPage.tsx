@@ -73,6 +73,15 @@ export function DietSetupPage({
   const [selectedFoods, setSelectedFoods] = useState<FoodItem[]>([]);
   const [selectedDayMealIds, setSelectedDayMealIds] = useState<string[]>([]);
   const [hasTriedAddFood, setHasTriedAddFood] = useState(false);
+  const [customFoodName, setCustomFoodName] = useState('');
+  const [customFoodQuantity, setCustomFoodQuantity] = useState(100);
+  const [customFoodUnit, setCustomFoodUnit] = useState('g');
+  const [customFoodCalories, setCustomFoodCalories] = useState(0);
+  const [customFoodProtein, setCustomFoodProtein] = useState(0);
+  const [customFoodCarbs, setCustomFoodCarbs] = useState(0);
+  const [customFoodFat, setCustomFoodFat] = useState(0);
+  const [customFoodFiber, setCustomFoodFiber] = useState(0);
+  const [hasTriedAddCustomFood, setHasTriedAddCustomFood] = useState(false);
   const [hasTriedSaveMeal, setHasTriedSaveMeal] = useState(false);
   const [hasTriedSaveDay, setHasTriedSaveDay] = useState(false);
   const debouncedFoodQuery = useDebouncedValue(foodQuery, 200);
@@ -114,6 +123,14 @@ export function DietSetupPage({
   const foodSelectionMessage = hasTriedAddFood && selectedFood && foodQuantity <= 0
     ? 'Informe uma quantidade maior que zero.'
     : '';
+  const customFoodUnitLabel = customFoodUnit.trim() || 'porção';
+  const customFoodMessage = hasTriedAddCustomFood && !customFoodName.trim()
+    ? 'Dê um nome ao alimento personalizado.'
+    : hasTriedAddCustomFood && customFoodQuantity <= 0
+      ? 'Informe uma quantidade maior que zero.'
+      : hasTriedAddCustomFood && !customFoodUnit.trim()
+        ? 'Informe a unidade da porção.'
+        : '';
   const mealFormMessage = hasTriedSaveMeal && !mealName.trim()
     ? 'Dê um nome à refeição para salvar.'
     : hasTriedSaveMeal && selectedFoods.length === 0
@@ -186,6 +203,7 @@ export function DietSetupPage({
   const resetMealForm = () => {
     lastAutoSavedMealKeyRef.current = '';
     setHasTriedAddFood(false);
+    setHasTriedAddCustomFood(false);
     setHasTriedSaveMeal(false);
     setEditingMealId(null);
     setMealName('');
@@ -194,6 +212,14 @@ export function DietSetupPage({
     setFoodOptions([]);
     setSelectedFood(null);
     setFoodQuantity(100);
+    setCustomFoodName('');
+    setCustomFoodQuantity(100);
+    setCustomFoodUnit('g');
+    setCustomFoodCalories(0);
+    setCustomFoodProtein(0);
+    setCustomFoodCarbs(0);
+    setCustomFoodFat(0);
+    setCustomFoodFiber(0);
   };
 
   const handleSelectFood = (food: TacoFood) => {
@@ -222,6 +248,39 @@ export function DietSetupPage({
     setFoodQuery('');
     setFoodOptions([]);
     setFoodQuantity(selectedFoodDefaultQuantity);
+  };
+
+  const handleAddCustomFood = () => {
+    setHasTriedAddCustomFood(true);
+
+    const nextFood: FoodItem = {
+      id: crypto.randomUUID(),
+      name: customFoodName.trim(),
+      calories: roundFoodMacro(Math.max(0, customFoodCalories || 0)),
+      protein: roundFoodMacro(Math.max(0, customFoodProtein || 0)),
+      carbs: roundFoodMacro(Math.max(0, customFoodCarbs || 0)),
+      fat: roundFoodMacro(Math.max(0, customFoodFat || 0)),
+      fiber: roundFoodMacro(Math.max(0, customFoodFiber || 0)),
+      quantity: customFoodQuantity,
+      unit: customFoodUnit.trim(),
+      baseQuantity: customFoodQuantity,
+      baseUnit: customFoodUnit.trim()
+    };
+
+    if (!isValidFoodItem(nextFood)) {
+      return;
+    }
+
+    setSelectedFoods((prev) => [...prev, nextFood]);
+    setHasTriedAddCustomFood(false);
+    setCustomFoodName('');
+    setCustomFoodQuantity(100);
+    setCustomFoodUnit('g');
+    setCustomFoodCalories(0);
+    setCustomFoodProtein(0);
+    setCustomFoodCarbs(0);
+    setCustomFoodFat(0);
+    setCustomFoodFiber(0);
   };
 
   const handleRemoveDraftFood = (foodId: string) => {
@@ -258,6 +317,7 @@ export function DietSetupPage({
     setFoodOptions([]);
     setSelectedFood(null);
     setFoodQuantity(100);
+    setHasTriedAddCustomFood(false);
   };
 
   const handleRemoveMeal = (mealId: string) => {
@@ -418,6 +478,49 @@ export function DietSetupPage({
               {foodSelectionMessage ? <p className="form-message form-message--error">{foodSelectionMessage}</p> : null}
             </div>
           ) : null}
+
+          <div className="setup-selection-card">
+            <div className="setup-selection-card__header">
+              <div>
+                <span className="meta-label">Alimento personalizado</span>
+                <p>Cadastre um alimento próprio informando os nutrientes da porção.</p>
+              </div>
+            </div>
+            <div className="setup-card__fields">
+              <TextInput
+                id="custom-food-name"
+                labelText="Nome do alimento"
+                value={customFoodName}
+                onChange={(event) => setCustomFoodName(event.target.value)}
+              />
+              <AppNumberInput
+                id="custom-food-quantity"
+                label={`Quantidade da porção (${customFoodUnitLabel})`}
+                min={0.1}
+                step={1}
+                value={customFoodQuantity}
+                onValueChange={setCustomFoodQuantity}
+              />
+              <TextInput
+                id="custom-food-unit"
+                labelText="Unidade"
+                helperText="Ex.: g, ml, unidade, scoop ou porção"
+                value={customFoodUnit}
+                onChange={(event) => setCustomFoodUnit(event.target.value)}
+              />
+              <AppNumberInput id="custom-food-calories" label="Calorias (kcal)" min={0} step={1} value={customFoodCalories} onValueChange={setCustomFoodCalories} />
+              <AppNumberInput id="custom-food-protein" label="Proteína (g)" min={0} step={0.1} value={customFoodProtein} onValueChange={setCustomFoodProtein} />
+              <AppNumberInput id="custom-food-carbs" label="Carboidratos (g)" min={0} step={0.1} value={customFoodCarbs} onValueChange={setCustomFoodCarbs} />
+              <AppNumberInput id="custom-food-fat" label="Gorduras (g)" min={0} step={0.1} value={customFoodFat} onValueChange={setCustomFoodFat} />
+              <AppNumberInput id="custom-food-fiber" label="Fibras (g)" min={0} step={0.1} value={customFoodFiber} onValueChange={setCustomFoodFiber} />
+            </div>
+            <div className="inline-actions">
+              <Button size="sm" onClick={handleAddCustomFood}>
+                Adicionar alimento personalizado
+              </Button>
+            </div>
+            {customFoodMessage ? <p className="form-message form-message--error">{customFoodMessage}</p> : null}
+          </div>
           <TextInput id="meal-name" labelText="Nome da refeição" value={mealName} onChange={(event) => setMealName(event.target.value)} />
           <InfoBlock label="Resumo da refeição atual">
             {selectedFoods.length} alimento(s) • {formatFixedDecimal(selectedMealTotals.calories)} kcal • {formatFixedDecimal(selectedMealTotals.protein)}g proteína
