@@ -182,6 +182,7 @@ create table if not exists public.app_diet_completed_meals (
   user_id uuid not null references auth.users(id) on delete cascade,
   day_id text not null references public.app_diet_days(id) on delete cascade,
   meal_id text not null references public.app_diet_meals(id) on delete cascade,
+  quantity numeric not null default 1,
   created_at timestamptz not null default timezone('utc', now()),
   unique (day_id, meal_id)
 );
