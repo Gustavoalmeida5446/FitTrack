@@ -32,15 +32,16 @@ export function DietDayPage({ day, meals, targets, onBack, onToggleMealDone, onU
         className="diet-summary-card"
         items={[
           { label: 'Refeições feitas', value: `${completedMeals}/${meals.length}` },
-          { label: 'Consumido hoje', value: `${formatRoundedInteger(totals.consumedCalories)} kcal` }
+          { label: 'Calorias', value: `${formatRoundedInteger(totals.consumedCalories)} / ${targets.caloriesDaily} kcal` },
+          { label: 'Proteína', value: `${formatRoundedInteger(totals.consumedProtein)} / ${targets.proteinDaily} g` }
         ]}
       />
 
       <Tile className="card metric-card diet-targets-card">
         <CardHeader
           icon={<CheckmarkFilled size={20} />}
-          title="Meta Diária"
-          description="O que você precisa consumir e o que já consumiu hoje"
+          title="Progresso diário"
+          description="Metas e consumo registrados até agora"
           accent="purple"
         />
         <StatsGrid
@@ -119,18 +120,6 @@ export function DietDayPage({ day, meals, targets, onBack, onToggleMealDone, onU
           );
         })}
 
-        <Tile className="card metric-card diet-totals-card">
-          <h3>Resumo do dia</h3>
-          <StatsGrid
-            className="diet-totals-card__grid"
-            items={[
-              { label: 'Meta de calorias', value: `${targets.caloriesDaily} kcal` },
-              { label: 'Meta de proteína', value: `${targets.proteinDaily}g` },
-              { label: 'Calorias consumidas', value: `${formatRoundedInteger(totals.consumedCalories)} kcal` },
-              { label: 'Proteína consumida', value: `${formatRoundedInteger(totals.consumedProtein)}g` }
-            ]}
-          />
-        </Tile>
       </div>
     </PageContainer>
   );
