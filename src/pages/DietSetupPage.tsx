@@ -64,6 +64,7 @@ export function DietSetupPage({
   const lastAutoSavedMealKeyRef = useRef('');
   const [draftDiet, setDraftDiet] = useState(diet);
   const [selectedDayId, setSelectedDayId] = useState(diet.days[0]?.id ?? 'd-1');
+  const [setupSection, setSetupSection] = useState<'meals' | 'week'>('meals');
   const [editingMealId, setEditingMealId] = useState<string | null>(null);
   const [foodQuery, setFoodQuery] = useState('');
   const [foodOptions, setFoodOptions] = useState<TacoFood[]>([]);
@@ -306,9 +307,11 @@ export function DietSetupPage({
     persistMeal(meal);
     setHasTriedSaveMeal(false);
     resetMealForm();
+    setSetupSection('meals');
   };
 
   const handleEditMeal = (meal: Meal) => {
+    setSetupSection('meals');
     lastAutoSavedMealKeyRef.current = JSON.stringify(meal);
     setEditingMealId(meal.id);
     setMealName(meal.name);
@@ -412,7 +415,35 @@ export function DietSetupPage({
             onSkip={onTutorialSkip}
           />
         ) : null}
+        <div className="setup-section-nav" role="tablist" aria-label="Cadastro de dieta">
+          <Button
+            kind={setupSection === 'meals' ? 'primary' : 'tertiary'}
+            size="sm"
+            role="tab"
+            aria-selected={setupSection === 'meals'}
+            onClick={() => setSetupSection('meals')}
+          >
+            Refeições ({draftDiet.meals.length})
+          </Button>
+          <Button
+            kind={setupSection === 'week' ? 'primary' : 'tertiary'}
+            size="sm"
+            role="tab"
+            aria-selected={setupSection === 'week'}
+            onClick={() => setSetupSection('week')}
+          >
+            Planejar semana
+          </Button>
+        </div>
+        {setupSection === 'meals' ? (
+        <>
         <Tile className="card metric-card setup-card">
+          <div className="setup-flow-steps" aria-label="Etapas para montar a dieta">
+            <span>1. Criar refeição</span>
+            <span>2. Revisar refeições</span>
+            <span>3. Planejar semana</span>
+            <span>4. Conferir o dia</span>
+          </div>
           <div className="card-head">
             <div className="card-head__group">
               <div className="icon-badge icon-badge--purple card-head__badge">
@@ -427,7 +458,7 @@ export function DietSetupPage({
           <div className="setup-card__fields">
             <TextInput
               id="food-search"
-              labelText="Buscar alimento"
+              labelText="1. Buscar alimento para a refeição"
               value={foodQuery}
               onChange={(event) => setFoodQuery(event.target.value)}
               onBlur={() => window.setTimeout(() => setFoodOptions([]), 150)}
@@ -559,6 +590,7 @@ export function DietSetupPage({
           </div>
           <div className="setup-card__footer">
             <Button onClick={handleSaveMeal}>{editingMealId ? 'Atualizar refeição' : 'Salvar refeição'}</Button>
+            {canSaveMeal ? <p className="form-message form-message--success">Salvamento automático ativo. Use o botão para concluir e limpar o formulário.</p> : null}
             {mealFormMessage ? <p className="form-message form-message--error">{mealFormMessage}</p> : null}
           </div>
         </Tile>
@@ -570,7 +602,7 @@ export function DietSetupPage({
                 <CheckmarkFilled size={20} />
               </div>
               <div className="card-head__title">
-                <h3>Refeições cadastradas</h3>
+                <h3>2. Refeições cadastradas</h3>
                 <p>Use essas refeições para montar os dias da dieta</p>
               </div>
             </div>
@@ -607,7 +639,11 @@ export function DietSetupPage({
             )}
           </div>
         </Tile>
+        </>
+        ) : null}
 
+        {setupSection === 'week' ? (
+        <>
         <Tile className="card metric-card setup-card">
           <div className="card-head">
             <div className="card-head__group">
@@ -615,7 +651,7 @@ export function DietSetupPage({
                 <CalendarHeatMap size={20} />
               </div>
               <div className="card-head__title">
-                <h3>Criar dia</h3>
+                <h3>3. Planejar semana</h3>
                 <p>Escolha o dia e selecione quais refeições fazem parte dele</p>
               </div>
             </div>
@@ -664,6 +700,7 @@ export function DietSetupPage({
               Salvar {selectedDay.label}
             </Button>
           </div>
+          {canSaveDay ? <p className="form-message form-message--success">As mudanças deste dia são salvas automaticamente ao selecionar ou remover refeições.</p> : null}
           {dayFormMessage ? <p className="form-message form-message--error">{dayFormMessage}</p> : null}
         </Tile>
 
@@ -674,7 +711,7 @@ export function DietSetupPage({
                 <CheckmarkFilled size={20} />
               </div>
               <div className="card-head__title">
-                <h3>{selectedDay.label}</h3>
+                <h3>4. {selectedDay.label}</h3>
                 <p>Reveja as refeições atribuídas ao dia selecionado</p>
               </div>
             </div>
@@ -701,6 +738,8 @@ export function DietSetupPage({
             )}
           </div>
         </Tile>
+        </>
+        ) : null}
       </div>
     </PageContainer>
   );

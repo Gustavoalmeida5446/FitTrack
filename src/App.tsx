@@ -507,6 +507,8 @@ export default function App() {
               onTutorialSkip={finishTutorial}
               onOpenWorkout={openWorkout}
               onOpenDietDay={openDietDay}
+              onOpenWorkoutSetup={openWorkoutSetup}
+              onOpenDietSetup={openDietSetup}
               onAddWater={handleAddWater}
             />
           ) : null}

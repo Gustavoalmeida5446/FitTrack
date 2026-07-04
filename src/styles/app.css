@@ -431,6 +431,21 @@ body {
   text-align: center;
 }
 
+.water-card__custom-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: end;
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.water-card__custom-entry .cds--btn {
+  min-inline-size: 8.75rem;
+  max-inline-size: none;
+}
+
 .exercise-media {
   width: 100%;
   aspect-ratio: 1 / 1;
@@ -974,6 +989,47 @@ body {
 .workout-tabs .cds--btn {
   min-inline-size: 0;
 }
+
+.setup-section-nav {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-soft-surface);
+}
+
+.setup-section-nav .cds--btn {
+  max-inline-size: none;
+  inline-size: 100%;
+}
+
+.setup-flow-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.setup-flow-steps span,
+.setup-step-label {
+  display: block;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--color-info-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-info-bg);
+  color: var(--color-info);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.setup-step-label {
+  align-self: flex-start;
+  margin-top: var(--space-2);
+}
+
 .setup-card__fields {
   display: grid;
   grid-template-columns: 1fr;
@@ -1250,6 +1306,14 @@ body {
   color: var(--color-danger);
 }
 
+.form-message--success {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--color-positive-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-positive-bg);
+  color: var(--color-positive);
+}
+
 .tutorial-inline-card {
   display: flex;
   flex-direction: column;
@@ -1372,6 +1436,11 @@ body {
 .empty-state-card p {
   margin: 0;
   color: var(--color-text-muted);
+}
+
+.empty-state-card .cds--btn {
+  align-self: flex-start;
+  margin-top: var(--space-2);
 }
 
 .goals-grid {
@@ -1638,6 +1707,14 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .water-card__custom-entry {
+    grid-template-columns: 1fr;
+  }
+
+  .water-card__custom-entry .cds--btn {
+    width: 100%;
+  }
+
   .workout-exercise-card__meta,
   .diet-meal-card__meta,
   .diet-totals-card__grid,
@@ -1670,6 +1747,14 @@ body {
   .selection-toggle-card {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .setup-flow-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .setup-section-nav {
+    grid-template-columns: 1fr;
   }
 
   .setup-card__footer {
