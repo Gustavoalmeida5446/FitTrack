@@ -53,7 +53,12 @@ export function HomePage({
   const hasDiet = weeklyDiet.days.some((day) => day.mealIds.length > 0);
   const todayDietDay = weeklyDiet.days.find((day) => day.id === getDietDayIdForDate()) ?? weeklyDiet.days[0];
   const todayMeals = getMealsForDietDay(todayDietDay, weeklyDiet.meals);
-  const todayDietProgress = calculateDietProgress(todayMeals, todayDietDay?.completedMealIds ?? []);
+  const todayDietProgress = calculateDietProgress(
+    todayMeals,
+    todayDietDay?.completedMealIds ?? [],
+    todayDietDay?.completedMealQuantities
+  );
+  const completedMealsCount = todayDietDay?.completedMealIds.length ?? 0;
 
   return (
     <PageContainer
@@ -131,7 +136,7 @@ export function HomePage({
       <div className="section-title">
         <div className="section-title__group">
           <CalendarHeatMap size={24} />
-          <h2>Dieta semanal</h2>
+          <h2>Dieta de hoje</h2>
         </div>
       </div>
       <div className="stack">
@@ -143,17 +148,17 @@ export function HomePage({
               </div>
               <div className="diet-home-card__title">
                 <h3>{todayDietDay.label}</h3>
-                <span>{todayDietDay.mealIds.length} refeições planejadas</span>
+                <span>{completedMealsCount}/{todayDietDay.mealIds.length} refeições feitas</span>
               </div>
               <ChevronRight size={24} className="list-card__chevron" />
             </div>
             <div className="diet-home-card__metrics">
               <div className="diet-home-card__metric">
-                <span>Proteína</span>
+                <span>Proteína consumida</span>
                 <strong>{formatRoundedInteger(todayDietProgress.consumedProtein)}g / {targets.proteinDaily}g</strong>
               </div>
               <div className="diet-home-card__metric">
-                <span>Calorias</span>
+                <span>Calorias consumidas</span>
                 <strong>{formatRoundedInteger(todayDietProgress.consumedCalories)} / {targets.caloriesDaily} kcal</strong>
               </div>
             </div>
