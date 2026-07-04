@@ -37,24 +37,6 @@ export function DietDayPage({ day, meals, targets, onBack, onToggleMealDone, onU
         ]}
       />
 
-      <Tile className="card metric-card diet-targets-card">
-        <CardHeader
-          icon={<CheckmarkFilled size={20} />}
-          title="Progresso diário"
-          description="Metas e consumo registrados até agora"
-          accent="purple"
-        />
-        <StatsGrid
-          className="diet-totals-card__grid"
-          items={[
-            { label: 'Meta de calorias', value: `${targets.caloriesDaily} kcal` },
-            { label: 'Meta de proteína', value: `${targets.proteinDaily} g` },
-            { label: 'Calorias consumidas', value: `${formatRoundedInteger(totals.consumedCalories)} kcal` },
-            { label: 'Proteína consumida', value: `${formatRoundedInteger(totals.consumedProtein)} g` }
-          ]}
-        />
-      </Tile>
-
       <div className="stack">
         {meals.map((meal) => {
           const isDone = day.completedMealIds.includes(meal.id);

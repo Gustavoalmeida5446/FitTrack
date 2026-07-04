@@ -76,6 +76,7 @@ export function WorkoutSetupPage({
   const importInputRef = useRef<HTMLInputElement | null>(null);
   const [editingWorkoutId, setEditingWorkoutId] = useState<string | null>(null);
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null);
+  const [setupSection, setSetupSection] = useState<'builder' | 'saved'>('builder');
   const [workoutListTab, setWorkoutListTab] = useState<'active' | 'archived'>('active');
   const [importMessage, setImportMessage] = useState('');
   const [activePreviewImageIndex, setActivePreviewImageIndex] = useState(0);
@@ -409,9 +410,11 @@ export function WorkoutSetupPage({
     persistWorkout(nextWorkout);
     setHasTriedSaveWorkout(false);
     resetWorkoutForm();
+    setSetupSection('saved');
   };
 
   const handleEditWorkout = (workout: Workout) => {
+    setSetupSection('builder');
     lastAutoSavedWorkoutKeyRef.current = JSON.stringify(workout);
     setEditingWorkoutId(workout.id);
     setName(workout.name);
@@ -494,7 +497,34 @@ export function WorkoutSetupPage({
             onSkip={onTutorialSkip}
           />
         ) : null}
+        <div className="setup-section-nav" role="tablist" aria-label="Cadastro de treino">
+          <Button
+            kind={setupSection === 'builder' ? 'primary' : 'tertiary'}
+            size="sm"
+            role="tab"
+            aria-selected={setupSection === 'builder'}
+            onClick={() => setSetupSection('builder')}
+          >
+            Montar treino
+          </Button>
+          <Button
+            kind={setupSection === 'saved' ? 'primary' : 'tertiary'}
+            size="sm"
+            role="tab"
+            aria-selected={setupSection === 'saved'}
+            onClick={() => setSetupSection('saved')}
+          >
+            Treinos salvos ({workouts.length})
+          </Button>
+        </div>
+        {setupSection === 'builder' ? (
         <Tile className="card metric-card setup-card">
+          <div className="setup-flow-steps" aria-label="Etapas para criar um treino">
+            <span>1. Nome do treino</span>
+            <span>2. Buscar exercício</span>
+            <span>3. Ajustar séries</span>
+            <span>4. Revisar e salvar</span>
+          </div>
           <div className="card-head">
             <div className="card-head__group">
               <div className="icon-badge icon-badge--primary card-head__badge">
@@ -506,11 +536,11 @@ export function WorkoutSetupPage({
               </div>
             </div>
           </div>
-          <TextInput id="workout-name" labelText="Nome do treino" value={name} onChange={(event) => setName(event.target.value)} />
+          <TextInput id="workout-name" labelText="1. Nome do treino" value={name} onChange={(event) => setName(event.target.value)} />
           <div className="setup-card__fields setup-card__fields--single">
             <TextInput
               id="exercise-search"
-              labelText="Buscar exercício"
+              labelText="2. Buscar exercício"
               value={query}
               onChange={(event) => {
                 const value = event.target.value;
@@ -545,6 +575,7 @@ export function WorkoutSetupPage({
               ))}
             </ul>
           ) : null}
+          <span className="setup-step-label">3. Ajustar séries e descanso</span>
           <div className="setup-card__metrics">
             <AppNumberInput id="exercise-load" label="Carga padrão (kg)" min={0} value={loadKg} onValueChange={handleDefaultLoadChange} />
             <AppNumberInput id="exercise-reps" label="Repetições padrão" min={1} value={reps} onValueChange={handleDefaultRepsChange} />
@@ -609,6 +640,7 @@ export function WorkoutSetupPage({
           {exerciseFormMessage ? <p className="form-message form-message--error">{exerciseFormMessage}</p> : null}
          
 
+          <span className="setup-step-label">4. Revisar exercícios adicionados</span>
           <div className="stack">
             {draftExercises.length > 0 ? draftExercises.map((exercise, index) => (
               <SelectionSummaryCard
@@ -661,10 +693,13 @@ export function WorkoutSetupPage({
               <Button onClick={handleSaveWorkout}>{editingWorkoutId ? 'Atualizar treino' : 'Salvar treino'}</Button>
               {editingWorkoutId ? <Button kind="ghost" onClick={resetWorkoutForm}>Cancelar edição</Button> : null}
             </div>
+            {canSaveWorkout ? <p className="form-message form-message--success">Salvamento automático ativo. Use o botão para concluir e limpar o formulário.</p> : null}
             {workoutFormMessage ? <p className="form-message form-message--error">{workoutFormMessage}</p> : null}
           </div>
         </Tile>
+        ) : null}
 
+        {setupSection === 'saved' ? (
         <Tile className="card metric-card setup-card">
           <div className="card-head">
             <div className="card-head__group">
@@ -748,6 +783,7 @@ export function WorkoutSetupPage({
             )}
           </div>
         </Tile>
+        ) : null}
       </div>
     </PageContainer>
   );

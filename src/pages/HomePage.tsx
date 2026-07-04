@@ -1,5 +1,6 @@
 import { CalendarHeatMap, ChevronRight, TemperatureWater } from '@carbon/icons-react';
-import { Button, ProgressBar, Tile } from '@carbon/react';
+import { Button, ProgressBar, TextInput, Tile } from '@carbon/react';
+import { useState } from 'react';
 import { ContextualTutorialCard, type TutorialStepContent } from '../components/ContextualTutorialCard';
 import { PageContainer } from '../components/PageContainer';
 import { NutritionTargets, WaterData, WeeklyDiet, Workout } from '../data/types';
@@ -22,6 +23,8 @@ interface Props {
   onTutorialSkip: () => void;
   onOpenWorkout: (workoutId: string) => void;
   onOpenDietDay: (dayId: string) => void;
+  onOpenWorkoutSetup: () => void;
+  onOpenDietSetup: () => void;
   onAddWater: (amount: number) => void;
 }
 
@@ -47,8 +50,11 @@ export function HomePage({
   onTutorialSkip,
   onOpenWorkout,
   onOpenDietDay,
+  onOpenWorkoutSetup,
+  onOpenDietSetup,
   onAddWater
 }: Props) {
+  const [customWaterAmount, setCustomWaterAmount] = useState('');
   const progress = calculateClampedPercentage(water.consumedMl, waterGoalMl);
   const hasDiet = weeklyDiet.days.some((day) => day.mealIds.length > 0);
   const todayDietDay = weeklyDiet.days.find((day) => day.id === getDietDayIdForDate()) ?? weeklyDiet.days[0];
@@ -59,6 +65,17 @@ export function HomePage({
     todayDietDay?.completedMealQuantities
   );
   const completedMealsCount = todayDietDay?.completedMealIds.length ?? 0;
+  const parsedCustomWaterAmount = parseDecimalNumber(customWaterAmount, 0);
+  const canAddCustomWater = waterGoalMl > 0 && parsedCustomWaterAmount > 0;
+
+  const handleAddCustomWater = () => {
+    if (!canAddCustomWater) {
+      return;
+    }
+
+    onAddWater(parsedCustomWaterAmount);
+    setCustomWaterAmount('');
+  };
 
   return (
     <PageContainer
@@ -104,6 +121,7 @@ export function HomePage({
           <Tile className="card metric-card empty-state-card">
             <h3>Nenhum treino cadastrado</h3>
             <p>Cadastre seu primeiro treino na aba de treinos para ele aparecer aqui.</p>
+            <Button size="sm" onClick={onOpenWorkoutSetup}>Criar treino</Button>
           </Tile>
         )}
       </div>
@@ -126,10 +144,26 @@ export function HomePage({
         <div className="actions-grid water-card__actions">
           <Button size="sm" disabled={waterGoalMl <= 0} onClick={() => onAddWater(250)}>+250 ml</Button>
           <Button size="sm" disabled={waterGoalMl <= 0} onClick={() => onAddWater(500)}>+500 ml</Button>
-          <Button size="sm" kind="tertiary" onClick={() => {
-            const custom = parseDecimalNumber(prompt('Quanto deseja adicionar em ml?') ?? '', 0);
-            if (custom > 0) onAddWater(custom);
-          }} disabled={waterGoalMl <= 0}>Personalizado</Button>
+          <Button size="sm" disabled={waterGoalMl <= 0} onClick={() => onAddWater(750)}>+750 ml</Button>
+        </div>
+        <div className="water-card__custom-entry">
+          <TextInput
+            id="custom-water-amount"
+            labelText="Adicionar outro valor"
+            placeholder="Ex.: 300"
+            inputMode="decimal"
+            value={customWaterAmount}
+            disabled={waterGoalMl <= 0}
+            onChange={(event) => setCustomWaterAmount(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                handleAddCustomWater();
+              }
+            }}
+          />
+          <Button size="sm" kind="tertiary" disabled={!canAddCustomWater} onClick={handleAddCustomWater}>
+            Adicionar ml
+          </Button>
         </div>
       </Tile>
 
@@ -167,6 +201,7 @@ export function HomePage({
           <Tile className="card metric-card empty-state-card">
             <h3>Nenhuma dieta cadastrada</h3>
             <p>Monte sua dieta na aba de dieta para ver o planejamento semanal aqui.</p>
+            <Button size="sm" onClick={onOpenDietSetup}>Montar dieta</Button>
           </Tile>
         )}
       </div>
