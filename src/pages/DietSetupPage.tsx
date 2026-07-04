@@ -1,4 +1,4 @@
-import { CalendarHeatMap, CheckmarkFilled, ChevronLeft, Search, TrashCan } from '@carbon/icons-react';
+import { CalendarHeatMap, CheckmarkFilled, ChevronDown, ChevronLeft, Search, TrashCan } from '@carbon/icons-react';
 import { Button, TextInput, Tile } from '@carbon/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AppNumberInput } from '../components/AppNumberInput';
@@ -479,48 +479,52 @@ export function DietSetupPage({
             </div>
           ) : null}
 
-          <div className="setup-selection-card">
-            <div className="setup-selection-card__header">
+          <details className="setup-selection-card custom-food-accordion">
+            <summary className="custom-food-accordion__summary">
               <div>
                 <span className="meta-label">Alimento personalizado</span>
-                <p>Cadastre um alimento próprio informando os nutrientes da porção.</p>
+                <p>Não encontrou na busca? Cadastre um alimento próprio.</p>
               </div>
+              <ChevronDown className="custom-food-accordion__chevron" size={20} aria-hidden="true" />
+            </summary>
+            <div className="custom-food-accordion__content">
+              <p className="custom-food-accordion__description">Informe os nutrientes da porção para adicionar este alimento à refeição atual.</p>
+              <div className="setup-card__fields">
+                <TextInput
+                  id="custom-food-name"
+                  labelText="Nome do alimento"
+                  value={customFoodName}
+                  onChange={(event) => setCustomFoodName(event.target.value)}
+                />
+                <AppNumberInput
+                  id="custom-food-quantity"
+                  label={`Quantidade da porção (${customFoodUnitLabel})`}
+                  min={0.1}
+                  step={1}
+                  value={customFoodQuantity}
+                  onValueChange={setCustomFoodQuantity}
+                />
+                <TextInput
+                  id="custom-food-unit"
+                  labelText="Unidade"
+                  helperText="Ex.: g, ml, unidade, scoop ou porção"
+                  value={customFoodUnit}
+                  onChange={(event) => setCustomFoodUnit(event.target.value)}
+                />
+                <AppNumberInput id="custom-food-calories" label="Calorias (kcal)" min={0} step={1} value={customFoodCalories} onValueChange={setCustomFoodCalories} />
+                <AppNumberInput id="custom-food-protein" label="Proteína (g)" min={0} step={0.1} value={customFoodProtein} onValueChange={setCustomFoodProtein} />
+                <AppNumberInput id="custom-food-carbs" label="Carboidratos (g)" min={0} step={0.1} value={customFoodCarbs} onValueChange={setCustomFoodCarbs} />
+                <AppNumberInput id="custom-food-fat" label="Gorduras (g)" min={0} step={0.1} value={customFoodFat} onValueChange={setCustomFoodFat} />
+                <AppNumberInput id="custom-food-fiber" label="Fibras (g)" min={0} step={0.1} value={customFoodFiber} onValueChange={setCustomFoodFiber} />
+              </div>
+              <div className="inline-actions">
+                <Button size="sm" onClick={handleAddCustomFood}>
+                  Adicionar alimento personalizado
+                </Button>
+              </div>
+              {customFoodMessage ? <p className="form-message form-message--error">{customFoodMessage}</p> : null}
             </div>
-            <div className="setup-card__fields">
-              <TextInput
-                id="custom-food-name"
-                labelText="Nome do alimento"
-                value={customFoodName}
-                onChange={(event) => setCustomFoodName(event.target.value)}
-              />
-              <AppNumberInput
-                id="custom-food-quantity"
-                label={`Quantidade da porção (${customFoodUnitLabel})`}
-                min={0.1}
-                step={1}
-                value={customFoodQuantity}
-                onValueChange={setCustomFoodQuantity}
-              />
-              <TextInput
-                id="custom-food-unit"
-                labelText="Unidade"
-                helperText="Ex.: g, ml, unidade, scoop ou porção"
-                value={customFoodUnit}
-                onChange={(event) => setCustomFoodUnit(event.target.value)}
-              />
-              <AppNumberInput id="custom-food-calories" label="Calorias (kcal)" min={0} step={1} value={customFoodCalories} onValueChange={setCustomFoodCalories} />
-              <AppNumberInput id="custom-food-protein" label="Proteína (g)" min={0} step={0.1} value={customFoodProtein} onValueChange={setCustomFoodProtein} />
-              <AppNumberInput id="custom-food-carbs" label="Carboidratos (g)" min={0} step={0.1} value={customFoodCarbs} onValueChange={setCustomFoodCarbs} />
-              <AppNumberInput id="custom-food-fat" label="Gorduras (g)" min={0} step={0.1} value={customFoodFat} onValueChange={setCustomFoodFat} />
-              <AppNumberInput id="custom-food-fiber" label="Fibras (g)" min={0} step={0.1} value={customFoodFiber} onValueChange={setCustomFoodFiber} />
-            </div>
-            <div className="inline-actions">
-              <Button size="sm" onClick={handleAddCustomFood}>
-                Adicionar alimento personalizado
-              </Button>
-            </div>
-            {customFoodMessage ? <p className="form-message form-message--error">{customFoodMessage}</p> : null}
-          </div>
+          </details>
           <TextInput id="meal-name" labelText="Nome da refeição" value={mealName} onChange={(event) => setMealName(event.target.value)} />
           <InfoBlock label="Resumo da refeição atual">
             {selectedFoods.length} alimento(s) • {formatFixedDecimal(selectedMealTotals.calories)} kcal • {formatFixedDecimal(selectedMealTotals.protein)}g proteína

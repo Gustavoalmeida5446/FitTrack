@@ -163,7 +163,7 @@ body {
 .goals-card,
 .water-card,
 .diet-targets-card,
-.diet-home-summary-card,
+.diet-home-card,
 .diet-meal-card,
 .diet-summary-card,
 .diet-totals-card,
@@ -826,11 +826,119 @@ body {
   flex-wrap: wrap;
 }
 
-.diet-targets-card,
-.diet-home-summary-card {
+.diet-targets-card {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+}
+
+.diet-home-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.diet-home-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.diet-home-card__title {
+  flex: 1;
+  min-width: 0;
+}
+
+.diet-home-card__title h3,
+.diet-home-card__title span {
+  overflow-wrap: anywhere;
+}
+
+.diet-home-card__title h3 {
+  margin: 0 0 0.2rem;
+}
+
+.diet-home-card__title span {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.diet-home-card__metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.diet-home-card__metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(138, 99, 255, 0.24);
+  border-radius: 12px;
+  background: rgba(138, 99, 255, 0.08);
+}
+
+.diet-home-card__metric span {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.diet-home-card__metric strong {
+  overflow-wrap: anywhere;
+}
+
+.custom-food-accordion {
+  padding: 0;
+}
+
+.custom-food-accordion__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  cursor: pointer;
+  list-style: none;
+}
+
+.custom-food-accordion__summary::-webkit-details-marker {
+  display: none;
+}
+
+.custom-food-accordion__summary p {
+  margin: 0.2rem 0 0;
+  color: var(--color-text-muted);
+}
+
+.custom-food-accordion__chevron {
+  flex-shrink: 0;
+  transition: transform 160ms ease;
+}
+
+.custom-food-accordion[open] .custom-food-accordion__chevron {
+  transform: rotate(180deg);
+}
+
+.custom-food-accordion__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 0 var(--space-3) var(--space-3);
+}
+
+.custom-food-accordion__description {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
 }
 
 .diet-day-build-summary {
@@ -841,12 +949,6 @@ body {
   border-radius: 12px;
   background: rgba(31, 112, 255, 0.1);
   border: 1px solid rgba(69, 137, 255, 0.35);
-}
-
-.diet-home-summary-card__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
 }
 
 .setup-card {
@@ -872,19 +974,16 @@ body {
 .workout-tabs .cds--btn {
   min-inline-size: 0;
 }
-
 .setup-card__fields {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-3);
 }
-
 .setup-card__metrics {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
 }
-
 .setup-card__footer {
   display: flex;
   justify-content: flex-start;
@@ -1542,7 +1641,7 @@ body {
   .workout-exercise-card__meta,
   .diet-meal-card__meta,
   .diet-totals-card__grid,
-  .diet-home-summary-card__grid,
+  .diet-home-card__metrics,
   .goals-grid,
   .goals-form-grid,
   .goals-grid--compact,
