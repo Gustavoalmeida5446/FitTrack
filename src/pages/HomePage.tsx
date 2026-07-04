@@ -2,7 +2,6 @@ import { CalendarHeatMap, ChevronRight, TemperatureWater } from '@carbon/icons-r
 import { Button, ProgressBar, Tile } from '@carbon/react';
 import { ContextualTutorialCard, type TutorialStepContent } from '../components/ContextualTutorialCard';
 import { PageContainer } from '../components/PageContainer';
-import { StatsGrid } from '../components/StatsGrid';
 import { NutritionTargets, WaterData, WeeklyDiet, Workout } from '../data/types';
 import { getDietDayIdForDate } from '../lib/date';
 import { calculateClampedPercentage, formatRoundedInteger, parseDecimalNumber } from '../lib/number';
@@ -137,17 +136,27 @@ export function HomePage({
       </div>
       <div className="stack">
         {hasDiet && todayDietDay ? (
-          <Tile key={todayDietDay.id} className="card-click list-card list-card--compact" onClick={() => onOpenDietDay(todayDietDay.id)}>
-            <div className="list-card__badge list-card__badge--purple">
-              <CalendarHeatMap size={20} />
+          <Tile key={todayDietDay.id} className="card-click diet-home-card" onClick={() => onOpenDietDay(todayDietDay.id)}>
+            <div className="diet-home-card__header">
+              <div className="list-card__badge list-card__badge--purple">
+                <CalendarHeatMap size={20} />
+              </div>
+              <div className="diet-home-card__title">
+                <h3>{todayDietDay.label}</h3>
+                <span>{todayDietDay.mealIds.length} refeições planejadas</span>
+              </div>
+              <ChevronRight size={24} className="list-card__chevron" />
             </div>
-            <div className="list-card__content">
-              <h3>{todayDietDay.label}</h3>
-              <span>{todayDietDay.mealIds.length} refeições</span>
-              <span>Proteína hoje: {formatRoundedInteger(todayDietProgress.consumedProtein)}g</span>
-              <span>Calorias hoje: {formatRoundedInteger(todayDietProgress.consumedCalories)} kcal</span>
+            <div className="diet-home-card__metrics">
+              <div className="diet-home-card__metric">
+                <span>Proteína</span>
+                <strong>{formatRoundedInteger(todayDietProgress.consumedProtein)}g / {targets.proteinDaily}g</strong>
+              </div>
+              <div className="diet-home-card__metric">
+                <span>Calorias</span>
+                <strong>{formatRoundedInteger(todayDietProgress.consumedCalories)} / {targets.caloriesDaily} kcal</strong>
+              </div>
             </div>
-            <ChevronRight size={24} className="list-card__chevron" />
           </Tile>
         ) : (
           <Tile className="card metric-card empty-state-card">
@@ -155,19 +164,6 @@ export function HomePage({
             <p>Monte sua dieta na aba de dieta para ver o planejamento semanal aqui.</p>
           </Tile>
         )}
-        {hasDiet && todayDietDay ? (
-          <Tile className="card metric-card diet-home-summary-card">
-            <StatsGrid
-              className="diet-home-summary-card__grid"
-              items={[
-                { label: 'Meta de proteína', value: `${targets.proteinDaily}g` },
-                { label: 'Proteína hoje', value: `${formatRoundedInteger(todayDietProgress.consumedProtein)}g` },
-                { label: 'Meta de calorias', value: `${targets.caloriesDaily} kcal` },
-                { label: 'Calorias hoje', value: `${formatRoundedInteger(todayDietProgress.consumedCalories)} kcal` }
-              ]}
-            />
-          </Tile>
-        ) : null}
       </div>
     </PageContainer>
   );
