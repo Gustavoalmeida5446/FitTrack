@@ -3,6 +3,7 @@ import { Button, TextInput, Tile } from '@carbon/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AppNumberInput } from '../components/AppNumberInput';
 import { ContextualTutorialCard, type TutorialStepContent } from '../components/ContextualTutorialCard';
+import { CollapsibleHelp } from '../components/CollapsibleHelp';
 import { InfoBlock } from '../components/InfoBlock';
 import { SelectionSummaryCard } from '../components/SelectionSummaryCard';
 import { StatsGrid } from '../components/StatsGrid';
@@ -421,17 +422,14 @@ export function DietSetupPage({
             onSkip={onTutorialSkip}
           />
         ) : null}
-        <Tile className="card metric-card ux-guide-card">
-          <div>
-            <span className="meta-label">Fluxo recomendado</span>
-            <h3>Monte uma refeição e depois escolha em quais dias ela aparece</h3>
-            <p>Dieta no FitTrack é composta por <strong>refeições</strong>. Cada refeição tem alimentos e quantidades. Depois você reutiliza essas refeições nos dias da semana.</p>
-          </div>
+        <CollapsibleHelp label="Fluxo recomendado">
+          <h3>Monte uma refeição e depois escolha em quais dias ela aparece</h3>
+          <p>Dieta no FitTrack é composta por <strong>refeições</strong>. Cada refeição tem alimentos e quantidades. Depois você reutiliza essas refeições nos dias da semana.</p>
           <div className="ux-guide-card__steps">
             <span className={setupSection === 'meals' ? 'ux-guide-card__step ux-guide-card__step--active' : 'ux-guide-card__step'}>1. Criar refeições</span>
             <span className={setupSection === 'week' ? 'ux-guide-card__step ux-guide-card__step--active' : 'ux-guide-card__step'}>2. Planejar dias</span>
           </div>
-        </Tile>
+        </CollapsibleHelp>
         {lastSavedMealName ? (
           <Tile className="card metric-card next-action-card" role="status" aria-live="polite">
             <div>

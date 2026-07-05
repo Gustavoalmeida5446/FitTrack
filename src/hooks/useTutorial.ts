@@ -24,7 +24,7 @@ interface UseTutorialResult<Step> {
 export function useTutorial<View extends string, Step extends TutorialStep<View>>({
   steps,
   sessionUserId,
-  isReady,
+  isReady: _isReady,
   onNavigate
 }: UseTutorialParams<View, Step>): UseTutorialResult<Step> {
   const [isTutorialOpen, setIsTutorialOpen] = useState(false);
@@ -43,19 +43,6 @@ export function useTutorial<View extends string, Step extends TutorialStep<View>
 
     resetTutorialState();
   }, [resetTutorialState, sessionUserId]);
-
-  useEffect(() => {
-    if (!sessionUserId || !isReady || !tutorialStorageKey) {
-      return;
-    }
-
-    const hasSeenTutorial = window.localStorage.getItem(tutorialStorageKey) === 'done';
-
-    if (!hasSeenTutorial) {
-      setTutorialStepIndex(0);
-      setIsTutorialOpen(true);
-    }
-  }, [isReady, sessionUserId, tutorialStorageKey]);
 
   useEffect(() => {
     if (!isTutorialOpen) {

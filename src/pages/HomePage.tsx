@@ -94,18 +94,11 @@ export function HomePage({
       )}
     >
       {onboardingActions.length > 0 ? (
-        <Tile className="card metric-card next-action-card">
-          <div>
-            <span className="meta-label">Primeiro acesso</span>
-            <h3>Configure o básico para acompanhar seu dia</h3>
-            <p>Comece pelo perfil para calcular metas. Depois cadastre um treino e uma dieta para liberar o acompanhamento diário.</p>
-          </div>
-          <div className="inline-actions">
-            {onboardingActions.map((item) => (
-              <Button key={item.label} size="sm" kind="secondary" onClick={item.action}>{item.label}</Button>
-            ))}
-          </div>
-        </Tile>
+        <div className="inline-actions" aria-label="Atalhos de configuração inicial">
+          {onboardingActions.map((item) => (
+            <Button key={item.label} size="sm" kind="secondary" onClick={item.action}>{item.label}</Button>
+          ))}
+        </div>
       ) : null}
       {tutorialStep ? (
         <ContextualTutorialCard
