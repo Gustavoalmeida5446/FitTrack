@@ -6,6 +6,7 @@ import { AppDigitScaledInput } from '../components/AppDigitScaledInput';
 import { AppNumberInput } from '../components/AppNumberInput';
 import { Portuguese } from 'flatpickr/dist/l10n/pt.js';
 import { CardHeader } from '../components/CardHeader';
+import { CollapsibleHelp } from '../components/CollapsibleHelp';
 import { ContextualTutorialCard, type TutorialStepContent } from '../components/ContextualTutorialCard';
 import { InfoBlock } from '../components/InfoBlock';
 import { StatsGrid } from '../components/StatsGrid';
@@ -134,9 +135,9 @@ export function NutritionGoalsPage({
             description="Preencha de cima para baixo; as metas são recalculadas automaticamente"
           />
           {!profileReady ? (
-            <InfoBlock label="Por que preencher isso?">
-              Peso, altura e data de nascimento liberam metas de calorias, macros e água. Atividade, objetivo e tipo de dieta ajustam esses números ao seu contexto.
-            </InfoBlock>
+            <CollapsibleHelp title="Por que preencher isso?">
+              <p>Peso, altura e data de nascimento liberam metas de calorias, macros e água. Atividade, objetivo e tipo de dieta ajustam esses números ao seu contexto.</p>
+            </CollapsibleHelp>
           ) : null}
           <div className="goals-form-grid">
             <AppDigitScaledInput id="profile-weight" labelText="Peso (kg)" value={profile.currentWeight} scale={3} onValueChange={(currentWeight) => {

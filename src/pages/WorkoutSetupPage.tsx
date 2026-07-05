@@ -3,6 +3,7 @@ import { Button, TextArea, TextInput, Tile } from '@carbon/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AppNumberInput } from '../components/AppNumberInput';
 import { ContextualTutorialCard, type TutorialStepContent } from '../components/ContextualTutorialCard';
+import { CollapsibleHelp } from '../components/CollapsibleHelp';
 import { InfoBlock } from '../components/InfoBlock';
 import { SelectionSummaryCard } from '../components/SelectionSummaryCard';
 import { MuscleGroup, Workout, WorkoutExercise, WorkoutExerciseSet } from '../data/types';
@@ -497,17 +498,14 @@ export function WorkoutSetupPage({
             onSkip={onTutorialSkip}
           />
         ) : null}
-        <Tile className="card metric-card ux-guide-card">
-          <div>
-            <span className="meta-label">Fluxo recomendado</span>
-            <h3>Crie uma ficha antes de acompanhar o treino do dia</h3>
-            <p>Dê um nome ao treino, selecione exercícios da busca e ajuste séries, cargas e descanso. Depois o treino aparece na tela inicial para marcar a execução.</p>
-          </div>
+        <CollapsibleHelp label="Fluxo recomendado">
+          <h3>Crie uma ficha antes de acompanhar o treino do dia</h3>
+          <p>Dê um nome ao treino, selecione exercícios da busca e ajuste séries, cargas e descanso. Depois o treino aparece na tela inicial para marcar a execução.</p>
           <div className="ux-guide-card__steps">
             <span className={setupSection === 'builder' ? 'ux-guide-card__step ux-guide-card__step--active' : 'ux-guide-card__step'}>1. Montar ficha</span>
             <span className={setupSection === 'saved' ? 'ux-guide-card__step ux-guide-card__step--active' : 'ux-guide-card__step'}>2. Gerenciar salvos</span>
           </div>
-        </Tile>
+        </CollapsibleHelp>
         <div className="setup-section-nav" role="tablist" aria-label="Cadastro de treino">
           <Button
             kind={setupSection === 'builder' ? 'primary' : 'tertiary'}
