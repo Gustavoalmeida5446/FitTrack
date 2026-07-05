@@ -1,4 +1,4 @@
-export type AppView = 'home' | 'workout' | 'diet-day' | 'workout-setup' | 'diet-setup' | 'goals';
+export type AppView = 'home' | 'workout' | 'diet-day' | 'workout-setup' | 'diet-setup' | 'goals' | 'calculation-info';
 
 export interface AppRouteState {
   view: AppView;
@@ -73,6 +73,10 @@ export function parseAppRoute(pathname: string, basePath: string): AppRouteState
     return { view: 'goals', selectedWorkoutId: '', selectedDayId: '' };
   }
 
+  if (section === 'calculos') {
+    return { view: 'calculation-info', selectedWorkoutId: '', selectedDayId: '' };
+  }
+
   return defaultRouteState;
 }
 
@@ -89,7 +93,8 @@ export function buildAppRoutePath(routeState: AppRouteState, basePath: string) {
     home: '/',
     'workout-setup': '/treinos',
     'diet-setup': '/dieta',
-    goals: '/perfil'
+    goals: '/perfil',
+    'calculation-info': '/calculos'
   };
 
   return joinBasePath(basePath, viewPath[routeState.view]);

@@ -497,6 +497,17 @@ export function WorkoutSetupPage({
             onSkip={onTutorialSkip}
           />
         ) : null}
+        <Tile className="card metric-card ux-guide-card">
+          <div>
+            <span className="meta-label">Fluxo recomendado</span>
+            <h3>Crie uma ficha antes de acompanhar o treino do dia</h3>
+            <p>Dê um nome ao treino, selecione exercícios da busca e ajuste séries, cargas e descanso. Depois o treino aparece na tela inicial para marcar a execução.</p>
+          </div>
+          <div className="ux-guide-card__steps">
+            <span className={setupSection === 'builder' ? 'ux-guide-card__step ux-guide-card__step--active' : 'ux-guide-card__step'}>1. Montar ficha</span>
+            <span className={setupSection === 'saved' ? 'ux-guide-card__step ux-guide-card__step--active' : 'ux-guide-card__step'}>2. Gerenciar salvos</span>
+          </div>
+        </Tile>
         <div className="setup-section-nav" role="tablist" aria-label="Cadastro de treino">
           <Button
             kind={setupSection === 'builder' ? 'primary' : 'tertiary'}
@@ -505,7 +516,7 @@ export function WorkoutSetupPage({
             aria-selected={setupSection === 'builder'}
             onClick={() => setSetupSection('builder')}
           >
-            Montar treino
+            1. Montar treino
           </Button>
           <Button
             kind={setupSection === 'saved' ? 'primary' : 'tertiary'}
@@ -514,7 +525,7 @@ export function WorkoutSetupPage({
             aria-selected={setupSection === 'saved'}
             onClick={() => setSetupSection('saved')}
           >
-            Treinos salvos ({workouts.length})
+            2. Treinos salvos ({workouts.length})
           </Button>
         </div>
         {setupSection === 'builder' ? (
@@ -684,7 +695,7 @@ export function WorkoutSetupPage({
               />
             )) : (
               <InfoBlock label="Exercícios do treino">
-                Adicione pelo menos um exercício para salvar o treino.
+                Busque um exercício acima, selecione uma opção da lista e toque em “Adicionar exercício”.
               </InfoBlock>
             )}
           </div>
@@ -693,7 +704,7 @@ export function WorkoutSetupPage({
               <Button onClick={handleSaveWorkout}>{editingWorkoutId ? 'Atualizar treino' : 'Salvar treino'}</Button>
               {editingWorkoutId ? <Button kind="ghost" onClick={resetWorkoutForm}>Cancelar edição</Button> : null}
             </div>
-            {canSaveWorkout ? <p className="form-message form-message--success">Salvamento automático ativo. Use o botão para concluir e limpar o formulário.</p> : null}
+            {canSaveWorkout ? <p className="form-message form-message--success">Tudo pronto para salvar. O botão conclui e limpa o formulário para o próximo cadastro.</p> : null}
             {workoutFormMessage ? <p className="form-message form-message--error">{workoutFormMessage}</p> : null}
           </div>
         </Tile>

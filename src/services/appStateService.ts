@@ -70,56 +70,6 @@ function shouldUseRelationalState(remoteUpdatedAt: string | null | undefined, re
   return relationalUpdatedAt >= remoteUpdatedAt;
 }
 
-async function createRemoteAppState(session: Session, state: AppState) {
-  const sanitizedState = sanitizeAppStateForSave(state);
-  const validState = validateAppState(sanitizedState);
-
-  if (!validState) {
-    console.error('Estado remoto bloqueado: payload inválido.');
-    return null;
-  }
-
-  if (hasSuspiciousWorkoutData(validState.workouts)) {
-    console.error('Estado remoto bloqueado: treinos com aparência de dados corrompidos.');
-    return null;
-  }
-
-  const row = {
-    user_id: session.user.id,
-    profile: validState.profile,
-    workouts: serializeWorkoutProgressState(validState.workouts, validState.workoutsUpdatedAt),
-    water: validState.water,
-    weekly_diet: validState.weeklyDiet,
-    weight_history: validState.weightHistory
-  };
-  const { error } = await supabase
-    .from('user_app_states')
-    .insert({
-      ...row,
-      updated_at: new Date().toISOString()
-    });
-
-  if (isMissingUpdatedAtColumnError(error)) {
-    const fallbackResult = await supabase
-      .from('user_app_states')
-      .insert(row);
-
-    if (fallbackResult.error) {
-      console.error('Erro ao criar estado remoto', fallbackResult.error);
-      return null;
-    }
-
-    return validState;
-  }
-
-  if (error) {
-    console.error('Erro ao criar estado remoto', error);
-    return null;
-  }
-
-  return validState;
-}
-
 export async function loadRemoteAppState(session: Session): Promise<AppState | null> {
   const result = await supabase
     .from('user_app_states')
@@ -142,10 +92,10 @@ export async function loadRemoteAppState(session: Session): Promise<AppState | n
   }
 
   if (!data) {
-    return createRemoteAppState(session, {
+    return {
       ...defaultAppState,
       water: normalizeWaterData(defaultAppState.water)
-    });
+    };
   }
 
   const remoteRow = data as RemoteAppStateRow;

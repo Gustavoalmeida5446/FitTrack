@@ -1,8 +1,80 @@
 # FitTrack
 
-App de fitness em React + Vite + TypeScript com componentes Carbon e cliente Supabase preparado.
+FitTrack é um app de acompanhamento fitness feito com React, Vite, TypeScript, Carbon Design System e Supabase. Ele ajuda o usuário a registrar treinos, montar uma dieta semanal, acompanhar água, peso corporal e metas nutricionais.
 
-## Setup
+## Funcionalidades principais
+
+- Autenticação por e-mail com Supabase e confirmação de cadastro.
+- Cadastro de perfil com peso, altura, data de nascimento, sexo, atividade, objetivo e tipo de dieta.
+- Cálculo de metas diárias de calorias, macronutrientes e água.
+- Cadastro de treinos com exercícios, séries, repetições, carga, descanso, observações e mídia quando disponível.
+- Cadastro de dieta por refeições, alimentos e dias da semana.
+- Acompanhamento diário de treino, dieta e consumo de água.
+- Histórico recente de peso.
+- Sincronização remota via Supabase para usuários autenticados.
+- PWA básico com manifest e service worker.
+- Deploy automático no GitHub Pages após merge/push em `main` ou `master`.
+
+## Como as metas são calculadas
+
+As metas são estimativas para acompanhamento diário e não substituem orientação profissional.
+
+### TMB / BMR
+
+O app usa a equação de Mifflin-St Jeor:
+
+- Homem: `10 × peso(kg) + 6,25 × altura(cm) - 5 × idade + 5`
+- Mulher: `10 × peso(kg) + 6,25 × altura(cm) - 5 × idade - 161`
+
+Quando a data de nascimento está disponível, a idade é recalculada a partir dela para evitar usar uma idade salva desatualizada.
+
+### Gasto diário / TDEE
+
+`TDEE = TMB × fator de atividade`
+
+Fatores usados:
+
+- Sedentário: `1,2`
+- Leve: `1,375`
+- Moderado: `1,55`
+- Intenso: `1,725`
+- Atleta: `1,9`
+
+### Calorias
+
+`calorias diárias = TDEE + ajuste do objetivo`
+
+Ajustes usados:
+
+- Perda de gordura: `-350 kcal`
+- Manutenção: `0 kcal`
+- Ganho de massa: `+250 kcal`
+
+O app não exibe meta calórica abaixo de `1200 kcal`.
+
+### Macronutrientes
+
+Proteína é calculada por peso e tipo de dieta:
+
+- Equilibrada: `1,8 g/kg`
+- Baixo carboidrato: `2,0 g/kg`
+- Alta em carboidrato: `1,7 g/kg`
+
+A distribuição considera:
+
+- Proteína: `4 kcal/g`
+- Carboidrato: `4 kcal/g`
+- Gordura: `9 kcal/g`
+
+Na dieta baixa em carboidrato, carboidratos ficam em `1,5 g/kg` e gorduras completam as calorias restantes. Nas demais dietas, gordura é definida por peso e carboidratos completam o restante das calorias.
+
+### Água
+
+A meta diária de água é estimada por:
+
+`35 ml × peso(kg)`
+
+## Desenvolvimento
 
 ```bash
 npm install
@@ -10,74 +82,41 @@ cp .env.example .env
 npm run dev
 ```
 
-## Deploy GitHub Pages
+Use apenas variáveis públicas esperadas pelo Vite/Supabase no arquivo `.env`. Não versione chaves privadas, tokens pessoais ou segredos de produção.
 
-O deploy de produção roda automaticamente no GitHub Actions quando há push/merge na branch `main` ou `master`. O workflow executa:
-
-- `npm ci`
-- `npm test`
-- `npm run build`
-- publicação do conteúdo de `dist/` no GitHub Pages
-
-Também é possível disparar o workflow manualmente pela aba Actions (`workflow_dispatch`).
-
-Para publicar manualmente pelo computador local, ainda existe:
+## Scripts
 
 ```bash
+npm test
+npm run build
+npm run preview
 npm run deploy
 ```
 
-O script local:
-
-- gera o build em `dist/`
-- copia `dist/index.html` para `dist/404.html`
-- publica o conteúdo em `origin/gh-pages`
-
-## Estado atual
-
-- Cadastro de treinos com múltiplos exercícios
-- Cadastro de dieta por dia, refeição e quantidade em gramas com base local TACO
-- Reset diário do consumo de água
-- Metas nutricionais calculadas a partir do perfil
-- Persistência local com sincronização remota via Supabase para usuários autenticados
-- Busca de exercícios via WGER
-- Busca de alimentos via base local TACO em `src/data/taco-foods.json`
-
-## Variáveis de ambiente
-
-Use os valores de `.env.example`:
-
-```bash
-VITE_SUPABASE_URL=
-VITE_SUPABASE_ANON_KEY=
-```
+- `npm test`: executa typecheck dos testes e a suíte automatizada.
+- `npm run build`: gera build de produção.
+- `npm run preview`: pré-visualiza o build localmente.
+- `npm run deploy`: deploy manual para `gh-pages`, quando necessário.
 
 ## Supabase
 
-Antes de usar a persistência remota, execute o schema em `supabase/schema.sql`.
+A persistência remota depende do schema em `supabase/schema.sql`. Configure as variáveis públicas do projeto conforme `.env.example`.
 
-## Observações
+## GitHub Pages
 
-- O projeto não usa Tailwind na UI atual.
-- O script `deploy` publica em `gh-pages`.
+O workflow de Pages:
 
+- Em pull requests: instala dependências, executa testes e gera build.
+- Em push/merge para `main` ou `master`: valida o projeto e publica automaticamente no GitHub Pages.
+- Também pode ser executado manualmente pela aba Actions.
 
 ## PWA
 
-O app agora possui configuração básica de PWA:
-
-- Manifest (`favicon/site.webmanifest`)
-- Service Worker (`public/sw.js`)
-- Registro do Service Worker (`src/main.tsx`)
-
-### Como testar
+O app inclui manifest, service worker e registro do service worker. Para testar localmente:
 
 ```bash
 npm run build
 npm run preview
 ```
 
-Depois abra o app no navegador, recarregue uma vez e teste:
-
-- instalação do app (opção "Instalar")
-- funcionamento básico offline (com arquivos já visitados em cache)
+Depois abra no navegador, recarregue uma vez e teste instalação/offline básico com arquivos já em cache.

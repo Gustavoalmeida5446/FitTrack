@@ -1,4 +1,4 @@
-import { ChevronLeft, Login, UserAvatar } from '@carbon/icons-react';
+import { CheckmarkFilled, ChevronLeft, Login, UserAvatar } from '@carbon/icons-react';
 import { Button, Checkbox, PasswordInput, TextInput, Tile } from '@carbon/react';
 import { useEffect, useState } from 'react';
 import { CardHeader } from '../components/CardHeader';
@@ -15,18 +15,20 @@ interface Props {
   onBack?: () => void;
   onLogin: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
   onSignUp: (email: string, password: string) => Promise<{ success: boolean; requiresEmailConfirmation?: boolean; message?: string }>;
+  onResendSignupConfirmation?: (email: string) => Promise<{ success: boolean; requiresEmailConfirmation?: boolean; message?: string }>;
   onRequestPasswordReset: (email: string) => Promise<boolean>;
   onUpdatePassword: (password: string) => Promise<boolean>;
   isPasswordRecoveryActive?: boolean;
   onCancelPasswordRecovery?: () => Promise<void> | void;
 }
 
-type AuthMode = 'login' | 'signup' | 'forgot-password' | 'reset-password';
+type AuthMode = 'login' | 'signup' | 'signup-success' | 'forgot-password' | 'reset-password';
 
 export function LoginPage({
   onBack,
   onLogin,
   onSignUp,
+  onResendSignupConfirmation,
   onRequestPasswordReset,
   onUpdatePassword,
   isPasswordRecoveryActive = false,
@@ -40,11 +42,13 @@ export function LoginPage({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [signupConfirmationEmail, setSignupConfirmationEmail] = useState('');
   const [hasTouchedEmail, setHasTouchedEmail] = useState(false);
   const [hasTouchedPassword, setHasTouchedPassword] = useState(false);
   const [hasTouchedConfirmPassword, setHasTouchedConfirmPassword] = useState(false);
   const [hasTriedSubmit, setHasTriedSubmit] = useState(false);
   const isSignupMode = mode === 'signup';
+  const isSignupSuccessMode = mode === 'signup-success';
   const isForgotPasswordMode = mode === 'forgot-password';
   const isResetPasswordMode = mode === 'reset-password';
   const fieldErrors = isSignupMode
@@ -74,8 +78,11 @@ export function LoginPage({
 
   const switchMode = (nextMode: AuthMode) => {
     setMode(nextMode);
-    if (nextMode !== 'forgot-password') {
+    if (nextMode !== 'forgot-password' && nextMode !== 'signup-success') {
       setEmail('');
+    }
+    if (nextMode !== 'signup-success') {
+      setSignupConfirmationEmail('');
     }
     setPassword('');
     setConfirmPassword('');
@@ -107,15 +114,19 @@ export function LoginPage({
     setSuccessMessage('');
   }, [confirmPassword, email, password]);
 
-  const title = isSignupMode
-    ? 'Criar conta'
+  const title = isSignupSuccessMode
+    ? 'Confirme seu e-mail'
+    : isSignupMode
+      ? 'Criar conta'
     : isForgotPasswordMode
       ? 'Recuperar senha'
       : isResetPasswordMode
         ? 'Definir nova senha'
         : 'Entrar';
-  const description = isSignupMode
-    ? 'Cadastre-se para começar a usar o app'
+  const description = isSignupSuccessMode
+    ? 'Falta apenas validar sua conta'
+    : isSignupMode
+      ? 'Cadastre-se para começar a usar o app'
     : isForgotPasswordMode
       ? 'Informe seu e-mail para receber o link de recuperação'
       : isResetPasswordMode
@@ -197,10 +208,36 @@ export function LoginPage({
       return;
     }
 
-    setSuccessMessage(result.message ?? (result.requiresEmailConfirmation ? 'Conta criada. Confirme seu e-mail para entrar.' : 'Conta criada com sucesso. Você já pode usar o app.'));
+    if (result.requiresEmailConfirmation) {
+      setSignupConfirmationEmail(email.trim());
+      setSuccessMessage(result.message ?? 'Enviamos um e-mail de confirmação. Confirme seu e-mail antes de entrar.');
+      setMode('signup-success');
+    } else {
+      setSuccessMessage(result.message ?? 'Conta criada com sucesso. Você já pode usar o app.');
+    }
     setPassword('');
     setConfirmPassword('');
     resetTouchState();
+    setIsSubmitting(false);
+  };
+
+
+  const handleResendConfirmation = async () => {
+    if (!onResendSignupConfirmation || !signupConfirmationEmail) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    resetMessages();
+    const result = await onResendSignupConfirmation(signupConfirmationEmail);
+
+    if (!result.success) {
+      setErrorMessage(result.message ?? 'Não foi possível reenviar o e-mail de confirmação agora.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    setSuccessMessage(result.message ?? 'Enviamos um novo e-mail de confirmação.');
     setIsSubmitting(false);
   };
 
@@ -239,11 +276,32 @@ export function LoginPage({
           ) : null}
 
           <CardHeader
-            icon={<Login size={20} />}
+            icon={isSignupSuccessMode ? <CheckmarkFilled size={20} /> : <Login size={20} />}
             title={title}
             description={description}
           />
 
+          {isSignupSuccessMode ? (
+            <div className="auth-success-state" role="status" aria-live="polite">
+              <div className="auth-success-state__icon" aria-hidden="true">
+                <CheckmarkFilled size={28} />
+              </div>
+              <div>
+                <h3>Enviamos um e-mail de confirmação</h3>
+                <p>Abra o link enviado para <strong>{signupConfirmationEmail}</strong>. A conta só poderá ser usada depois que o e-mail for confirmado.</p>
+              </div>
+              {successMessage ? <p className="auth-message auth-message--success">{successMessage}</p> : null}
+              {errorMessage ? <p className="auth-message auth-message--error">{errorMessage}</p> : null}
+              <div className="auth-success-state__actions">
+                <Button onClick={() => switchMode('login')}>Voltar ao login</Button>
+                {onResendSignupConfirmation ? (
+                  <Button kind="secondary" disabled={isSubmitting} onClick={handleResendConfirmation}>
+                    {isSubmitting ? 'Reenviando...' : 'Reenviar e-mail'}
+                  </Button>
+                ) : null}
+              </div>
+            </div>
+          ) : (
           <div className="auth-form">
             {!isResetPasswordMode ? (
               <>
@@ -328,6 +386,7 @@ export function LoginPage({
               </Button>
             </div>
           </div>
+          )}
         </Tile>
       </div>
     </PageContainer>

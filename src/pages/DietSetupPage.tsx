@@ -85,6 +85,7 @@ export function DietSetupPage({
   const [hasTriedAddCustomFood, setHasTriedAddCustomFood] = useState(false);
   const [hasTriedSaveMeal, setHasTriedSaveMeal] = useState(false);
   const [hasTriedSaveDay, setHasTriedSaveDay] = useState(false);
+  const [lastSavedMealName, setLastSavedMealName] = useState('');
   const debouncedFoodQuery = useDebouncedValue(foodQuery, 200);
 
   useEffect(() => {
@@ -114,10 +115,12 @@ export function DietSetupPage({
     setFoodOptions(searchFoods(trimmedQuery, 10));
   }, [debouncedFoodQuery]);
 
-  const canSaveMeal = useMemo(() => mealName.trim() && selectedFoods.length > 0, [mealName, selectedFoods.length]);
+  const canSaveMeal = useMemo(() => mealName.trim().length > 0 && selectedFoods.length > 0, [mealName, selectedFoods.length]);
+  const hasMeals = draftDiet.meals.length > 0;
   const selectedMealTotals = useMemo(() => calculateFoodTotals(selectedFoods), [selectedFoods]);
   const selectedDayMeals = useMemo(() => draftDiet.meals.filter((meal) => selectedDayMealIds.includes(meal.id)), [draftDiet.meals, selectedDayMealIds]);
   const selectedDayTotals = useMemo(() => calculateMealsTotals(selectedDayMeals), [selectedDayMeals]);
+  const selectedDayAssignedCount = selectedDayMealIds.length;
   const selectedFoodPortionBase = useMemo(() => parsePortionBase(selectedFood?.porcaoBase), [selectedFood]);
   const selectedFoodUnit = useMemo(() => selectedFood ? getFoodMeasurementUnit(selectedFood) : 'g', [selectedFood]);
   const selectedFoodDefaultQuantity = useMemo(() => selectedFood ? getFoodDefaultQuantity(selectedFood) : 100, [selectedFood]);
@@ -305,12 +308,14 @@ export function DietSetupPage({
 
     lastAutoSavedMealKeyRef.current = JSON.stringify(meal);
     persistMeal(meal);
+    setLastSavedMealName(meal.name);
     setHasTriedSaveMeal(false);
     resetMealForm();
     setSetupSection('meals');
   };
 
   const handleEditMeal = (meal: Meal) => {
+    setLastSavedMealName('');
     setSetupSection('meals');
     lastAutoSavedMealKeyRef.current = JSON.stringify(meal);
     setEditingMealId(meal.id);
@@ -335,6 +340,7 @@ export function DietSetupPage({
     };
 
     commitDiet(nextDiet);
+    setLastSavedMealName('');
 
     if (editingMealId === mealId) {
       resetMealForm();
@@ -415,6 +421,30 @@ export function DietSetupPage({
             onSkip={onTutorialSkip}
           />
         ) : null}
+        <Tile className="card metric-card ux-guide-card">
+          <div>
+            <span className="meta-label">Fluxo recomendado</span>
+            <h3>Monte uma refeição e depois escolha em quais dias ela aparece</h3>
+            <p>Dieta no FitTrack é composta por <strong>refeições</strong>. Cada refeição tem alimentos e quantidades. Depois você reutiliza essas refeições nos dias da semana.</p>
+          </div>
+          <div className="ux-guide-card__steps">
+            <span className={setupSection === 'meals' ? 'ux-guide-card__step ux-guide-card__step--active' : 'ux-guide-card__step'}>1. Criar refeições</span>
+            <span className={setupSection === 'week' ? 'ux-guide-card__step ux-guide-card__step--active' : 'ux-guide-card__step'}>2. Planejar dias</span>
+          </div>
+        </Tile>
+        {lastSavedMealName ? (
+          <Tile className="card metric-card next-action-card" role="status" aria-live="polite">
+            <div>
+              <span className="meta-label">Próximo passo</span>
+              <h3>{lastSavedMealName} foi salva</h3>
+              <p>Agora você pode criar outra refeição ou ir para o planejamento semanal para escolher em quais dias esta refeição aparece.</p>
+            </div>
+            <div className="inline-actions">
+              <Button kind="secondary" size="sm" onClick={() => setLastSavedMealName('')}>Criar outra refeição</Button>
+              <Button size="sm" onClick={() => setSetupSection('week')}>Planejar semana</Button>
+            </div>
+          </Tile>
+        ) : null}
         <div className="setup-section-nav" role="tablist" aria-label="Cadastro de dieta">
           <Button
             kind={setupSection === 'meals' ? 'primary' : 'tertiary'}
@@ -423,7 +453,7 @@ export function DietSetupPage({
             aria-selected={setupSection === 'meals'}
             onClick={() => setSetupSection('meals')}
           >
-            Refeições ({draftDiet.meals.length})
+            1. Refeições ({draftDiet.meals.length})
           </Button>
           <Button
             kind={setupSection === 'week' ? 'primary' : 'tertiary'}
@@ -432,33 +462,28 @@ export function DietSetupPage({
             aria-selected={setupSection === 'week'}
             onClick={() => setSetupSection('week')}
           >
-            Planejar semana
+            2. Planejar semana
           </Button>
         </div>
         {setupSection === 'meals' ? (
         <>
         <Tile className="card metric-card setup-card">
-          <div className="setup-flow-steps" aria-label="Etapas para montar a dieta">
-            <span>1. Criar refeição</span>
-            <span>2. Revisar refeições</span>
-            <span>3. Planejar semana</span>
-            <span>4. Conferir o dia</span>
-          </div>
           <div className="card-head">
             <div className="card-head__group">
               <div className="icon-badge icon-badge--purple card-head__badge">
                 <Search size={20} />
               </div>
               <div className="card-head__title">
-                <h3>Criar refeição</h3>
-                <p>Busque alimentos, adicione quantos quiser e salve a refeição</p>
+                <h3>{editingMealId ? 'Editar refeição' : 'Criar refeição'}</h3>
+                <p>Primeiro dê um nome, depois adicione alimentos e quantidades.</p>
               </div>
             </div>
           </div>
           <div className="setup-card__fields">
+            <TextInput id="meal-name" labelText="Nome da refeição" helperText="Ex.: Café da manhã, Almoço, Lanche da tarde" value={mealName} onChange={(event) => setMealName(event.target.value)} />
             <TextInput
               id="food-search"
-              labelText="1. Buscar alimento para a refeição"
+              labelText="Buscar alimento para adicionar"
               value={foodQuery}
               onChange={(event) => setFoodQuery(event.target.value)}
               onBlur={() => window.setTimeout(() => setFoodOptions([]), 150)}
@@ -556,7 +581,6 @@ export function DietSetupPage({
               {customFoodMessage ? <p className="form-message form-message--error">{customFoodMessage}</p> : null}
             </div>
           </details>
-          <TextInput id="meal-name" labelText="Nome da refeição" value={mealName} onChange={(event) => setMealName(event.target.value)} />
           <InfoBlock label="Resumo da refeição atual">
             {selectedFoods.length} alimento(s) • {formatFixedDecimal(selectedMealTotals.calories)} kcal • {formatFixedDecimal(selectedMealTotals.protein)}g proteína
           </InfoBlock>
@@ -584,13 +608,13 @@ export function DietSetupPage({
               />
             )) : (
               <InfoBlock label="Alimentos da refeição">
-                Selecione quantos alimentos quiser para montar a refeição.
+                Nenhum alimento adicionado ainda. Busque um alimento acima, ajuste a quantidade e toque em “Adicionar alimento”.
               </InfoBlock>
             )}
           </div>
           <div className="setup-card__footer">
             <Button onClick={handleSaveMeal}>{editingMealId ? 'Atualizar refeição' : 'Salvar refeição'}</Button>
-            {canSaveMeal ? <p className="form-message form-message--success">Salvamento automático ativo. Use o botão para concluir e limpar o formulário.</p> : null}
+            {canSaveMeal ? <p className="form-message form-message--success">Tudo pronto para salvar. O botão conclui e limpa o formulário para o próximo cadastro.</p> : null}
             {mealFormMessage ? <p className="form-message form-message--error">{mealFormMessage}</p> : null}
           </div>
         </Tile>
@@ -634,7 +658,7 @@ export function DietSetupPage({
               );
             }) : (
               <InfoBlock label="Refeições">
-                Nenhuma refeição cadastrada ainda.
+                Nenhuma refeição cadastrada ainda. Crie uma refeição acima; depois ela poderá ser usada em qualquer dia da semana.
               </InfoBlock>
             )}
           </div>
@@ -651,7 +675,7 @@ export function DietSetupPage({
                 <CalendarHeatMap size={20} />
               </div>
               <div className="card-head__title">
-                <h3>3. Planejar semana</h3>
+                <h3>Planejar semana</h3>
                 <p>Escolha o dia e selecione quais refeições fazem parte dele</p>
               </div>
             </div>
@@ -663,8 +687,13 @@ export function DietSetupPage({
               </button>
             ))}
           </div>
+          {!hasMeals ? (
+            <InfoBlock label="Antes de planejar">
+              Você ainda não tem refeições cadastradas. Volte para a etapa 1, crie uma refeição e depois selecione os dias.
+            </InfoBlock>
+          ) : null}
           <div className="diet-day-build-summary">
-            <span className="meta-label">Total do dia selecionado</span>
+            <span className="meta-label">{selectedDay.label}: {selectedDayAssignedCount} refeição(ões) selecionada(s)</span>
             <StatsGrid
               className="diet-totals-card__grid"
               items={[
@@ -688,7 +717,7 @@ export function DietSetupPage({
               );
             }) : (
               <InfoBlock label="Refeições disponíveis">
-                Cadastre pelo menos uma refeição antes de montar o dia.
+                Cadastre pelo menos uma refeição na etapa 1 antes de montar o dia.
               </InfoBlock>
             )}
           </div>
@@ -697,10 +726,10 @@ export function DietSetupPage({
               Limpar dia
             </Button>
             <Button onClick={handleSaveDay}>
-              Salvar {selectedDay.label}
+              Concluir {selectedDay.label}
             </Button>
           </div>
-          {canSaveDay ? <p className="form-message form-message--success">As mudanças deste dia são salvas automaticamente ao selecionar ou remover refeições.</p> : null}
+          {canSaveDay ? <p className="form-message form-message--success">Dia atualizado. Use “Concluir” apenas para validar que há pelo menos uma refeição selecionada.</p> : null}
           {dayFormMessage ? <p className="form-message form-message--error">{dayFormMessage}</p> : null}
         </Tile>
 
@@ -733,7 +762,7 @@ export function DietSetupPage({
               );
             }) : (
               <InfoBlock label="Refeições do dia">
-                Nenhuma refeição selecionada para este dia ainda.
+                Nenhuma refeição selecionada para este dia. Toque nas refeições acima para montar o planejamento.
               </InfoBlock>
             )}
           </div>

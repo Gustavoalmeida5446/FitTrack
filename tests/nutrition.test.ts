@@ -26,6 +26,25 @@ test('calculateNutritionTargets retorna metas coerentes para perfil válido', ()
   });
 });
 
+
+test('calculateNutritionTargets recalcula idade pela data de nascimento quando idade salva está desatualizada', () => {
+  const baseProfile: UserProfile = {
+    currentWeight: 70,
+    heightCm: 170,
+    birthDate: '1990-01-01',
+    age: 18,
+    sex: 'Feminino',
+    activityLevel: 'Leve',
+    goal: 'Manutenção',
+    dietType: 'Equilibrada'
+  };
+
+  assert.deepEqual(
+    calculateNutritionTargets(baseProfile),
+    calculateNutritionTargets({ ...baseProfile, age: 99 })
+  );
+});
+
 test('calculateNutritionTargets zera metas quando faltam dados base', () => {
   const profile: UserProfile = {
     currentWeight: 0,

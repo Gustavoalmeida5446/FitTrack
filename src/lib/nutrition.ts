@@ -1,4 +1,5 @@
 import { ActivityLevel, DietDay, DietType, FoodItem, GoalType, Meal, NutritionTargets, Sex, UserProfile } from '../data/types';
+import { calculateAgeFromBirthDate } from './date';
 
 const activityMultipliers: Record<ActivityLevel, number> = {
   Sedentario: 1.2,
@@ -13,6 +14,12 @@ const goalAdjustments: Record<GoalType, number> = {
   'Manutenção': 0,
   'Ganho de massa': 250
 };
+
+function getEffectiveAge(profile: UserProfile): number {
+  const ageFromBirthDate = profile.birthDate ? calculateAgeFromBirthDate(profile.birthDate) : 0;
+
+  return ageFromBirthDate > 0 ? ageFromBirthDate : profile.age;
+}
 
 function getBmr(weightKg: number, heightCm: number, age: number, sex: Sex): number {
   const sexAdjustment = sex === 'Masculino' ? 5 : -161;
@@ -77,7 +84,9 @@ function distributeMacros(caloriesDaily: number, weightKg: number, dietType: Die
 }
 
 export function calculateNutritionPlan(profile: UserProfile): NutritionCalculationResult {
-  if (profile.currentWeight <= 0 || profile.heightCm <= 0 || profile.age <= 0) {
+  const effectiveAge = getEffectiveAge(profile);
+
+  if (profile.currentWeight <= 0 || profile.heightCm <= 0 || effectiveAge <= 0) {
     return {
       bmr: 0,
       tdee: 0,
@@ -89,7 +98,7 @@ export function calculateNutritionPlan(profile: UserProfile): NutritionCalculati
     };
   }
 
-  const bmr = getBmr(profile.currentWeight, profile.heightCm, profile.age, profile.sex);
+  const bmr = getBmr(profile.currentWeight, profile.heightCm, effectiveAge, profile.sex);
   const tdee = bmr * activityMultipliers[profile.activityLevel];
   const caloriesDaily = Math.max(1200, Math.round(tdee + goalAdjustments[profile.goal]));
   const { proteinDaily, carbsDaily, fatDaily } = distributeMacros(caloriesDaily, profile.currentWeight, profile.dietType);

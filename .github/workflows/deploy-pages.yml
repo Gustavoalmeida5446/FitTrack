@@ -13,16 +13,14 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  group: pages-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build app
+  validate:
+    name: Validate app
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -44,17 +42,23 @@ jobs:
         run: npm run build
 
       - name: Prepare GitHub Pages fallback
+        if: github.event_name != 'pull_request'
         run: cp dist/index.html dist/404.html && touch dist/.nojekyll
 
       - name: Upload GitHub Pages artifact
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
   deploy:
     name: Deploy app
-    needs: build
+    needs: validate
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

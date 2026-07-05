@@ -32,6 +32,7 @@ interface Props {
   onTutorialSkip: () => void;
   onReplayTutorial: () => void;
   onBack: () => void;
+  onOpenCalculationInfo: () => void;
   onUpdateProfile: (profile: UserProfile) => void;
   onAddWeight: (weight: number) => void;
   onRemoveWeight: (index: number) => void;
@@ -57,6 +58,7 @@ export function NutritionGoalsPage({
   onTutorialSkip,
   onReplayTutorial,
   onBack,
+  onOpenCalculationInfo,
   onUpdateProfile,
   onAddWeight,
   onRemoveWeight,
@@ -80,6 +82,7 @@ export function NutritionGoalsPage({
     ? 'Informe um peso maior que zero para salvar.'
     : '';
   const isLightTheme = appTheme === 'light';
+  const profileReady = isProfileReady(profile);
 
   return (
     <PageContainer title="Metas nutricionais" subtitle="Defina suas metas do dia" actions={<Button kind="ghost" size="sm" renderIcon={ChevronLeft} iconDescription="Voltar" onClick={onBack}>Voltar</Button>}>
@@ -127,9 +130,14 @@ export function NutritionGoalsPage({
         <Tile className="card metric-card goals-card">
           <CardHeader
             icon={<UserAvatar size={20} />}
-            title="Dados do usuário"
-            description="Informações-base para as metas"
+            title="Dados do perfil"
+            description="Preencha de cima para baixo; as metas são recalculadas automaticamente"
           />
+          {!profileReady ? (
+            <InfoBlock label="Por que preencher isso?">
+              Peso, altura e data de nascimento liberam metas de calorias, macros e água. Atividade, objetivo e tipo de dieta ajustam esses números ao seu contexto.
+            </InfoBlock>
+          ) : null}
           <div className="goals-form-grid">
             <AppDigitScaledInput id="profile-weight" labelText="Peso (kg)" value={profile.currentWeight} scale={3} onValueChange={(currentWeight) => {
               setHasTouchedProfile(true);
@@ -179,6 +187,11 @@ export function NutritionGoalsPage({
               ))}
             </Select>
           </div>
+          <div className="inline-actions">
+            <Button kind="tertiary" size="sm" onClick={onOpenCalculationInfo}>
+              Entender os cálculos
+            </Button>
+          </div>
           {profileFormMessage ? <p className="form-message form-message--error">{profileFormMessage}</p> : null}
         </Tile>
 
@@ -186,7 +199,7 @@ export function NutritionGoalsPage({
           <CardHeader
             icon={<CheckmarkFilled size={20} />}
             title="Metas diárias"
-            description="Alvos de ingestão e hidratação"
+            description={profileReady ? "Alvos de ingestão e hidratação" : "Complete o perfil acima para liberar metas confiáveis"}
           />
           <StatsGrid
             className="goals-grid goals-grid--compact"
@@ -221,6 +234,11 @@ export function NutritionGoalsPage({
             </div>
             {newWeightMessage ? <p className="form-message form-message--error">{newWeightMessage}</p> : null}
           </div>
+          {weightHistory.length === 0 ? (
+            <InfoBlock label="Histórico vazio">
+              Registre seu peso atual para acompanhar a evolução aqui.
+            </InfoBlock>
+          ) : null}
           <ul className="goals-weight-log">
             {weightHistory.map((item, index) => (
               <li key={`${item.date}-${index}`}>
