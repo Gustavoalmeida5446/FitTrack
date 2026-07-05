@@ -25,6 +25,7 @@ interface Props {
   onOpenDietDay: (dayId: string) => void;
   onOpenWorkoutSetup: () => void;
   onOpenDietSetup: () => void;
+  onOpenGoals: () => void;
   onAddWater: (amount: number) => void;
 }
 
@@ -52,6 +53,7 @@ export function HomePage({
   onOpenDietDay,
   onOpenWorkoutSetup,
   onOpenDietSetup,
+  onOpenGoals,
   onAddWater
 }: Props) {
   const [customWaterAmount, setCustomWaterAmount] = useState('');
@@ -67,6 +69,11 @@ export function HomePage({
   const completedMealsCount = todayDietDay?.completedMealIds.length ?? 0;
   const parsedCustomWaterAmount = parseDecimalNumber(customWaterAmount, 0);
   const canAddCustomWater = waterGoalMl > 0 && parsedCustomWaterAmount > 0;
+  const onboardingActions = [
+    waterGoalMl <= 0 ? { label: 'Completar perfil', action: onOpenGoals } : null,
+    workouts.length === 0 ? { label: 'Criar treino', action: onOpenWorkoutSetup } : null,
+    !hasDiet ? { label: 'Montar dieta', action: onOpenDietSetup } : null
+  ].filter((item): item is { label: string; action: () => void } => Boolean(item));
 
   const handleAddCustomWater = () => {
     if (!canAddCustomWater) {
@@ -86,6 +93,20 @@ export function HomePage({
         </span>
       )}
     >
+      {onboardingActions.length > 0 ? (
+        <Tile className="card metric-card next-action-card">
+          <div>
+            <span className="meta-label">Primeiro acesso</span>
+            <h3>Configure o básico para acompanhar seu dia</h3>
+            <p>Comece pelo perfil para calcular metas. Depois cadastre um treino e uma dieta para liberar o acompanhamento diário.</p>
+          </div>
+          <div className="inline-actions">
+            {onboardingActions.map((item) => (
+              <Button key={item.label} size="sm" kind="secondary" onClick={item.action}>{item.label}</Button>
+            ))}
+          </div>
+        </Tile>
+      ) : null}
       {tutorialStep ? (
         <ContextualTutorialCard
           step={tutorialStep}
@@ -135,12 +156,15 @@ export function HomePage({
       <Tile className="card metric-card water-card">
         <div className="metric-row water-card__summary">
           <strong>{water.consumedMl} ml / {waterGoalMl} ml</strong>
-          <span>{waterGoalMl > 0 ? `Meta diária: ${waterGoalMl} ml` : 'Preencha seu perfil para calcular a meta.'}</span>
+          <span>{waterGoalMl > 0 ? `Meta diária: ${waterGoalMl} ml` : 'Complete o perfil para calcular sua meta de água.'}</span>
         </div>
         <div className="water-card__progress">
           <ProgressBar label="" hideLabel helperText="" value={progress} max={100} />
           <span>{progress}%</span>
         </div>
+        {waterGoalMl <= 0 ? (
+          <Button size="sm" kind="secondary" onClick={onOpenGoals}>Completar perfil</Button>
+        ) : null}
         <div className="actions-grid water-card__actions">
           <Button size="sm" disabled={waterGoalMl <= 0} onClick={() => onAddWater(250)}>+250 ml</Button>
           <Button size="sm" disabled={waterGoalMl <= 0} onClick={() => onAddWater(500)}>+500 ml</Button>

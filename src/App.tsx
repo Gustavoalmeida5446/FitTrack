@@ -25,6 +25,7 @@ import { getTodayDateString } from './lib/date';
 import { calculateNutritionTargets } from './lib/nutrition';
 import {
   requestPasswordReset,
+  resendSignupConfirmation,
   signInWithEmail,
   signOut,
   signUpWithEmail,
@@ -43,6 +44,7 @@ const WorkoutPage = lazy(() => import('./pages/WorkoutPage').then((module) => ({
 const DietDayPage = lazy(() => import('./pages/DietDayPage').then((module) => ({ default: module.DietDayPage })));
 const DietSetupPage = lazy(() => import('./pages/DietSetupPage').then((module) => ({ default: module.DietSetupPage })));
 const NutritionGoalsPage = lazy(() => import('./pages/NutritionGoalsPage').then((module) => ({ default: module.NutritionGoalsPage })));
+const CalculationInfoPage = lazy(() => import('./pages/CalculationInfoPage').then((module) => ({ default: module.CalculationInfoPage })));
 const WorkoutSetupPage = lazy(() => import('./pages/WorkoutSetupPage').then((module) => ({ default: module.WorkoutSetupPage })));
 const LoginPage = lazy(() => import('./pages/LoginPage').then((module) => ({ default: module.LoginPage })));
 const appThemeStorageKey = 'fittrack-theme';
@@ -113,6 +115,7 @@ export default function App() {
     setView,
     openHome,
     openGoals,
+    openCalculationInfo,
     openWorkoutSetup,
     openDietSetup,
     openWorkout,
@@ -422,6 +425,8 @@ export default function App() {
 
   const handleSignUp = async (email: string, password: string) => signUpWithEmail(email, password);
 
+  const handleResendSignupConfirmation = async (email: string) => resendSignupConfirmation(email);
+
   const handleSignOut = async () => {
     const success = await signOut();
     if (!success) return;
@@ -472,6 +477,7 @@ export default function App() {
             <LoginPage
               onLogin={handleLogin}
               onSignUp={handleSignUp}
+              onResendSignupConfirmation={handleResendSignupConfirmation}
               onRequestPasswordReset={handleRequestPasswordReset}
               onUpdatePassword={handleUpdatePassword}
               isPasswordRecoveryActive={isPasswordRecovery}
@@ -509,6 +515,7 @@ export default function App() {
               onOpenDietDay={openDietDay}
               onOpenWorkoutSetup={openWorkoutSetup}
               onOpenDietSetup={openDietSetup}
+              onOpenGoals={openGoals}
               onAddWater={handleAddWater}
             />
           ) : null}
@@ -567,6 +574,10 @@ export default function App() {
             />
           ) : null}
 
+          {view === 'calculation-info' ? (
+            <CalculationInfoPage onBack={openGoals} />
+          ) : null}
+
           {view === 'goals' ? (
             <NutritionGoalsPage
               profile={profile}
@@ -580,6 +591,7 @@ export default function App() {
               onTutorialSkip={finishTutorial}
               onReplayTutorial={startTutorial}
               onBack={openHome}
+              onOpenCalculationInfo={openCalculationInfo}
               onUpdateProfile={handleUpdateProfile}
               onAddWeight={handleAddWeight}
               onRemoveWeight={handleRemoveWeight}
@@ -610,7 +622,7 @@ export default function App() {
             </span>
             <span className="bottom-nav__label">Dieta</span>
           </Button>
-          <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'goals' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={openGoals}>
+          <Button kind="ghost" size="sm" className={`bottom-tabbar__item bottom-nav__item ${view === 'goals' || view === 'calculation-info' ? 'bottom-tabbar__item--active bottom-nav__item--active' : ''}`} onClick={openGoals}>
             <span className="bottom-nav__icon" aria-hidden="true">
               <UserAvatar size={20} />
             </span>

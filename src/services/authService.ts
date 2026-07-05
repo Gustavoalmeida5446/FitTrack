@@ -111,6 +111,31 @@ export async function signUpWithEmail(email: string, password: string): Promise<
   };
 }
 
+export async function resendSignupConfirmation(email: string): Promise<AuthActionResult> {
+  const { error } = await supabase.auth.resend({
+    type: 'signup',
+    email,
+    options: {
+      emailRedirectTo: getAppRedirectUrl()
+    }
+  });
+
+  if (error) {
+    console.error('Erro ao reenviar confirmação de cadastro', error);
+    return {
+      success: false,
+      requiresEmailConfirmation: true,
+      message: getAuthErrorMessage('signup', error)
+    };
+  }
+
+  return {
+    success: true,
+    requiresEmailConfirmation: true,
+    message: 'Enviamos um novo e-mail de confirmação. Confira sua caixa de entrada e spam.'
+  };
+}
+
 export async function requestPasswordReset(email: string) {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: getPasswordResetRedirectUrl()

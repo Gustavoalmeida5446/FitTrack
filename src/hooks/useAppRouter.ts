@@ -55,6 +55,7 @@ export function useAppRouter() {
     setView,
     openHome: () => navigate({ view: 'home', selectedWorkoutId: '', selectedDayId: '' }),
     openGoals: () => navigate({ view: 'goals', selectedWorkoutId: '', selectedDayId: '' }),
+    openCalculationInfo: () => navigate({ view: 'calculation-info', selectedWorkoutId: '', selectedDayId: '' }),
     openWorkoutSetup: () => navigate({ view: 'workout-setup', selectedWorkoutId: '', selectedDayId: '' }),
     openDietSetup: () => navigate({ view: 'diet-setup', selectedWorkoutId: '', selectedDayId: '' }),
     openWorkout: (workoutId: string) => {

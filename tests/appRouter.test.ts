@@ -26,6 +26,12 @@ test('parseAppRoute reconhece rotas principais com base de deploy', () => {
     selectedWorkoutId: '',
     selectedDayId: ''
   });
+
+  assert.deepEqual(parseAppRoute('/FitTrack/calculos', '/FitTrack/'), {
+    view: 'calculation-info',
+    selectedWorkoutId: '',
+    selectedDayId: ''
+  });
 });
 
 test('parseAppRoute reconhece rotas de detalhe', () => {
@@ -47,6 +53,7 @@ test('buildAppRoutePath monta rotas sob a base do app', () => {
   assert.equal(buildAppRoutePath({ view: 'workout-setup', selectedWorkoutId: '', selectedDayId: '' }, '/FitTrack/'), '/FitTrack/treinos');
   assert.equal(buildAppRoutePath({ view: 'diet-setup', selectedWorkoutId: '', selectedDayId: '' }, '/FitTrack/'), '/FitTrack/dieta');
   assert.equal(buildAppRoutePath({ view: 'goals', selectedWorkoutId: '', selectedDayId: '' }, '/FitTrack/'), '/FitTrack/perfil');
+  assert.equal(buildAppRoutePath({ view: 'calculation-info', selectedWorkoutId: '', selectedDayId: '' }, '/FitTrack/'), '/FitTrack/calculos');
   assert.equal(buildAppRoutePath({ view: 'workout', selectedWorkoutId: 'w 1', selectedDayId: '' }, '/FitTrack/'), '/FitTrack/treinos/w%201');
   assert.equal(buildAppRoutePath({ view: 'diet-day', selectedWorkoutId: '', selectedDayId: 'd 2' }, '/FitTrack/'), '/FitTrack/dieta/d%202');
 });
