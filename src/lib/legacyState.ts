@@ -1,4 +1,4 @@
-import type { FoodItem, Meal, MuscleGroup, UserProfile, WeeklyDiet, Workout, WorkoutExercise } from '../data/types';
+import type { FoodItem, Meal, MuscleGroup, UserProfile, WeeklyDiet, Workout, WorkoutExercise, WorkoutExerciseSet } from '../data/types';
 import type { ActivityLevel, DietType, GoalType } from '../data/types';
 import { calculateAgeFromBirthDate, normalizeBirthDateForStorage } from './date';
 import { withNormalizedWorkoutExerciseSets } from './workoutSets';
@@ -20,6 +20,7 @@ type LegacyExercise = WorkoutExercise | {
   sets: number;
   restSeconds: number;
   done: boolean;
+  setsDetail?: WorkoutExerciseSet[];
 };
 
 export type LegacyWorkout = {
@@ -125,7 +126,8 @@ function normalizeWorkoutExercise(exercise: LegacyExercise): WorkoutExercise {
     reps: exercise.reps,
     sets: exercise.sets,
     restSeconds: exercise.restSeconds,
-    done: Boolean(exercise.done)
+    done: Boolean(exercise.done),
+    setsDetail: exercise.setsDetail
   });
 }
 
