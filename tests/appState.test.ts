@@ -161,6 +161,46 @@ test('updateWorkoutExerciseSet preserva cargas diferentes em cada série', () =>
   assert.equal(updatedExercise?.loadKg, 40);
 });
 
+test('normalizeWorkoutProgressState preserva cargas diferentes salvas por série', () => {
+  const today = getTodayDateString();
+  const state = normalizeWorkoutProgressState({
+    version: 1,
+    updatedAt: today,
+    workouts: [
+      {
+        id: 'w-1',
+        name: 'Leg day',
+        muscleGroups: ['Pernas'],
+        exercises: [
+          {
+            id: 'e-1',
+            source: 'local',
+            sourceId: 'squat',
+            name: 'Agachamento',
+            ptName: 'Agachamento',
+            muscleGroup: 'Pernas',
+            mediaType: 'none',
+            mediaUrl: null,
+            loadKg: 40,
+            reps: 10,
+            sets: 3,
+            setsDetail: [
+              { id: 'e-1-set-1', loadKg: 40, reps: 10, done: false },
+              { id: 'e-1-set-2', loadKg: 45, reps: 9, done: false },
+              { id: 'e-1-set-3', loadKg: 50, reps: 8, done: false }
+            ],
+            restSeconds: 90,
+            done: false
+          }
+        ]
+      }
+    ]
+  });
+
+  assert.deepEqual(state.workouts[0]?.exercises[0]?.setsDetail?.map((set) => set.loadKg), [40, 45, 50]);
+  assert.deepEqual(state.workouts[0]?.exercises[0]?.setsDetail?.map((set) => set.reps), [10, 9, 8]);
+});
+
 test('normalizeWaterData reseta consumo de água quando o dia mudou', () => {
   const water = normalizeWaterData({
     goalMl: 3000,
